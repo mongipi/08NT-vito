@@ -10,8 +10,8 @@ export const LINES: Record<LineSlug, Line> = {
   beauty: {
     slug: 'beauty',
     name: 'Linea Beauty',
-    color: '#1a6b30',
-    colorLight: '#eaf5ec',
+    color: '#7c2878',
+    colorLight: '#f8f0f8',
   },
   circolo: {
     slug: 'circolo',

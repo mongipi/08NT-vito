@@ -30,7 +30,13 @@ export interface Product {
   notificationMs?: string
   published: boolean
   order: number
-  imageUrl?: string
+  images?: {
+    fronte?: string
+    infografica?: string
+    lato1?: string
+    lato2?: string
+    etichetta?: string
+  }
 }
 
 export interface Article {

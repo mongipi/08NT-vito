@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getProductBySlug, getProductSlugs } from '@/services/products'
+import { ProductGallery } from '@/components/ui/ProductGallery'
 import type { Metadata } from 'next'
 
 interface Props {
@@ -16,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const product = await getProductBySlug(slug)
   if (!product) return {}
-  return { title: product.name }
+  return { title: `${product.name} — 08 Natural Technology` }
 }
 
 export default async function ProductPage({ params }: Props) {
@@ -24,101 +26,118 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProductBySlug(slug)
   if (!product) notFound()
 
-  const { line, name, longDescription, ingredients, usage, target, capsules, days, dosage, notificationMs, format } =
-    product
+  const {
+    line, name, shortDescription, longDescription,
+    ingredients, usage, target, capsules, days,
+    dosage, notificationMs, format, images,
+  } = product
+
+  // Hero carousel: fronte first, then all detail shots
+  const heroSlides = [
+    images?.fronte    && { src: images.fronte,    label: 'Fronte',                   alt: name },
+    images?.lato1     && { src: images.lato1,     label: 'Composizione — lato A',    alt: `${name} — composizione` },
+    images?.lato2     && { src: images.lato2,     label: 'Informazioni — retro',     alt: `${name} — retro etichetta` },
+    images?.etichetta && { src: images.etichetta, label: 'Etichetta — vista piatta', alt: `${name} — etichetta` },
+  ].filter(Boolean) as { src: string; label: string; alt: string }[]
+
+  // Split product name into main word + qualifier for display
+  const words = name.split(' ')
+  const qualifier = words.length > 1 ? words[words.length - 1] : ''
+  const mainName   = words.length > 1 ? words.slice(0, -1).join(' ') : name
 
   return (
-    <main>
-      {/* ── CAT HEADER STRIP ── */}
+    <main style={{ background: '#fff' }}>
+
+      {/* ── BREADCRUMB ── */}
       <div
-        className="flex items-center justify-between"
-        style={{
-          padding: '11px 48px',
-          borderBottom: '1px solid var(--amber)',
-          background: 'var(--white)',
-        }}
+        className="flex items-center justify-between strip"
+        style={{ borderBottom: `1px solid ${line.color}20`, background: line.colorLight }}
       >
         <span
           style={{
-            fontSize: 9,
-            fontWeight: 300,
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-            color: 'var(--green)',
+            fontSize: 9, fontWeight: 500, letterSpacing: '0.22em',
+            textTransform: 'uppercase', color: `${line.color}90`,
           }}
         >
-          08 Natural Technology &nbsp;|&nbsp; {line.name}
+          08 Natural Technology &nbsp;/&nbsp; {line.name}
         </span>
         <Link
           href="/prodotti"
           className="flex items-center gap-1.5"
           style={{
-            fontSize: 9,
-            fontWeight: 300,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: 'var(--amber)',
+            fontSize: 9, fontWeight: 500, letterSpacing: '0.14em',
+            textTransform: 'uppercase', color: line.color,
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
           Tutti i prodotti
         </Link>
       </div>
 
-      {/* ── PRODUCT HERO (dark) ── */}
-      <div
+      {/* ══ 1. HERO ══════════════════════════════════════════════════════════ */}
+      <section
         className="grid grid-cols-1 lg:grid-cols-2"
-        style={{ background: 'var(--forest)' }}
+        style={{ minHeight: 560, borderBottom: `1px solid ${line.color}15` }}
       >
-        {/* Left */}
+        {/* Left: identity */}
         <div
-          className="flex flex-col justify-center section"
-          style={{ borderRight: '0.5px solid rgba(252, 174, 7, 0.15)' }}
+          className="hero-col hero-col-l flex flex-col justify-center"
+          style={{ borderRight: `0.5px solid ${line.color}18`, background: '#fff' }}
         >
+          {/* Eyebrow */}
           <div
-            className="mb-3.5 flex items-center gap-2.5"
+            className="flex items-center gap-2.5"
             style={{
-              fontSize: 9,
-              fontWeight: 300,
-              letterSpacing: '0.24em',
-              textTransform: 'uppercase',
-              color: 'rgba(184,144,60,0.6)',
+              fontSize: 9, fontWeight: 500, letterSpacing: '0.28em',
+              textTransform: 'uppercase', color: line.color,
+              marginBottom: 20,
             }}
           >
-            <span style={{ display: 'block', width: 16, height: '0.5px', background: 'var(--amber)', opacity: 0.5, flexShrink: 0 }} />
+            <span style={{ display: 'block', width: 22, height: '1px', background: line.color, flexShrink: 0 }} />
             {line.name}
           </div>
 
-          <div
+          {/* Product name */}
+          <h1
             style={{
               fontFamily: 'var(--font-cormorant), Georgia, serif',
-              fontSize: 'clamp(34px, 5vw, 46px)',
               fontWeight: 300,
-              color: '#f0ede8',
-              lineHeight: 1.1,
-              marginBottom: 18,
+              color: line.color,
+              lineHeight: 0.95,
+              letterSpacing: '-0.01em',
+              marginBottom: 20,
             }}
           >
-            {name}
-          </div>
+            <span style={{ display: 'block', fontSize: 'clamp(46px, 5.5vw, 70px)' }}>
+              {mainName}
+            </span>
+            {qualifier && (
+              <span style={{ display: 'block', fontSize: 'clamp(26px, 3vw, 42px)', fontWeight: 200, color: `${line.color}65` }}>
+                {qualifier}
+              </span>
+            )}
+          </h1>
 
+          {/* Short description */}
           <p
             style={{
-              fontSize: 12,
-              fontWeight: 300,
-              color: 'rgba(253,246,232,0.5)',
-              lineHeight: 1.85,
-              marginBottom: 28,
+              fontSize: 12, fontWeight: 300,
+              color: 'var(--ink-3)', lineHeight: 1.85,
+              maxWidth: 460, marginBottom: 28,
             }}
           >
-            {longDescription}
+            {shortDescription}
           </p>
 
-          <div className="flex flex-wrap gap-1.5">
+          {/* Divider */}
+          <div style={{ width: 36, height: '0.5px', background: line.color, opacity: 0.3, marginBottom: 28 }} />
+
+          {/* Chips */}
+          <div className="flex flex-wrap gap-2">
             {[
-              `${capsules} capsule`,
+              `${capsules} capsule vegetali`,
               `${days} giorni`,
               dosage,
               ...(notificationMs ? [notificationMs] : []),
@@ -127,13 +146,14 @@ export default async function ProductPage({ params }: Props) {
               <span
                 key={chip}
                 style={{
-                  fontSize: 9,
-                  fontWeight: 300,
-                  letterSpacing: '0.12em',
+                  fontSize: 8.5,
+                  fontWeight: 500,
+                  letterSpacing: '0.14em',
                   textTransform: 'uppercase',
-                  color: 'rgba(184,144,60,0.55)',
+                  color: line.color,
                   padding: '5px 11px',
-                  border: '0.5px solid rgba(184,144,60,0.2)',
+                  border: `0.5px solid ${line.color}38`,
+                  background: `${line.color}07`,
                 }}
               >
                 {chip}
@@ -142,219 +162,212 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Right: visual */}
-        <div className="flex items-center justify-center section">
-          <div className="flex flex-col items-center gap-5">
-            <div
-              style={{
-                position: 'relative',
-                width: 170,
-                height: 170,
-                border: '0.5px solid rgba(184,144,60,0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <div
-                style={{
-                  position: 'relative',
-                  width: 70,
-                  height: 150,
-                  borderRadius: '4px 4px 3px 3px',
-                  border: '0.5px solid rgba(0,0,0,0.09)',
-                }}
-              >
-                <div
+        {/* Right: image carousel */}
+        <div style={{ background: `linear-gradient(150deg, ${line.colorLight} 0%, #fff 55%)`, display: 'flex', flexDirection: 'column' }}>
+          {heroSlides.length > 0 ? (
+            <ProductGallery slides={heroSlides} color={line.color} contained />
+          ) : (
+            <div className="flex items-center justify-center" style={{ flex: 1 }}>
+              <BottleStub color={line.color} colorLight={line.colorLight} label={name} />
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ══ 2. INFOGRAFICA ════════════════════════════════════════════════════
+      {images?.infografica && (
+        <section style={{ background: '#f8f8f6', borderBottom: `1px solid var(--border)` }}>
+          <Image
+            src={images.infografica}
+            alt={`${name} — infografica ingredienti e benefici`}
+            width={1600}
+            height={900}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
+            sizes="100vw"
+          />
+        </section>
+      )} */}
+
+      {/* ══ 3. INGREDIENT TABLE ═══════════════════════════════════════════════ */}
+      <section className="section" style={{ background: '#fff', borderBottom: `1px solid var(--border)` }}>
+        <div style={{ maxWidth: 760, margin: '0 auto' }}>
+          <SectionLabel color={line.color}>Contenuti medi · per dose giornaliera (2 capsule)</SectionLabel>
+
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 4 }}>
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${line.color}28` }}>
+                <th
                   style={{
-                    position: 'absolute',
-                    top: 0,
-                    width: 70,
-                    height: 16,
-                    borderRadius: '3px 3px 0 0',
-                    background: 'linear-gradient(90deg,#888 0%,#ccc 22%,#e8e8e2 50%,#bbb 74%,#999 100%)',
-                    border: '0.5px solid rgba(0,0,0,0.07)',
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 16,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    borderRadius: '0 0 3px 3px',
-                    background: `linear-gradient(180deg, ${line.color}D9 0%, ${line.color}E6 100%)`,
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: 24,
-                    left: 0,
-                    right: 0,
-                    textAlign: 'center',
-                    fontSize: 7,
-                    fontWeight: 600,
-                    letterSpacing: '0.18em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(255,255,255,0.85)',
+                    textAlign: 'left', fontSize: 8.5, fontWeight: 500,
+                    letterSpacing: '0.2em', textTransform: 'uppercase',
+                    color: `${line.color}70`, padding: '0 0 12px',
                   }}
                 >
-                  {line.slug.toUpperCase()}
-                </div>
-                <div
+                  Ingrediente
+                </th>
+                <th
                   style={{
-                    position: 'absolute',
-                    bottom: 10,
-                    left: 0,
-                    right: 0,
-                    textAlign: 'center',
-                    fontSize: 11,
-                    fontFamily: 'var(--font-cormorant), Georgia, serif',
-                    color: 'rgba(255,255,255,0.6)',
+                    textAlign: 'right', fontSize: 8.5, fontWeight: 500,
+                    letterSpacing: '0.2em', textTransform: 'uppercase',
+                    color: `${line.color}70`, padding: '0 0 12px',
                   }}
                 >
-                  08
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="inline-flex flex-col items-center justify-center gap-[1px]"
-              style={{ border: '1.5px solid rgba(184,144,60,0.3)', padding: '6px 12px 7px' }}
-            >
-              <span
-                style={{
-                  fontFamily: 'var(--font-cormorant), Georgia, serif',
-                  fontSize: 18,
-                  fontWeight: 400,
-                  lineHeight: 1,
-                  color: 'rgba(253,246,232,0.4)',
-                }}
-              >
-                08
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-montserrat), system-ui, sans-serif',
-                  fontSize: 6,
-                  fontWeight: 300,
-                  letterSpacing: '0.26em',
-                  textTransform: 'uppercase',
-                  lineHeight: 1,
-                  whiteSpace: 'nowrap',
-                  color: 'rgba(253,246,232,0.25)',
-                }}
-              >
-                Natural Technology
-              </span>
-            </div>
-          </div>
+                  Per dose
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {ingredients.map((ing, i) => (
+                <tr
+                  key={ing.name}
+                  style={{
+                    borderBottom: `0.5px solid ${line.color}12`,
+                    background: i % 2 === 0 ? `${line.color}04` : 'transparent',
+                  }}
+                >
+                  <td style={{ padding: '11px 0', fontSize: 12, fontWeight: 400, color: 'var(--ink-2)' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span
+                        style={{
+                          display: 'inline-block', width: 5, height: 5,
+                          borderRadius: '50%', background: line.color,
+                          flexShrink: 0, opacity: 0.55,
+                        }}
+                      />
+                      {ing.name}
+                    </span>
+                  </td>
+                  <td
+                    style={{
+                      padding: '11px 0', fontSize: 12, fontWeight: 500,
+                      color: line.color, textAlign: 'right',
+                    }}
+                  >
+                    {ing.dosage ?? '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
+      </section>
 
-      {/* ── PRODUCT BODY ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1px_1fr] section" style={{ gap: 0 }}>
-        {/* Ingredients */}
-        <div className="pb-10 lg:pb-0 lg:pr-10">
-          <SectionLabel>Ingredienti</SectionLabel>
-          <div className="flex flex-wrap gap-1.5">
-            {ingredients.map((ing) => (
-              <span
-                key={ing.name}
-                style={{
-                  fontSize: 10,
-                  fontWeight: 300,
-                  padding: '5px 10px',
-                  background: 'var(--green-ll)',
-                  color: 'var(--green)',
-                  border: '0.5px solid rgba(26,74,46,0.2)',
-                }}
-              >
-                {ing.name}
-                {ing.dosage ? ` — ${ing.dosage}` : ''}
-              </span>
-            ))}
-          </div>
 
-          <div className="mt-8">
-            <SectionLabel>Formato</SectionLabel>
-            <p style={{ fontSize: 12, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9 }}>
-              {format}
-            </p>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="hidden lg:block" style={{ background: 'var(--border)', margin: '0 52px' }} />
-
-        {/* Usage + Target */}
-        <div className="border-t border-[var(--border)] pt-10 lg:border-0 lg:pl-10 lg:pt-0">
-          <div className="mb-8">
-            <SectionLabel>Modo d&apos;uso</SectionLabel>
+      {/* ══ 5. DETAILS: uso · target · formato ═══════════════════════════════ */}
+      <section
+        style={{
+          background: 'var(--paper)',
+          borderBottom: `1px solid var(--border)`,
+        }}
+      >
+        <div
+          className="grid grid-cols-1 lg:grid-cols-3 section"
+          style={{ gap: 48, maxWidth: 1200, margin: '0 auto' }}
+        >
+          <div>
+            <SectionLabel color={line.color}>Modo d&apos;uso</SectionLabel>
             <p style={{ fontSize: 12, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9 }}>
               {usage}
             </p>
           </div>
           <div>
-            <SectionLabel>A chi è rivolto</SectionLabel>
+            <SectionLabel color={line.color}>A chi è rivolto</SectionLabel>
             <p style={{ fontSize: 12, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9 }}>
               {target}
             </p>
           </div>
+          <div>
+            <SectionLabel color={line.color}>Formato &amp; composizione</SectionLabel>
+            <p style={{ fontSize: 12, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9 }}>
+              {format}
+            </p>
+            {longDescription && (
+              <p
+                style={{
+                  fontSize: 11, fontWeight: 300, color: 'var(--ink-4)',
+                  lineHeight: 1.85, marginTop: 16,
+                }}
+              >
+                {longDescription}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ 6. REGULATORY NOTICE ═════════════════════════════════════════════ */}
+      <div
+        className="strip"
+        style={{ background: `${line.color}06`, borderBottom: `0.5px solid ${line.color}16` }}
+      >
+        <div
+          className="flex items-start gap-3"
+          style={{
+            maxWidth: 860, margin: '0 auto',
+            padding: '16px 20px',
+            border: `0.5px solid ${line.color}20`,
+            background: '#fff',
+          }}
+        >
+          <svg
+            width="15" height="15" viewBox="0 0 24 24"
+            fill="none" stroke={line.color} strokeWidth="1.5"
+            strokeLinecap="round" strokeLinejoin="round"
+            aria-hidden="true"
+            style={{ flexShrink: 0, marginTop: 1, opacity: 0.6 }}
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4M12 16h.01" />
+          </svg>
+          <p style={{ fontSize: 11, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.75, margin: 0 }}>
+            Integratore alimentare notificato al Ministero della Salute della Repubblica Italiana
+            {notificationMs ? ` (${notificationMs})` : ''}.{' '}
+            Non superare la dose giornaliera consigliata. Gli integratori alimentari non sostituiscono
+            una dieta varia ed equilibrata e uno stile di vita sano. Tenere fuori dalla portata dei
+            bambini. In caso di gravidanza, allattamento o terapie farmacologiche, consultare il medico.
+          </p>
         </div>
       </div>
 
-      {/* ── NOTICE ── */}
-      <div
-        className="mx-6 mb-12 flex items-start gap-3 sm:mx-12"
-        style={{
-          padding: '16px 20px',
-          border: '0.5px solid rgba(26,74,46,0.2)',
-          background: 'var(--green-ll)',
-        }}
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--green-2)"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-          style={{ flexShrink: 0, marginTop: 1 }}
-        >
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          <path d="m9 12 2 2 4-4" />
-        </svg>
-        <p style={{ fontSize: 11, fontWeight: 300, color: 'var(--green-2)', lineHeight: 1.7, margin: 0 }}>
-          Integratore alimentare notificato al Ministero della Salute della Repubblica Italiana.
-          Prodotto e confezionato in Italia. Qualità italiana, ricerca e attenzione ai dettagli per
-          integratori affidabili e di eccellenza.
-        </p>
-      </div>
     </main>
   )
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+// ── Shared components ─────────────────────────────────────────────────────
+
+function SectionLabel({ children, color }: { children: React.ReactNode; color: string }) {
   return (
     <div
       style={{
-        fontSize: 9,
+        fontSize: 8.5,
         fontWeight: 500,
-        letterSpacing: '0.2em',
+        letterSpacing: '0.22em',
         textTransform: 'uppercase',
-        color: 'var(--ink-4)',
-        marginBottom: 14,
-        paddingBottom: 10,
-        borderBottom: '1px solid var(--border)',
+        color,
+        opacity: 0.7,
+        marginBottom: 18,
+        paddingBottom: 12,
+        borderBottom: `0.5px solid ${color}22`,
       }}
     >
       {children}
+    </div>
+  )
+}
+
+function BottleStub({ color, colorLight, label }: { color: string; colorLight: string; label: string }) {
+  return (
+    <div
+      style={{
+        width: 200, height: 280,
+        background: `linear-gradient(150deg, ${colorLight} 0%, #fff 80%)`,
+        border: `0.5px solid ${color}20`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}
+    >
+      <span style={{ fontSize: 11, fontWeight: 300, color: `${color}60`, textAlign: 'center' }}>
+        {label}
+      </span>
     </div>
   )
 }
