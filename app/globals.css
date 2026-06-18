@@ -81,3 +81,42 @@ body {
   outline: 2px solid var(--amber);
   outline-offset: 3px;
 }
+
+/* ─── Section wrapper: 48px/24px mobile → 80px/48px desktop ─── */
+.section {
+  padding: 48px 24px;
+}
+@media (min-width: 640px) {
+  .section { padding: 80px 48px; }
+}
+
+/* ─── Thin strip (amber bar, catalog header) ─── */
+.strip {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+@media (min-width: 640px) {
+  .strip { padding-left: 48px; padding-right: 48px; }
+}
+
+/* ─── Hero columns — pixel-perfect to mockup ─── */
+.hero-col {
+  padding: 48px 24px;
+}
+@media (min-width: 640px) {
+  .hero-col-l { padding: 72px 56px 72px 48px; }
+  .hero-col-r { padding: 64px 48px; }
+}
+
+/* ─── Ticker animation ─── */
+@keyframes tick {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: tick 26s linear infinite;
+}
