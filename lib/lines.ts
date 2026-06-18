@@ -16,8 +16,8 @@ export const LINES: Record<LineSlug, Line> = {
   circolo: {
     slug: 'circolo',
     name: 'Linea Circolo',
-    color: '#126b52',
-    colorLight: '#e4f5ef',
+    color: '#405089',
+    colorLight: '#eaecf5',
   },
   energia: {
     slug: 'energia',
