@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Product } from '@/types'
 
 interface ProductCardProps {
@@ -10,12 +11,12 @@ interface ProductCardProps {
 
 /** Per-line product card. Packaging uses hex-with-alpha for dynamic line colors. */
 export function ProductCard({ product, variant = 'home' }: ProductCardProps) {
-  const { line, name, shortDescription, ingredients, capsules, days, dosage, notificationMs, slug } =
+  const { line, name, shortDescription, ingredients, capsules, days, dosage, notificationMs, slug, images } =
     product
   const isCatalog = variant === 'catalog'
   const pkgW = isCatalog ? 56 : 50
   const pkgH = isCatalog ? 130 : 110
-  const visH = isCatalog ? 210 : 180
+  const visH = isCatalog ? 220 : 196
   const ingrCount = isCatalog ? 4 : 3
 
   const detailText =
@@ -49,65 +50,34 @@ export function ProductCard({ product, variant = 'home' }: ProductCardProps) {
           {line.name}
         </div>
 
-        {/* Pill bottle */}
-        <div className="flex items-end justify-center" style={{ height: 100, marginTop: 8 }}>
-          <div
-            className="relative"
-            style={{
-              width: pkgW,
-              height: pkgH,
-              borderRadius: '3px 3px 2px 2px',
-              border: '0.5px solid rgba(0,0,0,0.09)',
-            }}
-          >
-            {/* Silver cap */}
-            <div
-              className="absolute top-0"
+        {/* Product image */}
+        <div
+          className="flex items-end justify-center"
+          style={{ flex: 1, padding: '20px 16px 12px', position: 'relative' }}
+        >
+          {images?.fronte ? (
+            <Image
+              src={images.fronte}
+              alt={name}
+              width={isCatalog ? 120 : 100}
+              height={isCatalog ? 220 : 190}
               style={{
-                width: pkgW,
-                height: 13,
-                borderRadius: '2px 2px 0 0',
-                background:
-                  'linear-gradient(90deg,#888 0%,#ccc 22%,#e8e8e2 50%,#bbb 74%,#999 100%)',
-                border: '0.5px solid rgba(0,0,0,0.07)',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 12px 24px rgba(0,0,0,0.13)) drop-shadow(0 3px 6px rgba(0,0,0,0.08))',
+                maxHeight: isCatalog ? 200 : 170,
               }}
+              sizes="140px"
             />
-            {/* Colored body */}
+          ) : (
             <div
-              className="absolute left-0 right-0 bottom-0"
               style={{
-                top: 13,
-                borderRadius: '0 0 2px 2px',
+                width: pkgW, height: pkgH,
+                borderRadius: '3px 3px 2px 2px',
                 background: `linear-gradient(180deg, ${line.color}D9 0%, ${line.color}E6 100%)`,
+                border: '0.5px solid rgba(0,0,0,0.09)',
               }}
             />
-            {/* Line label */}
-            <div
-              className="absolute left-0 right-0 text-center"
-              style={{
-                bottom: 18,
-                fontSize: 5.5,
-                fontWeight: 600,
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.85)',
-              }}
-            >
-              {line.slug.toUpperCase()}
-            </div>
-            {/* "08" script */}
-            <div
-              className="absolute left-0 right-0 text-center"
-              style={{
-                bottom: 8,
-                fontSize: 9,
-                fontFamily: 'var(--font-cormorant), Georgia, serif',
-                color: 'rgba(255,255,255,0.6)',
-              }}
-            >
-              08
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

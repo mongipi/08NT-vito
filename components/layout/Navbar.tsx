@@ -67,12 +67,12 @@ export function Navbar() {
       style={{ borderBottom: '1px solid var(--amber)' }}
     >
       <nav
-        className="flex h-16 items-center justify-between"
+        className="flex h-24 items-center justify-between"
         style={{ padding: '0 48px' }}
         aria-label="Navigazione principale"
       >
         {/* Logo */}
-        <Logo color="var(--green)" />
+        <Logo variant="dark" height={72} />
 
         {/* Desktop links */}
         <ul className="hidden md:flex items-center" role="list">
@@ -81,7 +81,7 @@ export function Navbar() {
               <Link
                 href={href}
                 className={cn(
-                  'flex h-16 items-center uppercase transition-colors duration-[180ms]',
+                  'flex h-24 items-center uppercase transition-colors duration-[180ms]',
                   isActive(href)
                     ? 'text-[var(--green)]'
                     : 'text-[var(--ink-3)] hover:text-[var(--green)]'

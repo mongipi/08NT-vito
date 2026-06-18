@@ -46,20 +46,17 @@ export default async function ProductPage({ params }: Props) {
   const mainName   = words.length > 1 ? words.slice(0, -1).join(' ') : name
 
   return (
-    <main style={{ background: '#fff' }}>
+    <main style={{ background: '#fff', borderTop: '3px solid var(--forest)' }}>
 
       {/* ── BREADCRUMB ── */}
       <div
         className="flex items-center justify-between strip"
         style={{ borderBottom: `1px solid ${line.color}20`, background: line.colorLight }}
       >
-        <span
-          style={{
-            fontSize: 9, fontWeight: 500, letterSpacing: '0.22em',
-            textTransform: 'uppercase', color: `${line.color}90`,
-          }}
-        >
-          08 Natural Technology &nbsp;/&nbsp; {line.name}
+        <span style={{ fontSize: 9, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
+          <span style={{ color: 'var(--green)' }}>08 Natural Technology</span>
+          <span style={{ color: `${line.color}60`, margin: '0 6px' }}>/</span>
+          <span style={{ color: `${line.color}90` }}>{line.name}</span>
         </span>
         <Link
           href="/prodotti"
@@ -79,7 +76,7 @@ export default async function ProductPage({ params }: Props) {
       {/* ══ 1. HERO ══════════════════════════════════════════════════════════ */}
       <section
         className="grid grid-cols-1 lg:grid-cols-2"
-        style={{ minHeight: 560, borderBottom: `1px solid ${line.color}15` }}
+        style={{ minHeight: 560, borderBottom: `1px solid var(--green-l)` }}
       >
         {/* Left: identity */}
         <div

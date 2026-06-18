@@ -26,19 +26,19 @@ export default async function ProdottiPage() {
         {/* Legal disclaimer */}
         <div
           className="mt-6 flex items-start gap-3"
-          style={{ padding: '16px 20px', border: '0.5px solid var(--border-2)' }}
+          style={{ padding: '16px 20px', border: '0.5px solid rgba(42,110,62,0.15)', background: 'rgba(42,110,62,0.03)' }}
         >
           <svg
             width="16"
             height="16"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="var(--ink-4)"
+            stroke="var(--green-2)"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden="true"
-            style={{ flexShrink: 0, marginTop: 1 }}
+            style={{ flexShrink: 0, marginTop: 1, opacity: 0.55 }}
           >
             <circle cx="12" cy="12" r="10" />
             <path d="M12 16v-4M12 8h.01" />

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Logo } from './Logo'
 
 const FOOTER_LINKS = {
   Prodotti: [
@@ -40,49 +41,9 @@ export function Footer() {
       >
         {/* Colonna brand */}
         <div className="sm:col-span-2 lg:col-span-1">
-          {/* Logo footer — silver */}
+          {/* Logo footer */}
           <div style={{ marginBottom: 14 }}>
-            <Link
-              href="/"
-              aria-label="08 Natural Technology"
-              style={{
-                display: 'inline-flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 1,
-                border: '1.5px solid rgba(180,180,172,0.22)',
-                padding: '5px 10px 6px',
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: 'var(--font-cormorant), Georgia, serif',
-                  fontSize: 20,
-                  fontWeight: 400,
-                  lineHeight: 1,
-                  color: 'var(--silver-2)',
-                  opacity: 0.7,
-                }}
-              >
-                08
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-montserrat), system-ui, sans-serif',
-                  fontSize: 6,
-                  fontWeight: 300,
-                  letterSpacing: '0.26em',
-                  textTransform: 'uppercase',
-                  lineHeight: 1,
-                  whiteSpace: 'nowrap',
-                  color: 'var(--silver)',
-                  opacity: 0.6,
-                }}
-              >
-                Natural Technology
-              </span>
-            </Link>
+            <Logo variant="light" height={90} />
           </div>
 
           <p style={{ fontSize: 11, fontWeight: 300, color: 'rgba(253,246,232,0.6)', lineHeight: 1.85 }}>

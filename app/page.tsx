@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getProducts } from '@/services/products'
 import { getArticles } from '@/services/articles'
 import { ProductCard } from '@/components/ui/ProductCard'
@@ -120,40 +121,21 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Right: bottle row */}
-          <div className="hero-col hero-col-r flex items-end justify-center">
-            <div style={{ position: 'relative', width: '100%', maxWidth: 480, minHeight: 380 }}>
-              {/* Stage ring */}
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 45,
-                  border: '1px solid rgba(184,144,60,0.15)',
-                  borderRadius: '50%',
-                }}
-              />
-              {/* Stage light */}
-              <div
-                style={{
-                  position: 'absolute',
-                  width: '74%',
-                  height: '74%',
-                  borderRadius: '50%',
-                  background: 'radial-gradient(circle, rgba(184,144,60,0.16), transparent 62%)',
-                  top: '11%',
-                  left: '13%',
-                }}
-              />
-              {/* Bottles */}
-              <div
-                className="flex items-end justify-center gap-3"
-                style={{ position: 'relative', zIndex: 2, paddingBottom: 32 }}
-              >
-                {BOTTLES.map((b) => (
-                  <Bottle key={b.name} {...b} />
-                ))}
-              </div>
-            </div>
+          {/* Right: logo */}
+          <div className="hero-col hero-col-r flex items-center justify-center">
+            <Image
+              src="/logo.png"
+              alt="08 Natural Technology"
+              width={340}
+              height={340}
+              style={{
+                width: 'clamp(200px, 28vw, 340px)',
+                height: 'auto',
+                objectFit: 'contain',
+                filter: 'brightness(0) invert(1) opacity(0.55)',
+              }}
+              priority
+            />
           </div>
         </div>
       </section>
@@ -213,42 +195,46 @@ export default async function HomePage() {
       {/* ════ CHI SIAMO / FOUNDER ════ */}
       <section className="section">
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-[0.92fr_1.08fr] lg:gap-16 lg:items-center">
-          {/* Left: dark card */}
+          {/* Left: dark card con bottiglie */}
           <div
             style={{
               background: 'linear-gradient(160deg, var(--forest), #092212)',
               minHeight: 390,
               border: '1px solid rgba(184,144,60,0.25)',
               display: 'flex',
-              alignItems: 'center',
+              alignItems: 'flex-end',
               justifyContent: 'center',
               position: 'relative',
               overflow: 'hidden',
+              padding: '0 24px',
             }}
           >
+            {/* Stage light */}
             <div
               style={{
                 position: 'absolute',
-                width: 320,
-                height: 320,
+                width: 320, height: 320,
                 borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(184,144,60,0.16), transparent 62%)',
+                background: 'radial-gradient(circle, rgba(184,144,60,0.14), transparent 62%)',
+                top: '10%', left: '50%', transform: 'translateX(-50%)',
               }}
             />
-            <div style={{ position: 'relative', textAlign: 'center', color: 'rgba(232,232,226,0.48)' }}>
-              <div
-                style={{
-                  fontFamily: 'var(--font-cormorant), Georgia, serif',
-                  fontSize: 104,
-                  lineHeight: 1,
-                  fontWeight: 300,
-                }}
-              >
-                08
-              </div>
-              <div style={{ fontSize: 10, letterSpacing: '0.34em', textTransform: 'uppercase' }}>
-                Natural Technology
-              </div>
+            {/* Stage ring */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 40,
+                border: '1px solid rgba(184,144,60,0.12)',
+                borderRadius: '50%',
+              }}
+            />
+            <div
+              className="flex items-end justify-center gap-3"
+              style={{ position: 'relative', zIndex: 2, paddingBottom: 28 }}
+            >
+              {BOTTLES.map((b) => (
+                <Bottle key={b.name} {...b} />
+              ))}
             </div>
           </div>
 
