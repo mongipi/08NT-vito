@@ -2,9 +2,9 @@ import Link from 'next/link'
 
 const FOOTER_LINKS = {
   Prodotti: [
-    { label: 'Menopausa Complex',         href: '/prodotti/menopausa-complex' },
-    { label: 'Capelli, Pelle & Unghie',   href: '/prodotti/capelli-pelle-unghie' },
-    { label: 'Microcircolo Superior',     href: '/prodotti/microcircolo-superior' },
+    { label: 'Menopausa Complex',          href: '/prodotti/menopausa-complex' },
+    { label: 'Capelli, Pelle & Unghie',    href: '/prodotti/capelli-pelle-unghie' },
+    { label: 'Microcircolo Superior',      href: '/prodotti/microcircolo-superior' },
     { label: 'Multivitaminico & Minerali', href: '/prodotti/multivitaminico-minerali' },
   ],
   Brand: [
@@ -27,22 +27,19 @@ export function Footer() {
       style={{
         background: 'var(--forest)',
         borderTop: '1px solid var(--amber)',
-        padding: '52px 48px 24px',
+        padding: '52px 24px 24px',
       }}
     >
-      {/* Grid principale: 2fr 1fr 1fr 1fr */}
+      {/* Grid: 1 col mobile → 2 col sm → 4 col lg (2fr 1fr 1fr 1fr) */}
       <div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10 pb-10"
         style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr 1fr 1fr',
-          gap: 40,
-          paddingBottom: 40,
           borderBottom: '0.5px solid rgba(184,144,60,0.15)',
           marginBottom: 22,
         }}
       >
         {/* Colonna brand */}
-        <div>
+        <div className="sm:col-span-2 lg:col-span-1">
           {/* Logo footer — silver */}
           <div style={{ marginBottom: 14 }}>
             <Link
@@ -55,7 +52,6 @@ export function Footer() {
                 justifyContent: 'center',
                 gap: 1,
                 border: '1.5px solid rgba(180,180,172,0.22)',
-                color: 'rgba(180,180,172,0.35)',
                 padding: '5px 10px 6px',
               }}
             >
@@ -66,7 +62,7 @@ export function Footer() {
                   fontWeight: 400,
                   lineHeight: 1,
                   color: 'var(--silver-2)',
-                  opacity: 0.5,
+                  opacity: 0.7,
                 }}
               >
                 08
@@ -81,7 +77,7 @@ export function Footer() {
                   lineHeight: 1,
                   whiteSpace: 'nowrap',
                   color: 'var(--silver)',
-                  opacity: 0.4,
+                  opacity: 0.6,
                 }}
               >
                 Natural Technology
@@ -89,17 +85,11 @@ export function Footer() {
             </Link>
           </div>
 
-          <p
-            style={{
-              fontSize: 11,
-              fontWeight: 300,
-              color: 'rgba(253,246,232,0.6)',
-              lineHeight: 1.85,
-            }}
-          >
+          <p style={{ fontSize: 11, fontWeight: 300, color: 'rgba(253,246,232,0.6)', lineHeight: 1.85 }}>
             VIPHARMA di Tatulli Vito & Co. S.A.S.<br />
             Via Don Luigi Sturzo 44/46/48 — Bitonto (BA) 70032<br />
-            Tel. 080 303 1103 · 08naturaltechnology@gmail.com
+            Tel. 080 303 1103<br />
+            08naturaltechnology@gmail.com
           </p>
         </div>
 
@@ -110,7 +100,7 @@ export function Footer() {
               <p
                 style={{
                   fontSize: 8.5,
-                  fontWeight: 500,
+                  fontWeight: 600,
                   letterSpacing: '0.2em',
                   textTransform: 'uppercase',
                   color: 'rgba(184,144,60,0.85)',
@@ -122,7 +112,11 @@ export function Footer() {
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {links.map(({ label, href }) => (
                   <li key={href} style={{ marginBottom: 9 }}>
-                    <Link href={href} className="footer-link" style={{ fontSize: 11.5, fontWeight: 400 }}>
+                    <Link
+                      href={href}
+                      className="footer-link"
+                      style={{ fontSize: 11.5, fontWeight: 400 }}
+                    >
                       {label}
                     </Link>
                   </li>
@@ -134,15 +128,8 @@ export function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <p
-          style={{
-            fontSize: 10,
-            fontWeight: 300,
-            color: 'rgba(253,246,232,0.5)',
-            letterSpacing: '0.06em',
-          }}
-        >
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <p style={{ fontSize: 10, fontWeight: 300, color: 'rgba(253,246,232,0.5)', letterSpacing: '0.06em' }}>
           © {new Date().getFullYear()} 08 Natural Technology · Tutti i diritti riservati
         </p>
         <span

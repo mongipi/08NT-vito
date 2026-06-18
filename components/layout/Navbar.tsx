@@ -15,6 +15,38 @@ const NAV_LINKS = [
   { href: '/contatti', label: 'Contatti' },
 ] as const
 
+const SOCIAL_LINKS = [
+  {
+    href: 'https://www.facebook.com',
+    label: 'Facebook',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+      </svg>
+    ),
+  },
+  {
+    href: 'https://www.instagram.com',
+    label: 'Instagram',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    href: 'https://wa.me/390803031103',
+    label: 'WhatsApp',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+      </svg>
+    ),
+  },
+] as const
+
 export function Navbar() {
   const pathname = usePathname()
   const scrolled = useScrolled()
@@ -48,7 +80,7 @@ export function Navbar() {
                 className={cn(
                   'flex h-16 items-center uppercase transition-colors duration-[180ms]',
                   isActive(href)
-                    ? 'text-[var(--green)] font-medium'
+                    ? 'text-[var(--green)]'
                     : 'text-[var(--ink-3)] hover:text-[var(--green)]'
                 )}
                 style={{
@@ -68,22 +100,21 @@ export function Navbar() {
           ))}
         </ul>
 
-        {/* Desktop CTA */}
-        <Link
-          href="/contatti"
-          className="hidden md:inline-flex items-center uppercase transition-colors duration-[180ms] hover:bg-[var(--green)] hover:text-white"
-          style={{
-            fontSize: 9,
-            fontWeight: 500,
-            letterSpacing: '0.18em',
-            padding: '8px 18px',
-            border: '1px solid var(--green)',
-            color: 'var(--green)',
-            background: 'none',
-          }}
-        >
-          Contattaci
-        </Link>
+        {/* Social icons desktop */}
+        <div className="hidden md:flex items-center gap-4" style={{ paddingLeft: 16 }}>
+          {SOCIAL_LINKS.map(({ href, label, icon }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              className="text-[var(--amber)] hover:opacity-70 transition-opacity duration-150"
+            >
+              {icon}
+            </a>
+          ))}
+        </div>
 
         {/* Mobile hamburger */}
         <button
@@ -93,37 +124,19 @@ export function Navbar() {
           aria-expanded={mobileOpen}
           aria-controls="mobile-menu"
         >
-          <span
-            className={cn(
-              'block h-px w-5 bg-[var(--ink)] transition-transform duration-200',
-              mobileOpen && 'translate-y-[6px] rotate-45'
-            )}
-          />
-          <span
-            className={cn(
-              'block h-px w-5 bg-[var(--ink)] transition-opacity duration-200',
-              mobileOpen && 'opacity-0'
-            )}
-          />
-          <span
-            className={cn(
-              'block h-px w-5 bg-[var(--ink)] transition-transform duration-200',
-              mobileOpen && '-translate-y-[6px] -rotate-45'
-            )}
-          />
+          <span className={cn('block h-px w-5 bg-[var(--ink)] transition-transform duration-200', mobileOpen && 'translate-y-[6px] rotate-45')} />
+          <span className={cn('block h-px w-5 bg-[var(--ink)] transition-opacity duration-200', mobileOpen && 'opacity-0')} />
+          <span className={cn('block h-px w-5 bg-[var(--ink)] transition-transform duration-200', mobileOpen && '-translate-y-[6px] -rotate-45')} />
         </button>
       </nav>
 
       {/* Mobile menu */}
       <div
         id="mobile-menu"
-        className={cn(
-          'md:hidden overflow-hidden transition-all duration-300',
-          mobileOpen ? 'max-h-96' : 'max-h-0'
-        )}
+        className={cn('md:hidden overflow-hidden transition-all duration-300', mobileOpen ? 'max-h-[500px]' : 'max-h-0')}
         style={{ borderTop: '0.5px solid var(--border)' }}
       >
-        <ul className="flex flex-col px-12 py-4 gap-1" role="list">
+        <ul className="flex flex-col px-6 py-4 gap-1" role="list">
           {NAV_LINKS.map(({ href, label }) => (
             <li key={href}>
               <Link
@@ -131,9 +144,7 @@ export function Navbar() {
                 onClick={() => setMobileOpen(false)}
                 className={cn(
                   'block py-3 uppercase transition-colors duration-150',
-                  isActive(href)
-                    ? 'text-[var(--green)]'
-                    : 'text-[var(--ink-3)] hover:text-[var(--green)]'
+                  isActive(href) ? 'text-[var(--green)]' : 'text-[var(--ink-3)] hover:text-[var(--green)]'
                 )}
                 style={{
                   fontSize: 10,
@@ -147,24 +158,23 @@ export function Navbar() {
               </Link>
             </li>
           ))}
-          <li className="pt-3">
-            <Link
-              href="/contatti"
-              onClick={() => setMobileOpen(false)}
-              className="inline-flex uppercase transition-colors duration-150 hover:bg-[var(--green)] hover:text-white"
-              style={{
-                fontSize: 9,
-                fontWeight: 500,
-                letterSpacing: '0.18em',
-                padding: '8px 18px',
-                border: '1px solid var(--green)',
-                color: 'var(--green)',
-              }}
-            >
-              Contattaci
-            </Link>
-          </li>
         </ul>
+
+        {/* Social icons mobile */}
+        <div className="flex items-center gap-5 px-6 pb-5 pt-1">
+          {SOCIAL_LINKS.map(({ href, label, icon }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              className="text-[var(--amber)] hover:opacity-70 transition-opacity duration-150"
+            >
+              {icon}
+            </a>
+          ))}
+        </div>
       </div>
     </header>
   )
