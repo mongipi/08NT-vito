@@ -8,11 +8,14 @@ import { useScrolled } from '@/hooks/useScrolled'
 import { cn } from '@/lib/utils'
 
 const NAV_LINKS = [
-  { href: '/',         label: 'Home' },
-  { href: '/prodotti', label: 'Prodotti' },
-  { href: '/brand',    label: 'Brand' },
-  { href: '/blog',     label: 'Blog' },
-  { href: '/contatti', label: 'Contatti' },
+  { href: '/',            label: 'Home' },
+  { href: '/prodotti',    label: 'Prodotti' },
+  { href: '/metodo',      label: 'Metodo' },
+  { href: '/trasparenza', label: 'Trasparenza' },
+  { href: '/brand',       label: 'Brand' },
+  { href: '/blog',        label: 'Blog' },
+  { href: '/b2b',         label: 'B2B' },
+  { href: '/contatti',    label: 'Contatti' },
 ] as const
 
 const SOCIAL_LINKS = [
