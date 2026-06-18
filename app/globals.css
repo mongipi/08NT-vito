@@ -1,26 +1,83 @@
 @import "tailwindcss";
 
+/* ─── Brand design tokens ─── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Forest & green scale */
+  --forest:   #0b1e12;
+  --green:    #1a4a2e;
+  --green-2:  #2a6e3e;
+  --green-l:  #eef5f0;
+  --green-ll: #f6faf7;
+
+  /* Amber */
+  --amber:   #b8903c;
+  --amber-l: #fdf6e8;
+
+  /* Silver */
+  --silver:   #b4b4ac;
+  --silver-2: #d0d0c8;
+  --silver-3: #e8e8e2;
+  --silver-l: #f5f5f2;
+
+  /* Ink scale */
+  --ink:   #111110;
+  --ink-2: #333330;
+  --ink-3: #666660;
+  --ink-4: #999992;
+
+  /* Surface */
+  --white:   #ffffff;
+  --paper:   #fafaf8;
+  --paper-2: #f4f4f0;
+
+  /* Borders */
+  --border:   rgba(17, 17, 16, 0.10);
+  --border-2: rgba(17, 17, 16, 0.15);
+  --border-d: rgba(180, 180, 172, 0.14);
+
+  /* Product lines */
+  --menopausa:   #c94478;
+  --menopausa-l: #fdf0f5;
+  --beauty:      #1a6b30;
+  --beauty-l:    #eaf5ec;
+  --circolo:     #126b52;
+  --circolo-l:   #e4f5ef;
+  --energia:     #a86010;
+  --energia-l:   #faeedd;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ─── Base reset ─── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Footer link hover (no JS needed in Server Component) ─── */
+.footer-link {
+  color: rgba(232, 232, 226, 0.75);
+  transition: color 150ms;
+}
+.footer-link:hover {
+  color: rgba(232, 232, 226, 1);
+}
+
+/* ─── Focus visible ─── */
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
 }

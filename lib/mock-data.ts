@@ -1,0 +1,167 @@
+import { LINES } from '@/lib/lines'
+import type { Product, Article } from '@/types'
+
+export const PRODUCTS: Product[] = [
+  {
+    id: '1',
+    slug: 'menopausa-complex',
+    name: 'Menopausa Complex',
+    line: LINES.menopausa,
+    shortDescription:
+      'Supporto naturale al benessere femminile nel periodo della menopausa, con ingredienti botanici selezionati.',
+    longDescription:
+      'Menopausa Complex è una formula botanica d\'eccellenza pensata per accompagnare la donna durante la menopausa. Il blend di isoflavoni di soia, cimicifuga e salvia agisce in sinergia per favorire il benessere quotidiano e il riequilibrio naturale.',
+    ingredients: [
+      { name: 'Isoflavoni di Soia', dosage: '40 mg' },
+      { name: 'Cimicifuga e.s. 2,5% triterpeni', dosage: '20 mg' },
+      { name: 'Salvia e.s. 1,5% acido rosmarinico', dosage: '150 mg' },
+      { name: 'Magnesio bisglicinato', dosage: '100 mg' },
+      { name: 'Vitamina B6', dosage: '1,4 mg' },
+    ],
+    usage: 'Si consiglia l\'assunzione di 2 capsule al giorno, preferibilmente ai pasti, con un bicchiere d\'acqua.',
+    target:
+      'Pensato per le donne in fase di perimenopausa e menopausa che desiderano un supporto naturale al benessere quotidiano.',
+    format: 'Capsule vegetali',
+    capsules: 60,
+    days: 30,
+    dosage: '2 capsule/die',
+    notificationMs: 'Notif. Min. Salute',
+    published: true,
+    order: 1,
+  },
+  {
+    id: '2',
+    slug: 'capelli-pelle-unghie',
+    name: 'Capelli, Pelle & Unghie',
+    line: LINES.beauty,
+    shortDescription:
+      'Formula avanzata azione giorno & notte per capelli forti, pelle luminosa e unghie sane.',
+    longDescription:
+      'Una combinazione sinergica di Mela Annurca, Biotina, Bamboo 70% silice e Astaxantina 2,5% per supportare la salute di capelli, pelle e unghie dall\'interno. La formula giorno & notte ottimizza l\'apporto nutrizionale nelle fasi di riposo e attività.',
+    ingredients: [
+      { name: 'Mela Annurca e.s.', dosage: '200 mg' },
+      { name: 'Bamboo 70% silice', dosage: '150 mg' },
+      { name: 'Astaxantina 2,5%', dosage: '4 mg' },
+      { name: 'L-cisteina', dosage: '100 mg' },
+      { name: 'L-metionina', dosage: '100 mg' },
+      { name: 'Biotina', dosage: '300 µg' },
+      { name: 'Vitamina C', dosage: '80 mg' },
+      { name: 'Zinco', dosage: '10 mg' },
+    ],
+    usage: 'Si consiglia l\'assunzione di 2 capsule al giorno, 1 al mattino e 1 alla sera, con un bicchiere d\'acqua.',
+    target:
+      'Per chi desidera rafforzare capelli e unghie fragili e migliorare la luminosità della pelle attraverso un supporto nutrizionale mirato.',
+    format: 'Capsule vegetali',
+    capsules: 60,
+    days: 30,
+    dosage: '2 capsule/die',
+    notificationMs: 'Notif. MS N. 197030',
+    published: true,
+    order: 2,
+  },
+  {
+    id: '3',
+    slug: 'microcircolo-superior',
+    name: 'Microcircolo Superior',
+    line: LINES.circolo,
+    shortDescription:
+      'Complesso flavonoico avanzato per gambe leggere e normale funzionalità del microcircolo.',
+    longDescription:
+      'Microcircolo Superior combina Diosmina ultramicronizzata ed Esperidina micronizzata con Bromelina gastroprotetta, Centella asiatica, Rusco e Uva rossa OPC 95% per un\'azione sinergica sulla circolazione venosa e il benessere delle gambe.',
+    ingredients: [
+      { name: 'Diosmina ultramicronizzata', dosage: '450 mg' },
+      { name: 'Esperidina micronizzata', dosage: '50 mg' },
+      { name: 'Bromelina 10.000 GDU gastroprotetta', dosage: '100 mg' },
+      { name: 'Rusco e.s. 20% ruscogenine', dosage: '75 mg' },
+      { name: 'Uva rossa e.s. 95% OPC', dosage: '50 mg' },
+      { name: 'Centella asiatica 40% asiaticosidi', dosage: '30 mg' },
+    ],
+    usage: 'Si consiglia l\'assunzione di 2 capsule al giorno, preferibilmente a stomaco vuoto, con un bicchiere d\'acqua.',
+    target:
+      'Per chi avverte gambe pesanti o stanche, soprattutto nei periodi caldi o dopo molte ore in piedi o seduti.',
+    format: 'Capsule vegetali HPMC',
+    capsules: 60,
+    days: 30,
+    dosage: '2 capsule/die',
+    notificationMs: 'Prodotto in Italia',
+    published: true,
+    order: 3,
+  },
+  {
+    id: '4',
+    slug: 'multivitaminico-minerali',
+    name: 'Multivitaminico & Minerali',
+    line: LINES.energia,
+    shortDescription:
+      'Complesso nutrizionale avanzato con oltre 20 vitamine, minerali e antiossidanti selezionati.',
+    longDescription:
+      'Una formula completa con Vitamina C liposomiale ad alta biodisponibilità, CoQ10, Pterostilbene e Acetil L-carnitina. Integra Vitamina D3 da lichene, Magnesio bisglicinato e un pannello completo di vitamine del gruppo B per un supporto energetico quotidiano.',
+    ingredients: [
+      { name: 'Vitamina C liposomiale', dosage: '200 mg' },
+      { name: 'CoQ10 (Ubichinone)', dosage: '100 mg' },
+      { name: 'Pterostilbene', dosage: '50 mg' },
+      { name: 'Acetil L-carnitina', dosage: '250 mg' },
+      { name: 'Vitamina D3 da lichene', dosage: '25 µg (1000 UI)' },
+      { name: 'Magnesio bisglicinato', dosage: '150 mg' },
+      { name: 'Zinco', dosage: '10 mg' },
+      { name: 'Complesso vitamine B', dosage: 'da B1 a B12' },
+    ],
+    usage: 'Si consiglia l\'assunzione di 1 capsula al giorno, preferibilmente al mattino ai pasti, con un bicchiere d\'acqua.',
+    target: 'Per adulti dai 13 anni che desiderano un supporto nutrizionale completo all\'energia quotidiana.',
+    format: 'Capsule vegetali',
+    capsules: 30,
+    days: 30,
+    dosage: '1 capsula/die',
+    minAge: 13,
+    published: true,
+    order: 4,
+  },
+]
+
+export const ARTICLES: Article[] = [
+  {
+    id: '1',
+    slug: 'coq10-pterostilbene-sinergia-anti-aging',
+    title: 'CoQ10 e Pterostilbene: la sinergia anti-aging spiegata dalla ricerca scientifica',
+    excerpt:
+      'Due molecole, un obiettivo: rallentare i processi ossidativi cellulari. Ecco cosa dice la letteratura più recente.',
+    body: 'La combinazione di CoQ10 e Pterostilbene rappresenta una delle frontiere più promettenti della nutraceutica moderna...',
+    tag: 'Scienza',
+    publishedAt: '2026-06-12',
+    readingTime: 5,
+    published: true,
+  },
+  {
+    id: '2',
+    slug: 'mela-annurca-superfood-italiano',
+    title: 'Mela Annurca: il superfood italiano per capelli forti e pelle luminosa',
+    excerpt: 'Un frutto della tradizione campana diventato protagonista della nutraceutica moderna.',
+    body: 'La Mela Annurca è una varietà autoctona campana con la più alta concentrazione di procianidine...',
+    tag: 'Nutrizione',
+    publishedAt: '2026-06-05',
+    readingTime: 4,
+    published: true,
+  },
+  {
+    id: '3',
+    slug: 'gambe-pesanti-microcircolo-estate',
+    title: 'Gambe pesanti in estate: come supportare il microcircolo giorno per giorno',
+    excerpt: 'Il caldo aumenta la sensazione di pesantezza. Scopri i meccanismi e le strategie di supporto.',
+    body: 'Nelle stagioni calde, la vasodilatazione periferica può accentuare la sensazione di gambe pesanti...',
+    tag: 'Benessere',
+    publishedAt: '2026-05-28',
+    readingTime: 3,
+    published: true,
+  },
+  {
+    id: '4',
+    slug: 'vitamina-c-liposomiale-biodisponibilita',
+    title: 'Vitamina C liposomiale vs tradizionale: perché la biodisponibilità cambia tutto',
+    excerpt: 'Non tutta la Vitamina C è uguale. La forma liposomiale raggiunge le cellule in modo radicalmente diverso.',
+    body: 'La Vitamina C tradizionale (acido ascorbico) ha una biodisponibilità limitata dall\'assorbimento intestinale...',
+    tag: 'Scienza',
+    publishedAt: '2026-05-20',
+    readingTime: 6,
+    published: true,
+  },
+]
