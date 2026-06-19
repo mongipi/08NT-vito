@@ -68,7 +68,7 @@ export function Navbar() {
     >
       <nav
         className="flex h-24 items-center justify-between"
-        style={{ padding: '0 48px' }}
+        style={{ padding: '0 3rem' }}
         aria-label="Navigazione principale"
       >
         {/* Logo */}
@@ -87,8 +87,8 @@ export function Navbar() {
                     : 'text-[var(--ink-3)] hover:text-[var(--green)]'
                 )}
                 style={{
-                  padding: '0 14px',
-                  fontSize: 10,
+                  padding: '0 0.875rem',
+                  fontSize: '0.625rem',
                   fontWeight: isActive(href) ? 500 : 400,
                   letterSpacing: '0.14em',
                   borderBottom: isActive(href)
@@ -104,7 +104,7 @@ export function Navbar() {
         </ul>
 
         {/* Social icons desktop */}
-        <div className="hidden md:flex items-center gap-4" style={{ paddingLeft: 16 }}>
+        <div className="hidden md:flex items-center gap-4" style={{ paddingLeft: '1rem' }}>
           {SOCIAL_LINKS.map(({ href, label, icon }) => (
             <a
               key={label}
@@ -150,7 +150,7 @@ export function Navbar() {
                   isActive(href) ? 'text-[var(--green)]' : 'text-[var(--ink-3)] hover:text-[var(--green)]'
                 )}
                 style={{
-                  fontSize: 10,
+                  fontSize: '0.625rem',
                   fontWeight: isActive(href) ? 500 : 400,
                   letterSpacing: '0.14em',
                   borderBottom: '0.5px solid var(--border)',

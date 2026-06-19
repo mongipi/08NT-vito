@@ -60,7 +60,7 @@ export function Footer() {
       style={{
         background: 'var(--forest)',
         borderTop: '1px solid var(--amber)',
-        padding: '52px 24px 24px',
+        padding: '3.25rem 1.5rem 1.5rem',
       }}
     >
       {/* Grid: 1 col mobile → 2 col sm → 4 col lg (2fr 1fr 1fr 1fr) */}
@@ -68,17 +68,17 @@ export function Footer() {
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10 pb-10"
         style={{
           borderBottom: '0.5px solid rgba(184,144,60,0.15)',
-          marginBottom: 22,
+          marginBottom: '1.375rem',
         }}
       >
         {/* Colonna brand */}
         <div className="sm:col-span-2 lg:col-span-1">
           {/* Logo footer */}
-          <div style={{ marginBottom: 14 }}>
+          <div style={{ marginBottom: '0.875rem' }}>
             <Logo variant="light" height={90} />
           </div>
 
-          <p style={{ fontSize: 11, fontWeight: 300, color: 'rgba(253,246,232,0.6)', lineHeight: 1.85, marginBottom: 20 }}>
+          <p style={{ fontSize: '0.6875rem', fontWeight: 300, color: 'rgba(253,246,232,0.6)', lineHeight: 1.85, marginBottom: '1.25rem' }}>
             VIPHARMA di Tatulli Vito & Co. S.A.S.<br />
             Via Don Luigi Sturzo 44/46/48 — Bitonto (BA) 70032<br />
             Tel. 080 303 1103<br />
@@ -93,23 +93,23 @@ export function Footer() {
             <div key={section}>
               <p
                 style={{
-                  fontSize: 8.5,
+                  fontSize: '0.53rem',
                   fontWeight: 600,
                   letterSpacing: '0.2em',
                   textTransform: 'uppercase',
                   color: 'rgba(184,144,60,0.85)',
-                  marginBottom: 14,
+                  marginBottom: '0.875rem',
                 }}
               >
                 {section}
               </p>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {links.map(({ label, href }) => (
-                  <li key={href} style={{ marginBottom: 9 }}>
+                  <li key={href} style={{ marginBottom: '0.5625rem' }}>
                     <Link
                       href={href}
                       className="footer-link"
-                      style={{ fontSize: 11.5, fontWeight: 400 }}
+                      style={{ fontSize: '0.72rem', fontWeight: 400 }}
                     >
                       {label}
                     </Link>
@@ -123,7 +123,7 @@ export function Footer() {
 
       {/* Bottom bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p style={{ fontSize: 10, fontWeight: 300, color: 'rgba(253,246,232,0.5)', letterSpacing: '0.06em' }}>
+        <p style={{ fontSize: '0.625rem', fontWeight: 300, color: 'rgba(253,246,232,0.5)', letterSpacing: '0.06em' }}>
           © {new Date().getFullYear()} 08 Natural Technology · Tutti i diritti riservati
         </p>
 
@@ -145,13 +145,13 @@ export function Footer() {
 
         <span
           style={{
-            fontSize: 10,
+            fontSize: '0.625rem',
             fontWeight: 300,
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
             color: 'rgba(184,144,60,0.9)',
             border: '0.5px solid rgba(184,144,60,0.5)',
-            padding: '5px 16px',
+            padding: '0.3125rem 1rem',
           }}
         >
           Made in Italy

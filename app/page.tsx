@@ -29,12 +29,12 @@ export default async function HomePage() {
             <div
               className="flex items-center gap-2.5"
               style={{
-                fontSize: 9,
+                fontSize: '0.5625rem',
                 fontWeight: 500,
                 letterSpacing: '0.28em',
                 textTransform: 'uppercase',
                 color: 'var(--amber)',
-                marginBottom: 18,
+                marginBottom: '1.125rem',
               }}
             >
               <span style={{ display: 'block', width: 24, height: '0.5px', background: 'var(--amber)', opacity: 0.75, flexShrink: 0 }} />
@@ -49,7 +49,7 @@ export default async function HomePage() {
                 lineHeight: 1.03,
                 letterSpacing: '-0.02em',
                 color: 'var(--silver-3)',
-                marginBottom: 24,
+                marginBottom: '1.5rem',
               }}
             >
               L&apos;<em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>Eccellenza</em>
@@ -59,12 +59,12 @@ export default async function HomePage() {
 
             <p
               style={{
-                fontSize: 13,
+                fontSize: '0.8125rem',
                 fontWeight: 300,
                 color: 'rgba(253,246,232,0.66)',
                 lineHeight: 1.9,
                 maxWidth: 520,
-                marginBottom: 34,
+                marginBottom: '2.125rem',
               }}
             >
               Integratori alimentari italiani formulati con ingredienti selezionati, ricerca e
@@ -76,11 +76,11 @@ export default async function HomePage() {
               <Link
                 href="/prodotti"
                 style={{
-                  fontSize: 9,
+                  fontSize: '0.5625rem',
                   fontWeight: 600,
                   letterSpacing: '0.18em',
                   textTransform: 'uppercase',
-                  padding: '13px 26px',
+                  padding: '0.8125rem 1.625rem',
                   background: 'var(--amber)',
                   color: 'var(--forest)',
                   border: '1px solid var(--amber)',
@@ -91,11 +91,11 @@ export default async function HomePage() {
               <Link
                 href="/metodo"
                 style={{
-                  fontSize: 9,
+                  fontSize: '0.5625rem',
                   fontWeight: 600,
                   letterSpacing: '0.18em',
                   textTransform: 'uppercase',
-                  padding: '13px 26px',
+                  padding: '0.8125rem 1.625rem',
                   background: 'transparent',
                   color: 'rgba(253,246,232,0.78)',
                   border: '1px solid rgba(253,246,232,0.22)',
@@ -107,11 +107,11 @@ export default async function HomePage() {
 
             <div
               style={{
-                marginTop: 34,
+                marginTop: '2.125rem',
                 borderLeft: '1px solid rgba(184,144,60,0.42)',
-                paddingLeft: 18,
+                paddingLeft: '1.125rem',
                 color: 'rgba(253,246,232,0.43)',
-                fontSize: 10.5,
+                fontSize: '0.66rem',
                 fontWeight: 300,
                 lineHeight: 1.8,
               }}
@@ -146,7 +146,7 @@ export default async function HomePage() {
           background: 'var(--forest)',
           borderTop: '0.5px solid rgba(184,144,60,0.25)',
           borderBottom: '1px solid var(--amber)',
-          padding: '15px 48px',
+          padding: '0.9375rem 3rem',
         }}
       >
         <div
@@ -158,15 +158,15 @@ export default async function HomePage() {
               key={item.title}
               className="flex gap-3 items-start"
               style={{
-                padding: '0 18px',
+                padding: '0 1.125rem',
                 borderRight: '0.5px solid rgba(184,144,60,0.16)',
               }}
             >
-              <div style={{ color: 'var(--amber)', fontSize: 16, marginTop: 2 }}>{item.icon}</div>
+              <div style={{ color: 'var(--amber)', fontSize: '1rem', marginTop: 2 }}>{item.icon}</div>
               <div>
                 <div
                   style={{
-                    fontSize: 10,
+                    fontSize: '0.625rem',
                     textTransform: 'uppercase',
                     letterSpacing: '0.15em',
                     color: 'rgba(255,255,255,0.76)',
@@ -178,7 +178,7 @@ export default async function HomePage() {
                 </div>
                 <div
                   style={{
-                    fontSize: 10.2,
+                    fontSize: '0.64rem',
                     color: 'rgba(253,246,232,0.42)',
                     lineHeight: 1.55,
                     fontWeight: 300,
@@ -206,7 +206,7 @@ export default async function HomePage() {
               justifyContent: 'center',
               position: 'relative',
               overflow: 'hidden',
-              padding: '0 24px',
+              padding: '0 1.5rem',
             }}
           >
             {/* Stage light */}
@@ -230,7 +230,7 @@ export default async function HomePage() {
             />
             <div
               className="flex items-end justify-center gap-3"
-              style={{ position: 'relative', zIndex: 2, paddingBottom: 28 }}
+              style={{ position: 'relative', zIndex: 2, paddingBottom: '1.75rem' }}
             >
               {BOTTLES.map((b) => (
                 <Bottle key={b.name} {...b} />
@@ -243,12 +243,12 @@ export default async function HomePage() {
             <div
               className="flex items-center gap-2.5"
               style={{
-                fontSize: 9,
+                fontSize: '0.5625rem',
                 fontWeight: 500,
                 letterSpacing: '0.26em',
                 textTransform: 'uppercase',
                 color: 'var(--amber)',
-                marginBottom: 14,
+                marginBottom: '0.875rem',
               }}
             >
               <span style={{ display: 'block', width: 22, height: '0.5px', background: 'var(--amber)', flexShrink: 0 }} />
@@ -258,7 +258,7 @@ export default async function HomePage() {
             <span
               style={{
                 fontFamily: 'var(--font-great-vibes), cursive',
-                fontSize: 32,
+                fontSize: '2rem',
                 color: 'var(--green-2)',
                 display: 'block',
                 marginBottom: 4,
@@ -275,7 +275,7 @@ export default async function HomePage() {
                 lineHeight: 1.13,
                 letterSpacing: '-0.01em',
                 color: 'var(--ink)',
-                marginBottom: 24,
+                marginBottom: '1.5rem',
               }}
             >
               Un sogno diventato{' '}
@@ -285,22 +285,22 @@ export default async function HomePage() {
             <blockquote
               style={{
                 fontFamily: 'var(--font-cormorant), Georgia, serif',
-                fontSize: 25,
+                fontSize: '1.5625rem',
                 fontWeight: 300,
                 fontStyle: 'italic',
                 lineHeight: 1.55,
                 color: 'var(--green)',
                 borderLeft: '2px solid var(--amber)',
-                paddingLeft: 22,
-                margin: '0 0 24px',
+                paddingLeft: '1.375rem',
+                margin: '0 0 1.5rem',
               }}
             >
               &ldquo;Per noi il benessere non è una semplice parola: è energia, equilibrio,
               serenità e qualità della vita.&rdquo;
             </blockquote>
 
-            <div style={{ fontSize: 12.2, fontWeight: 300, lineHeight: 1.95, color: 'var(--ink-3)' }}>
-              <p style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: '0.76rem', fontWeight: 300, lineHeight: 1.95, color: 'var(--ink-3)' }}>
+              <p style={{ marginBottom: '0.875rem' }}>
                 <strong>08 Natural Technology</strong> nasce dal desiderio di creare integratori
                 alimentari curati nei dettagli, con formule comprensibili, ingredienti selezionati
                 e un&apos;identità italiana riconoscibile.
@@ -315,9 +315,9 @@ export default async function HomePage() {
             <div
               style={{
                 fontFamily: 'var(--font-great-vibes), cursive',
-                fontSize: 34,
+                fontSize: '2.125rem',
                 color: 'var(--green-2)',
-                marginTop: 18,
+                marginTop: '1.125rem',
               }}
             >
               Vito Tatulli
@@ -329,12 +329,12 @@ export default async function HomePage() {
       {/* ════ CATALOG STRIP ════ */}
       <div
         className="strip flex items-center justify-between"
-        style={{ borderBottom: '1px solid var(--amber)', background: '#fff', paddingTop: 11, paddingBottom: 11 }}
+        style={{ borderBottom: '1px solid var(--amber)', background: '#fff', paddingTop: '0.6875rem', paddingBottom: '0.6875rem' }}
       >
-        <span style={{ fontSize: 9, fontWeight: 300, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--green)' }}>
+        <span style={{ fontSize: '0.5625rem', fontWeight: 300, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--green)' }}>
           08 Natural Technology &nbsp;|&nbsp; Linea Prodotti
         </span>
-        <div className="flex items-center gap-2" style={{ fontSize: 9, fontWeight: 300, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--amber)' }}>
+        <div className="flex items-center gap-2" style={{ fontSize: '0.5625rem', fontWeight: 300, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--amber)' }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true">
             <path d="M12 22C12 22 4 16 4 9a8 8 0 0 1 16 0c0 7-8 13-8 13z" /><path d="M12 9v13" />
           </svg>
@@ -344,9 +344,9 @@ export default async function HomePage() {
 
       {/* ════ PRODUCTS ════ */}
       <section className="section" style={{ background: 'var(--paper-2)' }}>
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10" style={{ marginBottom: 46 }}>
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10" style={{ marginBottom: '2.875rem' }}>
           <div>
-            <div className="flex items-center gap-2.5" style={{ fontSize: 9, fontWeight: 400, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 14 }}>
+            <div className="flex items-center gap-2.5" style={{ fontSize: '0.5625rem', fontWeight: 400, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '0.875rem' }}>
               <span style={{ display: 'block', width: 22, height: '0.5px', background: 'var(--amber)', flexShrink: 0 }} />
               Le nostre formule
             </div>
@@ -364,7 +364,7 @@ export default async function HomePage() {
               <em style={{ fontStyle: 'italic', color: 'var(--green-2)' }}>per esigenze reali.</em>
             </h2>
           </div>
-          <p style={{ fontSize: 12.5, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9, maxWidth: 480 }}>
+          <p style={{ fontSize: '0.78rem', fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9, maxWidth: 480 }}>
             Ogni linea aiuta l&apos;utente a riconoscersi subito: donna, beauty, microcircolo,
             energia quotidiana. Meno parole generiche, più chiarezza d&apos;uso.
           </p>
@@ -378,7 +378,7 @@ export default async function HomePage() {
 
       {/* ════ IL METODO ════ */}
       <section className="section" style={{ background: 'var(--forest)' }}>
-        <div className="flex items-center gap-2.5" style={{ fontSize: 9, fontWeight: 500, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(184,144,60,0.72)', marginBottom: 14 }}>
+        <div className="flex items-center gap-2.5" style={{ fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(184,144,60,0.72)', marginBottom: '0.875rem' }}>
           <span style={{ display: 'block', width: 22, height: '0.5px', background: 'var(--amber)', opacity: 0.75, flexShrink: 0 }} />
           Il metodo 08
         </div>
@@ -390,12 +390,12 @@ export default async function HomePage() {
             lineHeight: 1.13,
             letterSpacing: '-0.01em',
             color: '#f0ede8',
-            marginBottom: 12,
+            marginBottom: '0.75rem',
           }}
         >
           Dalla funzione alla <em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>formula.</em>
         </h2>
-        <p style={{ fontSize: 12.5, fontWeight: 300, color: 'rgba(253,246,232,0.52)', lineHeight: 1.9, maxWidth: 680, marginBottom: 48 }}>
+        <p style={{ fontSize: '0.78rem', fontWeight: 300, color: 'rgba(253,246,232,0.52)', lineHeight: 1.9, maxWidth: 680, marginBottom: '3rem' }}>
           Una sezione pensata per aumentare fiducia: non solo cosa contiene il prodotto, ma
           perché è stato formulato in quel modo.
         </p>
@@ -404,18 +404,18 @@ export default async function HomePage() {
             <div
               key={step.n}
               style={{
-                padding: '34px 26px',
+                padding: '2.125rem 1.625rem',
                 background: 'rgba(255,255,255,0.04)',
                 borderRight: i < 3 ? '0.5px solid rgba(184,144,60,0.14)' : undefined,
               }}
             >
-              <div style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: 48, fontStyle: 'italic', fontWeight: 300, color: 'rgba(184,144,60,0.28)', lineHeight: 1, marginBottom: 18 }}>
+              <div style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: '3rem', fontStyle: 'italic', fontWeight: 300, color: 'rgba(184,144,60,0.28)', lineHeight: 1, marginBottom: '1.125rem' }}>
                 {step.n}
               </div>
-              <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)', marginBottom: 10 }}>
+              <div style={{ fontSize: '0.66rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)', marginBottom: '0.625rem' }}>
                 {step.title}
               </div>
-              <div style={{ fontSize: 11.2, fontWeight: 300, lineHeight: 1.8, color: 'rgba(253,246,232,0.46)' }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 300, lineHeight: 1.8, color: 'rgba(253,246,232,0.46)' }}>
                 {step.body}
               </div>
             </div>
@@ -427,7 +427,7 @@ export default async function HomePage() {
       <section className="section">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
           <div>
-            <div className="flex items-center gap-2.5" style={{ fontSize: 9, fontWeight: 400, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 14 }}>
+            <div className="flex items-center gap-2.5" style={{ fontSize: '0.5625rem', fontWeight: 400, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '0.875rem' }}>
               <span style={{ display: 'block', width: 22, height: '0.5px', background: 'var(--amber)', flexShrink: 0 }} />
               Trasparenza
             </div>
@@ -439,41 +439,41 @@ export default async function HomePage() {
                 lineHeight: 1.13,
                 letterSpacing: '-0.01em',
                 color: 'var(--ink)',
-                marginBottom: 12,
+                marginBottom: '0.75rem',
               }}
             >
               Cosa deve vedere<br />
               <em style={{ fontStyle: 'italic', color: 'var(--green-2)' }}>chi acquista.</em>
             </h2>
-            <p style={{ fontSize: 12.5, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9, maxWidth: 680, marginBottom: 34 }}>
+            <p style={{ fontSize: '0.78rem', fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9, maxWidth: 680, marginBottom: '2.125rem' }}>
               Questa parte è stata inserita per rendere il sito più affidabile e meno &ldquo;solo
               estetico&rdquo;. È qui che il brand dimostra serietà.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 14 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: '0.875rem' }}>
               {PROOF_CARDS.map((card) => (
-                <div key={card.title} style={{ background: '#fff', border: '1px solid var(--border-2)', padding: 22, minHeight: 160 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.13em', textTransform: 'uppercase', color: 'var(--ink)', marginBottom: 8 }}>
+                <div key={card.title} style={{ background: '#fff', border: '1px solid var(--border-2)', padding: '1.375rem', minHeight: 160 }}>
+                  <div style={{ fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.13em', textTransform: 'uppercase', color: 'var(--ink)', marginBottom: '0.5rem' }}>
                     {card.title}
                   </div>
-                  <p style={{ fontSize: 11.4, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.75 }}>{card.body}</p>
+                  <p style={{ fontSize: '0.71rem', fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.75 }}>{card.body}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Reg box */}
-          <div style={{ background: 'var(--forest)', padding: 34, border: '1px solid rgba(184,144,60,0.25)' }}>
-            <div style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: 34, fontWeight: 300, color: '#f0ede8', marginBottom: 18, lineHeight: 1.1 }}>
+          <div style={{ background: 'var(--forest)', padding: '2.125rem', border: '1px solid rgba(184,144,60,0.25)' }}>
+            <div style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: '2.125rem', fontWeight: 300, color: '#f0ede8', marginBottom: '1.125rem', lineHeight: 1.1 }}>
               Nota di conformità.
             </div>
-            <p style={{ fontSize: 11.8, fontWeight: 300, lineHeight: 1.85, color: 'rgba(253,246,232,0.52)', marginBottom: 16 }}>
+            <p style={{ fontSize: '0.74rem', fontWeight: 300, lineHeight: 1.85, color: 'rgba(253,246,232,0.52)', marginBottom: '1rem' }}>
               Gli integratori alimentari non sostituiscono una dieta varia ed equilibrata e uno
               stile di vita sano. Le indicazioni devono restare entro i claim ammessi e verificabili.
             </p>
-            <ul style={{ listStyle: 'none', marginTop: 18 }}>
+            <ul style={{ listStyle: 'none', marginTop: '1.125rem' }}>
               {['Niente promesse di cura o guarigione.', 'Niente "clinicamente provato" senza prove specifiche.', 'Claim Ministero/EFSA solo se corretti.', 'Ogni scheda prodotto deve avere avvertenze complete.'].map((item) => (
-                <li key={item} style={{ fontSize: 10.4, color: 'rgba(253,246,232,0.64)', lineHeight: 1.75, borderTop: '0.5px solid rgba(184,144,60,0.15)', padding: '9px 0' }}>
-                  <span style={{ color: 'var(--amber)', marginRight: 9 }}>•</span>{item}
+                <li key={item} style={{ fontSize: '0.65rem', color: 'rgba(253,246,232,0.64)', lineHeight: 1.75, borderTop: '0.5px solid rgba(184,144,60,0.15)', padding: '0.5625rem 0' }}>
+                  <span style={{ color: 'var(--amber)', marginRight: '0.5625rem' }}>•</span>{item}
                 </li>
               ))}
             </ul>
@@ -483,9 +483,9 @@ export default async function HomePage() {
 
       {/* ════ BLOG ════ */}
       <section className="section" style={{ background: 'var(--forest)' }}>
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10" style={{ marginBottom: 46 }}>
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10" style={{ marginBottom: '2.875rem' }}>
           <div>
-            <div className="flex items-center gap-2.5" style={{ fontSize: 9, fontWeight: 400, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'rgba(184,144,60,0.72)', marginBottom: 14 }}>
+            <div className="flex items-center gap-2.5" style={{ fontSize: '0.5625rem', fontWeight: 400, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'rgba(184,144,60,0.72)', marginBottom: '0.875rem' }}>
               <span style={{ display: 'block', width: 22, height: '0.5px', background: 'rgba(184,144,60,0.5)', flexShrink: 0 }} />
               Approfondimenti
             </div>
@@ -503,7 +503,7 @@ export default async function HomePage() {
               <em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>e benessere.</em>
             </h2>
           </div>
-          <p style={{ fontSize: 12.5, fontWeight: 300, color: 'rgba(253,246,232,0.52)', lineHeight: 1.9, maxWidth: 480 }}>
+          <p style={{ fontSize: '0.78rem', fontWeight: 300, color: 'rgba(253,246,232,0.52)', lineHeight: 1.9, maxWidth: 480 }}>
             Il blog diventa uno strumento SEO e di autorevolezza: articoli sugli ingredienti,
             guide d&apos;uso, consigli e spiegazioni semplici.
           </p>
@@ -523,14 +523,14 @@ export default async function HomePage() {
               <div className="flex items-center justify-center" style={{ height: 160, borderBottom: '0.5px solid rgba(184,144,60,0.14)', background: 'rgba(255,255,255,0.035)' }}>
                 <ArticleIcon size={42} />
               </div>
-              <div style={{ padding: 24 }}>
-                <span style={{ fontSize: 8.5, letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700, color: 'var(--amber)', display: 'block', marginBottom: 10 }}>
+              <div style={{ padding: '1.5rem' }}>
+                <span style={{ fontSize: '0.53rem', letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700, color: 'var(--amber)', display: 'block', marginBottom: '0.625rem' }}>
                   {article.tag}
                 </span>
-                <div style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', color: '#f0ede8', fontSize: 21, lineHeight: 1.35, fontWeight: 400, marginBottom: 10 }}>
+                <div style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', color: '#f0ede8', fontSize: '1.3125rem', lineHeight: 1.35, fontWeight: 400, marginBottom: '0.625rem' }}>
                   {article.title}
                 </div>
-                <div style={{ fontSize: 10, color: 'rgba(253,246,232,0.34)' }}>
+                <div style={{ fontSize: '0.625rem', color: 'rgba(253,246,232,0.34)' }}>
                   {formatDate(article.publishedAt)} · {article.readingTime} min di lettura
                 </div>
               </div>
@@ -538,9 +538,9 @@ export default async function HomePage() {
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-2" style={{ marginTop: 26 }}>
+        <div className="flex flex-wrap gap-2" style={{ marginTop: '1.625rem' }}>
           {BLOG_TOPICS.map((topic) => (
-            <span key={topic} style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(253,246,232,0.58)', border: '0.5px solid rgba(184,144,60,0.22)', padding: '7px 12px' }}>
+            <span key={topic} style={{ fontSize: '0.5625rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(253,246,232,0.58)', border: '0.5px solid rgba(184,144,60,0.22)', padding: '0.4375rem 0.75rem' }}>
               {topic}
             </span>
           ))}
@@ -550,33 +550,33 @@ export default async function HomePage() {
       {/* ════ B2B ════ */}
       <section className="section" style={{ background: 'var(--paper-2)' }}>
         <div className="grid grid-cols-1 gap-9 lg:grid-cols-2">
-          <div style={{ background: '#fff', border: '1px solid var(--border-2)', padding: 32 }}>
-            <div className="flex items-center gap-2.5" style={{ fontSize: 9, fontWeight: 500, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 14 }}>
+          <div style={{ background: '#fff', border: '1px solid var(--border-2)', padding: '2rem' }}>
+            <div className="flex items-center gap-2.5" style={{ fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '0.875rem' }}>
               <span style={{ display: 'block', width: 22, height: '0.5px', background: 'var(--amber)', flexShrink: 0 }} />
               Retail &amp; Farmacie
             </div>
-            <h3 style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: 30, fontWeight: 400, color: 'var(--ink)', marginBottom: 14, lineHeight: 1.2 }}>
+            <h3 style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: '1.875rem', fontWeight: 400, color: 'var(--ink)', marginBottom: '0.875rem', lineHeight: 1.2 }}>
               Diventa rivenditore 08 Natural Technology.
             </h3>
-            <p style={{ fontSize: 12, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.85, marginBottom: 18 }}>
+            <p style={{ fontSize: '0.75rem', fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.85, marginBottom: '1.125rem' }}>
               Una sezione dedicata a farmacie, parafarmacie, erboristerie e partner commerciali.
               Qui il sito diventa anche uno strumento B2B, non solo una vetrina.
             </p>
             <Link
               href="/b2b"
-              style={{ display: 'inline-block', fontSize: 9, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', padding: '12px 24px', background: 'var(--green)', color: '#fff', border: '1px solid var(--green)' }}
+              style={{ display: 'inline-block', fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', padding: '0.75rem 1.5rem', background: 'var(--green)', color: '#fff', border: '1px solid var(--green)' }}
             >
               Richiedi catalogo
             </Link>
           </div>
-          <div style={{ background: '#fff', border: '1px solid var(--border-2)', padding: 32 }}>
-            <h3 style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: 30, fontWeight: 400, color: 'var(--ink)', marginBottom: 20, lineHeight: 1.2 }}>
+          <div style={{ background: '#fff', border: '1px solid var(--border-2)', padding: '2rem' }}>
+            <h3 style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: '1.875rem', fontWeight: 400, color: 'var(--ink)', marginBottom: '1.25rem', lineHeight: 1.2 }}>
               Materiali utili per il punto vendita.
             </h3>
-            <div className="grid grid-cols-2" style={{ gap: 8 }}>
+            <div className="grid grid-cols-2" style={{ gap: '0.5rem' }}>
               {B2B_ITEMS.map((item) => (
-                <div key={item} style={{ fontSize: 10, color: 'var(--ink-3)', borderTop: '1px solid var(--border)', padding: '10px 0' }}>
-                  <span style={{ color: 'var(--green-2)', fontWeight: 700, marginRight: 8 }}>✓</span>
+                <div key={item} style={{ fontSize: '0.625rem', color: 'var(--ink-3)', borderTop: '1px solid var(--border)', padding: '0.625rem 0' }}>
+                  <span style={{ color: 'var(--green-2)', fontWeight: 700, marginRight: '0.5rem' }}>✓</span>
                   {item}
                 </div>
               ))}
@@ -660,15 +660,15 @@ function Bottle({ name, label, color, small, tall }: { name: string; label: stri
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
-          padding: '10px 6px',
+          padding: '0.625rem 0.375rem',
           border: '1px solid rgba(184,144,60,0.23)',
         }}
       >
-        <div style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: 28, color: 'var(--green)', lineHeight: 1 }}>08</div>
-        <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink)', lineHeight: 1.35, marginTop: 7 }}>
+        <div style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: '1.75rem', color: 'var(--green)', lineHeight: 1 }}>08</div>
+        <div style={{ fontSize: '0.4375rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink)', lineHeight: 1.35, marginTop: '0.4375rem' }}>
           {lines.map((line, i) => <span key={i} style={{ display: 'block' }}>{line}</span>)}
         </div>
-        <div style={{ height: 3, width: 38, marginTop: 9, background: color }} />
+        <div style={{ height: 3, width: 38, marginTop: '0.5625rem', background: color }} />
       </div>
     </div>
   )

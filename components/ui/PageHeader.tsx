@@ -12,18 +12,18 @@ export function PageHeader({ eyebrow, script, title }: PageHeaderProps) {
       style={{
         background: 'var(--forest)',
         borderBottom: '1px solid var(--amber)',
-        paddingBottom: 52,
+        paddingBottom: '3.25rem',
       }}
     >
       <div
         className="flex items-center gap-2.5"
         style={{
-          fontSize: 9,
+          fontSize: '0.5625rem',
           fontWeight: 300,
           letterSpacing: '0.28em',
           textTransform: 'uppercase',
           color: 'rgba(253,246,232,0.45)',
-          marginBottom: 18,
+          marginBottom: '1.125rem',
         }}
       >
         <span
@@ -42,7 +42,7 @@ export function PageHeader({ eyebrow, script, title }: PageHeaderProps) {
       <span
         style={{
           fontFamily: 'var(--font-great-vibes), cursive',
-          fontSize: 26,
+          fontSize: '1.625rem',
           color: 'rgba(184,144,60,0.5)',
           display: 'block',
           marginBottom: 4,

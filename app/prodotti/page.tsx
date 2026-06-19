@@ -26,7 +26,7 @@ export default async function ProdottiPage() {
         {/* Legal disclaimer */}
         <div
           className="mt-6 flex items-start gap-3"
-          style={{ padding: '16px 20px', border: '0.5px solid rgba(42,110,62,0.15)', background: 'rgba(42,110,62,0.03)' }}
+          style={{ padding: '1rem 1.25rem', border: '0.5px solid rgba(42,110,62,0.15)', background: 'rgba(42,110,62,0.03)' }}
         >
           <svg
             width="16"
@@ -43,7 +43,7 @@ export default async function ProdottiPage() {
             <circle cx="12" cy="12" r="10" />
             <path d="M12 16v-4M12 8h.01" />
           </svg>
-          <p style={{ fontSize: 11, fontWeight: 300, color: 'var(--ink-4)', lineHeight: 1.75, margin: 0 }}>
+          <p style={{ fontSize: '0.6875rem', fontWeight: 300, color: 'var(--ink-4)', lineHeight: 1.75, margin: 0 }}>
             Gli integratori alimentari non sostituiscono una dieta varia ed equilibrata e uno stile
             di vita sano. Tenere fuori dalla portata dei bambini. Tutti i prodotti sono notificati
             al Ministero della Salute della Repubblica Italiana.

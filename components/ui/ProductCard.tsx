@@ -38,11 +38,11 @@ export function ProductCard({ product, variant = 'home' }: ProductCardProps) {
         <div
           className="absolute left-3.5 top-3.5"
           style={{
-            fontSize: 8,
+            fontSize: '0.5rem',
             fontWeight: 500,
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
-            padding: '4px 10px',
+            padding: '0.25rem 0.625rem',
             background: `${line.color}1A`,
             color: line.color,
           }}
@@ -53,7 +53,7 @@ export function ProductCard({ product, variant = 'home' }: ProductCardProps) {
         {/* Product image */}
         <div
           className="flex items-end justify-center"
-          style={{ flex: 1, padding: '20px 16px 12px', position: 'relative' }}
+          style={{ flex: 1, padding: '1.25rem 1rem 0.75rem', position: 'relative' }}
         >
           {images?.fronte ? (
             <Image
@@ -82,21 +82,21 @@ export function ProductCard({ product, variant = 'home' }: ProductCardProps) {
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col" style={{ padding: '24px 26px 28px' }}>
+      <div className="flex flex-1 flex-col" style={{ padding: '1.5rem 1.625rem 1.75rem' }}>
         {/* Accent stripe */}
         <div
-          style={{ height: 2, background: line.color, margin: '-24px -26px 16px', opacity: 0.15 }}
+          style={{ height: 2, background: line.color, margin: '-1.5rem -1.625rem 1rem', opacity: 0.15 }}
         />
 
         {/* Name */}
         <div
           style={{
             fontFamily: 'var(--font-cormorant), Georgia, serif',
-            fontSize: 22,
+            fontSize: '1.375rem',
             fontWeight: 400,
             color: 'var(--ink)',
             lineHeight: 1.25,
-            marginBottom: 10,
+            marginBottom: '0.625rem',
           }}
         >
           {name}
@@ -105,25 +105,25 @@ export function ProductCard({ product, variant = 'home' }: ProductCardProps) {
         {/* Short description */}
         <div
           style={{
-            fontSize: 11.5,
+            fontSize: '0.72rem',
             fontWeight: 300,
             color: 'var(--ink-3)',
             lineHeight: 1.85,
-            marginBottom: 16,
+            marginBottom: '1rem',
           }}
         >
           {shortDescription}
         </div>
 
         {/* Ingredient pills */}
-        <div className="flex flex-wrap gap-1.5" style={{ marginBottom: 18 }}>
+        <div className="flex flex-wrap gap-1.5" style={{ marginBottom: '1.125rem' }}>
           {ingredients.slice(0, ingrCount).map((ing) => (
             <span
               key={ing.name}
               style={{
-                fontSize: 9.5,
+                fontSize: '0.59rem',
                 fontWeight: 300,
-                padding: '4px 8px',
+                padding: '0.25rem 0.5rem',
                 background: `${line.color}12`,
                 color: line.color,
                 border: `0.5px solid ${line.color}33`,
@@ -137,21 +137,21 @@ export function ProductCard({ product, variant = 'home' }: ProductCardProps) {
         {/* Footer row */}
         <div
           className="mt-auto flex items-center justify-between"
-          style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}
+          style={{ borderTop: '1px solid var(--border)', paddingTop: '0.875rem' }}
         >
-          <span style={{ fontSize: 9.5, fontWeight: 300, color: 'var(--ink-4)' }}>
+          <span style={{ fontSize: '0.59rem', fontWeight: 300, color: 'var(--ink-4)' }}>
             {detailText}
           </span>
           <Link
             href={`/prodotti/${slug}`}
             className="flex shrink-0 items-center gap-1 transition-all duration-150 group-hover:gap-2"
             style={{
-              fontSize: 9,
+              fontSize: '0.5625rem',
               fontWeight: 500,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
               color: line.color,
-              marginLeft: 8,
+              marginLeft: '0.5rem',
             }}
           >
             {isCatalog ? 'Scheda completa' : 'Scopri'}

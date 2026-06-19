@@ -53,16 +53,16 @@ export default async function ProductPage({ params }: Props) {
         className="flex items-center justify-between strip"
         style={{ borderBottom: `1px solid ${line.color}20`, background: line.colorLight }}
       >
-        <span style={{ fontSize: 9, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
+        <span style={{ fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
           <span style={{ color: 'var(--green)' }}>08 Natural Technology</span>
-          <span style={{ color: `${line.color}60`, margin: '0 6px' }}>/</span>
+          <span style={{ color: `${line.color}60`, margin: '0 0.375rem' }}>/</span>
           <span style={{ color: `${line.color}90` }}>{line.name}</span>
         </span>
         <Link
           href="/prodotti"
           className="flex items-center gap-1.5"
           style={{
-            fontSize: 9, fontWeight: 500, letterSpacing: '0.14em',
+            fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.14em',
             textTransform: 'uppercase', color: line.color,
           }}
         >
@@ -87,9 +87,9 @@ export default async function ProductPage({ params }: Props) {
           <div
             className="flex items-center gap-2.5"
             style={{
-              fontSize: 9, fontWeight: 500, letterSpacing: '0.28em',
+              fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.28em',
               textTransform: 'uppercase', color: line.color,
-              marginBottom: 20,
+              marginBottom: '1.25rem',
             }}
           >
             <span style={{ display: 'block', width: 22, height: '1px', background: line.color, flexShrink: 0 }} />
@@ -104,7 +104,7 @@ export default async function ProductPage({ params }: Props) {
               color: line.color,
               lineHeight: 0.95,
               letterSpacing: '-0.01em',
-              marginBottom: 20,
+              marginBottom: '1.25rem',
             }}
           >
             <span style={{ display: 'block', fontSize: 'clamp(46px, 5.5vw, 70px)' }}>
@@ -120,16 +120,16 @@ export default async function ProductPage({ params }: Props) {
           {/* Short description */}
           <p
             style={{
-              fontSize: 12, fontWeight: 300,
+              fontSize: '0.75rem', fontWeight: 300,
               color: 'var(--ink-3)', lineHeight: 1.85,
-              maxWidth: 460, marginBottom: 28,
+              maxWidth: 460, marginBottom: '1.75rem',
             }}
           >
             {shortDescription}
           </p>
 
           {/* Divider */}
-          <div style={{ width: 36, height: '0.5px', background: line.color, opacity: 0.3, marginBottom: 28 }} />
+          <div style={{ width: 36, height: '0.5px', background: line.color, opacity: 0.3, marginBottom: '1.75rem' }} />
 
           {/* Chips */}
           <div className="flex flex-wrap gap-2">
@@ -143,12 +143,12 @@ export default async function ProductPage({ params }: Props) {
               <span
                 key={chip}
                 style={{
-                  fontSize: 8.5,
+                  fontSize: '0.53rem',
                   fontWeight: 500,
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
                   color: line.color,
-                  padding: '5px 11px',
+                  padding: '0.3125rem 0.6875rem',
                   border: `0.5px solid ${line.color}38`,
                   background: `${line.color}07`,
                 }}
@@ -190,23 +190,23 @@ export default async function ProductPage({ params }: Props) {
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <SectionLabel color={line.color}>Contenuti medi · per dose giornaliera (2 capsule)</SectionLabel>
 
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 4 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '0.25rem' }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${line.color}28` }}>
                 <th
                   style={{
-                    textAlign: 'left', fontSize: 8.5, fontWeight: 500,
+                    textAlign: 'left', fontSize: '0.53rem', fontWeight: 500,
                     letterSpacing: '0.2em', textTransform: 'uppercase',
-                    color: `${line.color}70`, padding: '0 0 12px',
+                    color: `${line.color}70`, padding: '0 0 0.75rem',
                   }}
                 >
                   Ingrediente
                 </th>
                 <th
                   style={{
-                    textAlign: 'right', fontSize: 8.5, fontWeight: 500,
+                    textAlign: 'right', fontSize: '0.53rem', fontWeight: 500,
                     letterSpacing: '0.2em', textTransform: 'uppercase',
-                    color: `${line.color}70`, padding: '0 0 12px',
+                    color: `${line.color}70`, padding: '0 0 0.75rem',
                   }}
                 >
                   Per dose
@@ -222,8 +222,8 @@ export default async function ProductPage({ params }: Props) {
                     background: i % 2 === 0 ? `${line.color}04` : 'transparent',
                   }}
                 >
-                  <td style={{ padding: '11px 0', fontSize: 12, fontWeight: 400, color: 'var(--ink-2)' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <td style={{ padding: '0.6875rem 0', fontSize: '0.75rem', fontWeight: 400, color: 'var(--ink-2)' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
                       <span
                         style={{
                           display: 'inline-block', width: 5, height: 5,
@@ -236,7 +236,7 @@ export default async function ProductPage({ params }: Props) {
                   </td>
                   <td
                     style={{
-                      padding: '11px 0', fontSize: 12, fontWeight: 500,
+                      padding: '0.6875rem 0', fontSize: '0.75rem', fontWeight: 500,
                       color: line.color, textAlign: 'right',
                     }}
                   >
@@ -259,30 +259,30 @@ export default async function ProductPage({ params }: Props) {
       >
         <div
           className="grid grid-cols-1 lg:grid-cols-3 section"
-          style={{ gap: 48, maxWidth: 1200, margin: '0 auto' }}
+          style={{ gap: '3rem', maxWidth: 1200, margin: '0 auto' }}
         >
           <div>
             <SectionLabel color={line.color}>Modo d&apos;uso</SectionLabel>
-            <p style={{ fontSize: 12, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9 }}>
+            <p style={{ fontSize: '0.75rem', fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9 }}>
               {usage}
             </p>
           </div>
           <div>
             <SectionLabel color={line.color}>A chi è rivolto</SectionLabel>
-            <p style={{ fontSize: 12, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9 }}>
+            <p style={{ fontSize: '0.75rem', fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9 }}>
               {target}
             </p>
           </div>
           <div>
             <SectionLabel color={line.color}>Formato &amp; composizione</SectionLabel>
-            <p style={{ fontSize: 12, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9 }}>
+            <p style={{ fontSize: '0.75rem', fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.9 }}>
               {format}
             </p>
             {longDescription && (
               <p
                 style={{
-                  fontSize: 11, fontWeight: 300, color: 'var(--ink-4)',
-                  lineHeight: 1.85, marginTop: 16,
+                  fontSize: '0.6875rem', fontWeight: 300, color: 'var(--ink-4)',
+                  lineHeight: 1.85, marginTop: '1rem',
                 }}
               >
                 {longDescription}
@@ -301,7 +301,7 @@ export default async function ProductPage({ params }: Props) {
           className="flex items-start gap-3"
           style={{
             maxWidth: 860, margin: '0 auto',
-            padding: '16px 20px',
+            padding: '1rem 1.25rem',
             border: `0.5px solid ${line.color}20`,
             background: '#fff',
           }}
@@ -316,7 +316,7 @@ export default async function ProductPage({ params }: Props) {
             <circle cx="12" cy="12" r="10" />
             <path d="M12 8v4M12 16h.01" />
           </svg>
-          <p style={{ fontSize: 11, fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.75, margin: 0 }}>
+          <p style={{ fontSize: '0.6875rem', fontWeight: 300, color: 'var(--ink-3)', lineHeight: 1.75, margin: 0 }}>
             Integratore alimentare notificato al Ministero della Salute della Repubblica Italiana
             {notificationMs ? ` (${notificationMs})` : ''}.{' '}
             Non superare la dose giornaliera consigliata. Gli integratori alimentari non sostituiscono
@@ -336,14 +336,14 @@ function SectionLabel({ children, color }: { children: React.ReactNode; color: s
   return (
     <div
       style={{
-        fontSize: 8.5,
+        fontSize: '0.53rem',
         fontWeight: 500,
         letterSpacing: '0.22em',
         textTransform: 'uppercase',
         color,
         opacity: 0.7,
-        marginBottom: 18,
-        paddingBottom: 12,
+        marginBottom: '1.125rem',
+        paddingBottom: '0.75rem',
         borderBottom: `0.5px solid ${color}22`,
       }}
     >
@@ -362,7 +362,7 @@ function BottleStub({ color, colorLight, label }: { color: string; colorLight: s
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}
     >
-      <span style={{ fontSize: 11, fontWeight: 300, color: `${color}60`, textAlign: 'center' }}>
+      <span style={{ fontSize: '0.6875rem', fontWeight: 300, color: `${color}60`, textAlign: 'center' }}>
         {label}
       </span>
     </div>

@@ -57,7 +57,7 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: contained ? '36px 40px' : '32px 80px',
+                padding: contained ? '2.25rem 2.5rem' : '2rem 5rem',
                 background: contained
                   ? 'transparent'
                   : (i % 2 === 0 ? 'var(--paper-2)' : '#f0f0ec'),
@@ -101,7 +101,7 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
           style={{
             position: 'absolute',
             top: '50%',
-            left: 12,
+            left: '0.75rem',
             transform: 'translateY(-50%)',
             width: 36,
             height: 36,
@@ -130,7 +130,7 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
           style={{
             position: 'absolute',
             top: '50%',
-            right: 12,
+            right: '0.75rem',
             transform: 'translateY(-50%)',
             width: 36,
             height: 36,
@@ -155,7 +155,7 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
       <div
         className="flex items-center justify-between"
         style={{
-          padding: '10px 16px',
+          padding: '0.625rem 1rem',
           borderTop: `0.5px solid ${color}18`,
           background: contained ? 'rgba(255,255,255,0.7)' : '#fff',
           backdropFilter: contained ? 'blur(8px)' : undefined,
@@ -164,7 +164,7 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
       >
         <span
           style={{
-            fontSize: 8.5,
+            fontSize: '0.53rem',
             fontWeight: 500,
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
@@ -198,7 +198,7 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
           )}
           <span
             style={{
-              fontSize: 8.5,
+              fontSize: '0.53rem',
               fontWeight: 400,
               letterSpacing: '0.1em',
               color: `${color}45`,
