@@ -38,7 +38,7 @@ export default async function HomePage() {
               }}
             >
               <span style={{ display: 'block', width: 24, height: '0.5px', background: 'var(--amber)', opacity: 0.75, flexShrink: 0 }} />
-              Integratori alimentari · Bitonto, Puglia · Made in Italy
+              Integratori alimentari
             </div>
 
             <h1
