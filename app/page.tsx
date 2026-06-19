@@ -101,7 +101,7 @@ export default async function HomePage() {
                   border: '1px solid rgba(253,246,232,0.22)',
                 }}
               >
-                Il metodo 08
+                Qualità 08
               </Link>
             </div>
 
@@ -376,11 +376,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ════ IL METODO ════ */}
+      {/* ════ QUALITÀ 08 ════ */}
       <section className="section" style={{ background: 'var(--forest)' }}>
         <div className="flex items-center gap-2.5" style={{ fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(184,144,60,0.72)', marginBottom: '0.875rem' }}>
           <span style={{ display: 'block', width: 22, height: '0.5px', background: 'var(--amber)', opacity: 0.75, flexShrink: 0 }} />
-          Il metodo 08
+          Qualità 08
         </div>
         <h2
           style={{
@@ -553,7 +553,7 @@ export default async function HomePage() {
           <div style={{ background: '#fff', border: '1px solid var(--border-2)', padding: '2rem' }}>
             <div className="flex items-center gap-2.5" style={{ fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '0.875rem' }}>
               <span style={{ display: 'block', width: 22, height: '0.5px', background: 'var(--amber)', flexShrink: 0 }} />
-              Retail &amp; Farmacie
+              Area Rivenditori
             </div>
             <h3 style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: '1.875rem', fontWeight: 400, color: 'var(--ink)', marginBottom: '0.875rem', lineHeight: 1.2 }}>
               Diventa rivenditore 08 Natural Technology.

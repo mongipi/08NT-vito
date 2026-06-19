@@ -40,10 +40,11 @@ const FOOTER_LINKS = {
     { label: 'Microcircolo Superior',      href: '/prodotti/microcircolo-superior' },
     { label: 'Multivitaminico & Minerali', href: '/prodotti/multivitaminico-minerali' },
   ],
-  Brand: [
-    { label: 'Chi siamo',  href: '/brand' },
-    { label: 'Blog',       href: '/blog' },
-    { label: 'Contatti',   href: '/contatti' },
+  Azienda: [
+    { label: 'Qualità 08',       href: '/metodo' },
+    { label: 'Blog',             href: '/blog' },
+    { label: 'Area Rivenditori', href: '/b2b' },
+    { label: 'Contatti',         href: '/contatti' },
   ],
   Legale: [
     { label: 'Privacy policy', href: '/privacy' },

@@ -10,11 +10,9 @@ import { cn } from '@/lib/utils'
 const NAV_LINKS = [
   { href: '/',            label: 'Home' },
   { href: '/prodotti',    label: 'Prodotti' },
-  { href: '/metodo',      label: 'Metodo 08' },
-  { href: '/trasparenza', label: 'Trasparenza' },
-  { href: '/brand',       label: 'Brand' },
+  { href: '/metodo',      label: 'Qualità 08' },
   { href: '/blog',        label: 'Blog' },
-  { href: '/b2b',         label: 'B2B' },
+  { href: '/b2b',         label: 'Area Rivenditori' },
   { href: '/contatti',    label: 'Contatti' },
 ] as const
 
@@ -103,7 +101,7 @@ export function Navbar() {
           ))}
         </ul>
 
-        {/* Social icons desktop */}
+        {/* Social + lang switcher desktop */}
         <div className="hidden md:flex items-center gap-4" style={{ paddingLeft: '1rem' }}>
           {SOCIAL_LINKS.map(({ href, label, icon }) => (
             <a
@@ -117,6 +115,36 @@ export function Navbar() {
               {icon}
             </a>
           ))}
+
+          {/* Language switcher */}
+          <div
+            className="flex items-center"
+            style={{
+              border: '0.5px solid var(--border-2)',
+              marginLeft: 8,
+              overflow: 'hidden',
+            }}
+          >
+            {(['IT', 'EN'] as const).map((lang, i) => (
+              <button
+                key={lang}
+                aria-label={`Lingua ${lang}`}
+                style={{
+                  fontSize: '0.5625rem',
+                  fontWeight: lang === 'IT' ? 600 : 400,
+                  letterSpacing: '0.14em',
+                  padding: '5px 9px',
+                  background: lang === 'IT' ? 'var(--forest)' : 'transparent',
+                  color: lang === 'IT' ? '#fff' : 'var(--ink-3)',
+                  border: 'none',
+                  borderLeft: i > 0 ? '0.5px solid var(--border-2)' : 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                {lang}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Mobile hamburger */}

@@ -10,6 +10,7 @@ const CONTACT_ROWS = [
     value: 'Via Don Luigi Sturzo 44/46/48\nBitonto (BA) 70032',
   },
   { icon: <PhoneIcon />, label: 'Telefono', value: '080 303 1103' },
+  { icon: <WhatsAppIcon />, label: 'WhatsApp', value: '351 507 8701' },
   { icon: <MailIcon />, label: 'Email', value: '08naturaltechnology@gmail.com' },
   { icon: <InstagramIcon />, label: 'Social', value: 'Seguici per aggiornamenti e contenuti' },
 ]
@@ -97,7 +98,11 @@ export default function ContattiPage() {
                         whiteSpace: 'pre-line',
                       }}
                     >
-                      {value}
+                      {label === 'WhatsApp' ? (
+                        <a href="https://wa.me/393515078701" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--green-2)', textDecoration: 'none' }}>
+                          {value}
+                        </a>
+                      ) : value}
                     </div>
                   </div>
                 </div>
@@ -238,6 +243,14 @@ function MailIcon() {
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
       <polyline points="22,6 12,13 2,6" />
+    </svg>
+  )
+}
+
+function WhatsAppIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
     </svg>
   )
 }
