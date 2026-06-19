@@ -3,26 +3,49 @@ import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Il Metodo 08 — Qualità Formulativa' }
 
-const STEPS = [
+const PILLARS = [
   {
-    n: 'I',
-    title: 'Esigenza reale',
-    body: 'Si parte da bisogni chiari: energia, microcircolo, menopausa, capelli, pelle e unghie.',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 22c0 0-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2C20 17.5 12 22 12 22z" />
+        <path d="M12 22V12" />
+        <path d="M12 12c0 0-3-3-3-6" />
+        <path d="M12 12c0 0 3-3 3-6" />
+      </svg>
+    ),
+    title: 'Ingredienti selezionati',
+    body: 'Attivi scelti per funzione, qualità e coerenza formulativa.',
   },
   {
-    n: 'II',
-    title: 'Attivi selezionati',
-    body: 'Ingredienti scelti per funzione, qualità e ruolo nella formula.',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M9 3h6l1 7H8L9 3z" />
+        <path d="M8 10l-3 9a1 1 0 0 0 .9 1.4h12.2a1 1 0 0 0 .9-1.4L16 10" />
+        <circle cx="12" cy="16" r="1.5" />
+      </svg>
+    ),
+    title: 'Metodo formulativo',
+    body: 'Sinergie, dosaggi e razionalità d\'uso spiegati con chiarezza.',
   },
   {
-    n: 'III',
-    title: 'Formula leggibile',
-    body: 'Una scheda deve far capire perché ogni ingrediente è presente.',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <polyline points="9 12 11 14 15 10" />
+      </svg>
+    ),
+    title: 'Trasparenza',
+    body: 'Informazioni regolatorie riportate nella scheda di ciascun prodotto.',
   },
   {
-    n: 'IV',
-    title: 'Uso responsabile',
-    body: 'Modo d\'uso e avvertenze visibili, senza promesse eccessive.',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+        <circle cx="12" cy="9" r="2.5" />
+      </svg>
+    ),
+    title: 'Identità italiana',
+    body: 'Un progetto nato in Puglia, pensato per farmacia, e-commerce e retail.',
   },
 ]
 
@@ -134,55 +157,45 @@ export default function MetodoPage() {
         </div>
       </section>
 
-      {/* ── METHOD STEPS ── */}
+      {/* ── PILLARS ── */}
       <section className="section" style={{ background: 'var(--forest)' }}>
         <div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
           style={{ border: '0.5px solid rgba(184,144,60,0.22)' }}
         >
-          {STEPS.map((step, i) => (
+          {PILLARS.map((p, i) => (
             <div
-              key={step.n}
+              key={p.title}
               style={{
-                padding: '34px 26px',
+                padding: '2.125rem 1.625rem',
                 background: 'rgba(255,255,255,0.04)',
-                borderRight: i < STEPS.length - 1 ? '0.5px solid rgba(184,144,60,0.14)' : undefined,
+                borderRight: i < PILLARS.length - 1 ? '0.5px solid rgba(184,144,60,0.14)' : undefined,
               }}
             >
-              <div
-                style={{
-                  fontFamily: 'var(--font-cormorant), Georgia, serif',
-                  fontSize: 48,
-                  fontStyle: 'italic',
-                  fontWeight: 300,
-                  color: 'rgba(184,144,60,0.28)',
-                  lineHeight: 1,
-                  marginBottom: 18,
-                }}
-              >
-                {step.n}
+              <div style={{ color: 'rgba(184,144,60,0.72)', marginBottom: '1.125rem' }}>
+                {p.icon}
               </div>
               <div
                 style={{
-                  fontSize: 10.5,
+                  fontSize: '0.65rem',
                   fontWeight: 700,
                   letterSpacing: '0.16em',
                   textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.75)',
-                  marginBottom: 10,
+                  marginBottom: '0.625rem',
                 }}
               >
-                {step.title}
+                {p.title}
               </div>
               <div
                 style={{
-                  fontSize: 11.2,
+                  fontSize: '0.7rem',
                   fontWeight: 300,
                   lineHeight: 1.8,
                   color: 'rgba(253,246,232,0.46)',
                 }}
               >
-                {step.body}
+                {p.body}
               </div>
             </div>
           ))}
