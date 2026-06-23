@@ -4,8 +4,16 @@ import { getArticleSlugs } from '@/services/articles'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://08naturaltechnology.it'
 
+export const dynamic = 'force-dynamic'
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [productSlugs, articleSlugs] = await Promise.all([getProductSlugs(), getArticleSlugs()])
+  let productSlugs: string[] = []
+  let articleSlugs: string[] = []
+  try {
+    ;[productSlugs, articleSlugs] = await Promise.all([getProductSlugs(), getArticleSlugs()])
+  } catch {
+    // DB non raggiungibile durante il build — la sitemap verrà generata a runtime
+  }
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },

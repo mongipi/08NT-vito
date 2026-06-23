@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getProductBySlug, getProductSlugs } from '@/services/products'
+import { getProductBySlug } from '@/services/products'
 import { ProductGallery } from '@/components/ui/ProductGallery'
 import { AddToCartButton } from '@/components/ui/AddToCartButton'
 import type { Metadata } from 'next'
@@ -11,10 +11,7 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
-  const slugs = await getProductSlugs()
-  return slugs.map((slug) => ({ slug }))
-}
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params

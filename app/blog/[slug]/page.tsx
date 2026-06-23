@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getArticleBySlug, getArticleSlugs } from '@/services/articles'
+import { getArticleBySlug } from '@/services/articles'
 import type { Metadata } from 'next'
 import { formatDate } from '@/lib/utils'
 
@@ -8,10 +8,7 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
-  const slugs = await getArticleSlugs()
-  return slugs.map((slug) => ({ slug }))
-}
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
