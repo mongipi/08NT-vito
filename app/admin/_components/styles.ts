@@ -45,6 +45,21 @@ export const s = {
     padding: '1.25rem',
   } satisfies React.CSSProperties,
 
+  card: {
+    background: 'white',
+    borderRadius: '0.625rem',
+    border: '1px solid #e8eaed',
+    overflow: 'hidden',
+  } satisfies React.CSSProperties,
+
+  cardHeader: {
+    padding: '0.875rem 1.25rem',
+    borderBottom: '1px solid #f0f1f3',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  } satisfies React.CSSProperties,
+
   cardTitle: {
     fontSize: '0.8125rem',
     fontWeight: 600,
@@ -82,6 +97,58 @@ export const s = {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
     gap: '0.875rem',
+  } satisfies React.CSSProperties,
+
+  breadcrumb: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginBottom: '1.5rem',
+    flexWrap: 'wrap',
+  } satisfies React.CSSProperties,
+
+  link: {
+    fontSize: '0.8125rem',
+    color: '#6b7280',
+    textDecoration: 'none',
+  } satisfies React.CSSProperties,
+
+  linkGreen: {
+    fontSize: '0.8125rem',
+    fontWeight: 500,
+    color: '#1a4a2e',
+    textDecoration: 'none',
+  } satisfies React.CSSProperties,
+
+  mono: {
+    fontFamily: 'monospace',
+    fontSize: '0.8125rem',
+    color: '#374151',
+  } satisfies React.CSSProperties,
+
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    minWidth: '28rem',
+  } satisfies React.CSSProperties,
+
+  th: {
+    padding: '0.625rem 1rem',
+    textAlign: 'left',
+    fontSize: '0.6875rem',
+    fontWeight: 600,
+    letterSpacing: '0.07em',
+    textTransform: 'uppercase',
+    color: '#9ca3af',
+    borderBottom: '1px solid #f0f1f3',
+    whiteSpace: 'nowrap',
+  } satisfies React.CSSProperties,
+
+  td: {
+    padding: '0.6875rem 1rem',
+    fontSize: '0.8125rem',
+    color: '#374151',
+    borderBottom: '1px solid #f7f8f9',
   } satisfies React.CSSProperties,
 
   stack: (gap: number): React.CSSProperties => ({
