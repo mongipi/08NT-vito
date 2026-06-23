@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { Cormorant_Garamond, Montserrat, Great_Vibes } from 'next/font/google'
-import { Navbar } from '@/components/layout/Navbar'
-import { Footer } from '@/components/layout/Footer'
+import { Providers } from './providers'
+import { SiteShell } from './_components/SiteShell'
+import { organizationJsonLd } from '@/lib/jsonld'
 // @ts-ignore
 import './globals.css'
 
@@ -49,11 +50,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="it"
       className={`${montserrat.variable} ${cormorant.variable} ${greatVibes.variable} h-full`}
       style={{ fontFamily: 'var(--font-montserrat), system-ui, sans-serif' }}
+      suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col">
-        <Navbar />
-        {children}
-        <Footer />
+      <body className="min-h-full">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
+        />
+        <Providers>
+          <SiteShell>{children}</SiteShell>
+        </Providers>
       </body>
     </html>
   )

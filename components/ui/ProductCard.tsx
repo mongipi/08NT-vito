@@ -117,9 +117,9 @@ export function ProductCard({ product, variant = 'home' }: ProductCardProps) {
 
         {/* Ingredient pills */}
         <div className="flex flex-wrap gap-1.5" style={{ marginBottom: '1.125rem' }}>
-          {ingredients.slice(0, ingrCount).map((ing) => (
+          {ingredients.slice(0, ingrCount).map((ing, i) => (
             <span
-              key={ing.name}
+              key={`${ing.name}-${i}`}
               style={{
                 fontSize: '0.59rem',
                 fontWeight: 300,

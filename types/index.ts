@@ -1,10 +1,13 @@
-export type LineSlug = 'menopausa' | 'beauty' | 'circolo' | 'energia'
+export type LineSlug = string
 
 export interface Line {
+  id: string
   slug: LineSlug
   name: string
   color: string
   colorLight: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface Ingredient {
@@ -12,31 +15,39 @@ export interface Ingredient {
   dosage?: string
 }
 
+export interface ProductImages {
+  fronte?: string
+  infografica?: string
+  lato1?: string
+  lato2?: string
+  etichetta?: string
+}
+
 export interface Product {
   id: string
   slug: string
   name: string
   line: Line
-  shortDescription: string
-  longDescription: string
-  ingredients: Ingredient[]
-  usage: string
-  target: string
-  format: string
-  capsules: number
-  days: number
-  dosage: string
-  minAge?: number
-  notificationMs?: string
+  price: number
+  comparePrice?: number | null
+  stock: number
   published: boolean
   order: number
-  images?: {
-    fronte?: string
-    infografica?: string
-    lato1?: string
-    lato2?: string
-    etichetta?: string
-  }
+  shortDescription: string
+  longDescription: string
+  usage?: string | null
+  target?: string | null
+  format?: string | null
+  capsules?: number | null
+  days?: number | null
+  dosage?: string | null
+  notificationMs?: string | null
+  ingredients: Ingredient[]
+  images?: ProductImages
+  metaTitle?: string | null
+  metaDescription?: string | null
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface Article {
@@ -46,7 +57,11 @@ export interface Article {
   excerpt: string
   body: string
   tag: string
-  publishedAt: string
-  readingTime: number
+  publishedAt: Date | string
+  readingTime?: number | null
   published: boolean
+  metaTitle?: string | null
+  metaDescription?: string | null
+  createdAt: Date
+  updatedAt: Date
 }

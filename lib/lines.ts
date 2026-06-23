@@ -1,6 +1,4 @@
-import type { Line, LineSlug } from '@/types'
-
-export const LINES: Record<LineSlug, Line> = {
+export const LINES = {
   menopausa: {
     slug: 'menopausa',
     name: 'Linea Menopausa',
@@ -25,4 +23,4 @@ export const LINES: Record<LineSlug, Line> = {
     color: '#a86010',
     colorLight: '#faeedd',
   },
-}
+} as const

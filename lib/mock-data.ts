@@ -1,7 +1,6 @@
 import { LINES } from '@/lib/lines'
-import type { Product, Article } from '@/types'
 
-export const PRODUCTS: Product[] = [
+export const PRODUCTS = [
   {
     id: '1',
     slug: 'menopausa-complex',
@@ -167,7 +166,7 @@ export const PRODUCTS: Product[] = [
   },
 ]
 
-export const ARTICLES: Article[] = [
+export const ARTICLES = [
   {
     id: '1',
     slug: 'coq10-pterostilbene-sinergia-anti-aging',

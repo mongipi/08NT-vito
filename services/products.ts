@@ -1,17 +1,42 @@
-import { PRODUCTS } from '@/lib/mock-data'
-import type { Product } from '@/types'
+import { prisma } from '@/lib/prisma'
+import type { Product, Ingredient, ProductImages } from '@/types'
 
-/** Returns all published products sorted by order. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapProduct(p: any): Product {
+  return {
+    ...p,
+    ingredients: (p.ingredients ?? []) as Ingredient[],
+    images: (p.images ?? {}) as ProductImages,
+  }
+}
+
 export async function getProducts(): Promise<Product[]> {
-  return PRODUCTS.filter((p) => p.published).sort((a, b) => a.order - b.order)
+  const products = await prisma.product.findMany({
+    where: { published: true },
+    include: { line: true },
+    orderBy: { order: 'asc' },
+  })
+  return products.map(mapProduct)
 }
 
-/** Returns a single published product by slug, or null if not found. */
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  return PRODUCTS.find((p) => p.slug === slug && p.published) ?? null
+  const p = await prisma.product.findFirst({
+    where: { slug, published: true },
+    include: { line: true, b2bPricing: true },
+  })
+  if (!p) return null
+  return mapProduct(p)
 }
 
-/** Returns all published product slugs (used for generateStaticParams). */
 export async function getProductSlugs(): Promise<string[]> {
-  return PRODUCTS.filter((p) => p.published).map((p) => p.slug)
+  const products = await prisma.product.findMany({
+    where: { published: true },
+    select: { slug: true },
+  })
+  return products.map((p) => p.slug)
+}
+
+export async function getB2BPrice(productId: string): Promise<number | null> {
+  const b2b = await prisma.b2BPricing.findUnique({ where: { productId } })
+  return b2b?.price ?? null
 }

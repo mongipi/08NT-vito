@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /** Formats an ISO date string to Italian locale (e.g. "12 giugno 2026"). */
-export function formatDate(isoDate: string): string {
+export function formatDate(isoDate: string | Date): string {
   return new Date(isoDate).toLocaleDateString('it-IT', {
     day: 'numeric',
     month: 'long',

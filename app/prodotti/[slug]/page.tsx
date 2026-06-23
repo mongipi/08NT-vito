@@ -3,7 +3,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getProductBySlug, getProductSlugs } from '@/services/products'
 import { ProductGallery } from '@/components/ui/ProductGallery'
+import { AddToCartButton } from '@/components/ui/AddToCartButton'
 import type { Metadata } from 'next'
+import type { Ingredient, ProductImages } from '@/types'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -28,9 +30,11 @@ export default async function ProductPage({ params }: Props) {
 
   const {
     line, name, shortDescription, longDescription,
-    ingredients, usage, target, capsules, days,
-    dosage, notificationMs, format, images,
+    usage, target, capsules, days,
+    dosage, notificationMs, format,
   } = product
+  const ingredients = (product.ingredients ?? []) as Ingredient[]
+  const images = (product.images ?? {}) as ProductImages
 
   // Hero carousel: fronte first, then all detail shots
   const heroSlides = [
@@ -157,6 +161,32 @@ export default async function ProductPage({ params }: Props) {
               </span>
             ))}
           </div>
+
+          {/* Prezzo + Aggiungi al carrello */}
+          <div style={{ marginTop: '1.75rem', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+              <span style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.625rem)', fontWeight: 700, color: line.color }}>
+                €{product.price.toFixed(2)}
+              </span>
+              {product.comparePrice && (
+                <span style={{ fontSize: '1rem', color: `${line.color}55`, textDecoration: 'line-through', fontWeight: 400 }}>
+                  €{product.comparePrice.toFixed(2)}
+                </span>
+              )}
+            </div>
+            <AddToCartButton
+              item={{
+                productId: product.id,
+                slug: product.slug,
+                name: product.name,
+                price: product.price,
+                comparePrice: product.comparePrice ?? undefined,
+                image: images.fronte,
+              }}
+              color={line.color}
+              stock={product.stock}
+            />
+          </div>
         </div>
 
         {/* Right: image carousel */}
@@ -216,7 +246,7 @@ export default async function ProductPage({ params }: Props) {
             <tbody>
               {ingredients.map((ing, i) => (
                 <tr
-                  key={ing.name}
+                  key={`${ing.name}-${i}`}
                   style={{
                     borderBottom: `0.5px solid ${line.color}12`,
                     background: i % 2 === 0 ? `${line.color}04` : 'transparent',

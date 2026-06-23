@@ -1,19 +1,23 @@
-import { ARTICLES } from '@/lib/mock-data'
+import { prisma } from '@/lib/prisma'
 import type { Article } from '@/types'
 
-/** Returns all published articles sorted by date descending. */
 export async function getArticles(): Promise<Article[]> {
-  return ARTICLES.filter((a) => a.published).sort(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-  )
+  return prisma.article.findMany({
+    where: { published: true },
+    orderBy: { publishedAt: 'desc' },
+  }) as Promise<Article[]>
 }
 
-/** Returns a single published article by slug, or null if not found. */
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
-  return ARTICLES.find((a) => a.slug === slug && a.published) ?? null
+  return prisma.article.findFirst({
+    where: { slug, published: true },
+  }) as Promise<Article | null>
 }
 
-/** Returns all published article slugs (used for generateStaticParams). */
 export async function getArticleSlugs(): Promise<string[]> {
-  return ARTICLES.filter((a) => a.published).map((a) => a.slug)
+  const articles = await prisma.article.findMany({
+    where: { published: true },
+    select: { slug: true },
+  })
+  return articles.map((a) => a.slug)
 }
