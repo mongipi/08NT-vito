@@ -41,8 +41,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const order = await prisma.order.findUnique({ where: { id }, include: { user: true } })
   if (!order) notFound()
 
-  const items = order.items as OrderItem[]
-  const address = order.shippingAddress as ShippingAddress
+  const items = order.items as unknown as OrderItem[]
+  const address = order.shippingAddress as unknown as ShippingAddress
 
   return (
     <div>

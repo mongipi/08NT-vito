@@ -50,8 +50,8 @@ export default async function OrderDetailPage({ params }: Props) {
   const order = await prisma.order.findUnique({ where: { id } })
   if (!order || order.userId !== session.user.id) notFound()
 
-  const items = order.items as OrderItem[]
-  const address = order.shippingAddress as ShippingAddress
+  const items = order.items as unknown as OrderItem[]
+  const address = order.shippingAddress as unknown as ShippingAddress
   const sc = STATUS_STYLE[order.status] ?? STATUS_STYLE.pending
   const itemCount = items.reduce((n, i) => n + i.qty, 0)
 
