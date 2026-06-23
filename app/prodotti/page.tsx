@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import { getProducts } from '@/services/products'
 import { PageHeader } from '@/components/ui/PageHeader'
