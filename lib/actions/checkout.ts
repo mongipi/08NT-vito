@@ -5,8 +5,6 @@ import { auth } from '@/auth'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
 import { calcSubtotal, calcDiscount, calcTotal } from '@/lib/cart'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-
 interface ShippingAddress {
   name: string
   address: string
@@ -22,6 +20,8 @@ export async function createPaymentIntent(
   coupon: AppliedCoupon | null,
   shippingAddress: ShippingAddress
 ) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+
   const session = await auth()
   if (!session?.user) throw new Error('Non autenticato')
 
