@@ -110,8 +110,8 @@ export default async function OrderDetailPage({ params }: Props) {
                 background: 'var(--paper)', border: '0.5px solid var(--border)',
                 position: 'relative', overflow: 'hidden',
               }}>
-                {item.productId ? (
-                  <Image src={`/api/product-images/${item.productId}/fronte`} alt={item.name} fill style={{ objectFit: 'contain' }} sizes="56px" />
+                {item.slug ? (
+                  <Image src={`/api/product-images/${item.slug}/fronte`} alt={item.name} fill style={{ objectFit: 'contain' }} sizes="56px" />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <svg width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="var(--border-2)" strokeWidth="1">

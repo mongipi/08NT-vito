@@ -16,9 +16,19 @@ export async function GET(
   const { productId, key } = await params
   const dbKey = KEY_MAP[key] ?? key
 
-  const image = await prisma.productImage.findUnique({
+  // productId può essere un id cuid o uno slug
+  let image = await prisma.productImage.findUnique({
     where: { productId_key: { productId, key: dbKey } },
   })
+
+  if (!image) {
+    const product = await prisma.product.findUnique({ where: { slug: productId }, select: { id: true } })
+    if (product) {
+      image = await prisma.productImage.findUnique({
+        where: { productId_key: { productId: product.id, key: dbKey } },
+      })
+    }
+  }
 
   if (!image) return new NextResponse(null, { status: 404 })
 
