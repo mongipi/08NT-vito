@@ -1,7 +1,6 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import Image from 'next/image'
 
 const IMAGE_SLOTS = [
   { key: 'fronte',      label: 'Fronte' },
@@ -50,7 +49,8 @@ export function ImageUploader({ images }: Props) {
               }}
             >
               {shown ? (
-                <Image src={shown} alt={label} fill style={{ objectFit: 'contain', padding: 6 }} unoptimized />
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={shown} alt={label} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }} />
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, pointerEvents: 'none' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5">
