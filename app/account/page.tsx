@@ -26,6 +26,7 @@ const STATUS_STYLE: Record<string, React.CSSProperties> = {
 export default async function AccountPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
+  if (session.user.role === 'admin') redirect('/admin')
 
   const orders = await prisma.order.findMany({
     where: { userId: session.user.id },

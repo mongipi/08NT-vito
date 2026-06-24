@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
+import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 const inputStyle: React.CSSProperties = {
@@ -31,7 +31,9 @@ export function LoginForm() {
       setError('Email o password non corretti.')
       setLoading(false)
     } else {
-      router.push(callbackUrl)
+      const session = await getSession()
+      const dest = session?.user?.role === 'admin' ? '/admin' : callbackUrl
+      router.push(dest)
     }
   }
 

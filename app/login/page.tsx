@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default async function LoginPage() {
   const session = await auth()
-  if (session?.user) redirect('/account')
+  if (session?.user) redirect(session.user.role === 'admin' ? '/admin' : '/account')
   return (
     <main style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       {/* Top accent */}
