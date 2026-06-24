@@ -45,7 +45,6 @@ model Product {
   metaDescription  String?
   ingredients      Ingredient[]
   productImages    ProductImage[]
-  orderItems       OrderItem[]
   b2bPricing       B2BPricing?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
@@ -175,15 +174,13 @@ model Order {
 }
 
 model OrderItem {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   orderId   String
-  productId String?
   slug      String?
   name      String
   unitPrice Float
   qty       Int
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model OrderAddress {

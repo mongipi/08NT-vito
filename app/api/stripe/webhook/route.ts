@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     const meta = pi.metadata
 
     try {
-      const items: { productId?: string; slug?: string; name: string; unitPrice: number; qty: number }[] =
+      const items: { slug?: string; name: string; unitPrice: number; qty: number }[] =
         JSON.parse(meta.items ?? '[]')
       const addr: ShippingAddress = JSON.parse(meta.shippingAddress ?? '{}')
 
@@ -36,7 +36,6 @@ export async function POST(req: NextRequest) {
           stripePaymentIntentId: pi.id,
           items: {
             create: items.map((i) => ({
-              productId: i.productId ?? null,
               slug: i.slug ?? null,
               name: i.name,
               unitPrice: Number(i.unitPrice),
@@ -63,10 +62,10 @@ export async function POST(req: NextRequest) {
 
       await Promise.all([
         ...items
-          .filter((i) => i.productId)
+          .filter((i) => i.slug)
           .map((i) =>
             prisma.product.update({
-              where: { id: i.productId! },
+              where: { slug: i.slug! },
               data: { stock: { decrement: i.qty } },
             })
           ),
