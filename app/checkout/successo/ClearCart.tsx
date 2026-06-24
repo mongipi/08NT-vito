@@ -1,9 +1,9 @@
 'use client'
-import { useEffect } from 'react'
-import { useCart } from '@/contexts/CartContext'
+import { useLayoutEffect } from 'react'
 
 export function ClearCart() {
-  const { clearCart } = useCart()
-  useEffect(() => { clearCart() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    try { localStorage.removeItem('08nt-cart') } catch {}
+  }, [])
   return null
 }

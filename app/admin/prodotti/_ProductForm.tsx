@@ -1,4 +1,4 @@
-import type { Line, Product, Ingredient } from '@prisma/client'
+import type { Line, Product, Ingredient, ProductImage } from '@prisma/client'
 import { s } from '../_components/styles'
 import { ImageUploader } from './_ImageUploader'
 import { ToggleField } from '../_components/ToggleField'
@@ -7,7 +7,7 @@ import { IngredientsEditor } from './_IngredientsEditor'
 interface Props {
   lines: Line[]
   action: (fd: FormData) => Promise<void>
-  product?: Product & { line: Line; ingredients: Ingredient[] }
+  product?: Product & { line: Line; ingredients: Ingredient[]; productImages: Pick<ProductImage, 'key'>[] }
   deleteAction?: (fd: FormData) => Promise<void>
 }
 
@@ -27,7 +27,14 @@ function Field({ label: lbl, name, type = 'text', required, defaultValue, placeh
 }
 
 export function ProductForm({ lines, action, product, deleteAction }: Props) {
-  const images = (product?.images ?? {}) as Record<string, string>
+  const KEY_TO_PATH: Record<string, string> = { fronte: 'fronte', infografica: 'infografica', lato1: 'lato-1', lato2: 'lato-2', etichetta: 'etichetta' }
+  const images: Record<string, string> = {}
+  if (product) {
+    for (const img of product.productImages) {
+      const path = KEY_TO_PATH[img.key]
+      if (path) images[img.key] = `/api/product-images/${product.id}/${path}`
+    }
+  }
 
   return (
     <>

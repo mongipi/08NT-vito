@@ -110,8 +110,8 @@ export default async function OrderDetailPage({ params }: Props) {
                 background: 'var(--paper)', border: '0.5px solid var(--border)',
                 position: 'relative', overflow: 'hidden',
               }}>
-                {item.image ? (
-                  <Image src={item.image} alt={item.name} fill style={{ objectFit: 'contain' }} sizes="56px" />
+                {item.productId ? (
+                  <Image src={`/api/product-images/${item.productId}/fronte`} alt={item.name} fill style={{ objectFit: 'contain' }} sizes="56px" />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <svg width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="var(--border-2)" strokeWidth="1">
@@ -123,12 +123,18 @@ export default async function OrderDetailPage({ params }: Props) {
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <Link
-                  href={`/prodotti/${item.slug}`}
-                  style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--ink)', textDecoration: 'none', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
-                  {item.name}
-                </Link>
+                {item.slug ? (
+                  <Link
+                    href={`/prodotti/${item.slug}`}
+                    style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--ink)', textDecoration: 'none', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  >
+                    {item.name}
+                  </Link>
+                ) : (
+                  <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--ink)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.name}
+                  </span>
+                )}
                 <p style={{ fontSize: '0.75rem', color: 'var(--ink-4)', margin: '0.1875rem 0 0', fontWeight: 300 }}>
                   Qtà {item.qty} · €{item.unitPrice.toFixed(2)} cad.
                 </p>

@@ -4,7 +4,7 @@ import { s } from '../_components/styles'
 
 interface Ingredient {
   name: string
-  dosage: string
+  dosage?: string | null
 }
 
 export function IngredientsEditor({ defaultValue }: { defaultValue: Ingredient[] }) {
@@ -45,7 +45,7 @@ export function IngredientsEditor({ defaultValue }: { defaultValue: Ingredient[]
           />
           <input
             type="text"
-            value={item.dosage}
+            value={item.dosage ?? ''}
             onChange={e => update(i, 'dosage', e.target.value)}
             placeholder="es. 200 mg"
             style={s.input}

@@ -12,7 +12,7 @@ const td: React.CSSProperties = { padding: '0.6875rem 1rem', fontSize: '0.8125re
 export default async function OrdiniPage() {
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: 'desc' },
-    include: { user: { select: { email: true, name: true } } },
+    include: { user: { select: { email: true, name: true } }, items: { select: { qty: true } } },
   })
 
   return (
@@ -29,7 +29,6 @@ export default async function OrdiniPage() {
                 <tr><td colSpan={9} style={{ ...td, textAlign: 'center', color: '#9ca3af', padding: '2.5rem 1rem' }}>Nessun ordine</td></tr>
               )}
               {orders.map((o) => {
-                const items = o.items as { qty: number }[]
                 return (
                   <tr key={o.id}>
                     <td style={td}>
@@ -38,7 +37,7 @@ export default async function OrdiniPage() {
                       </Link>
                     </td>
                     <td style={td}>{o.user.name ?? o.user.email}</td>
-                    <td style={{ ...td, color: '#9ca3af' }}>{items.length}</td>
+                    <td style={{ ...td, color: '#9ca3af' }}>{o.items.length}</td>
                     <td style={td}>€{o.subtotal.toFixed(2)}</td>
                     <td style={{ ...td, color: o.discountAmount > 0 ? '#dc2626' : '#9ca3af' }}>
                       {o.discountAmount > 0 ? `-€${o.discountAmount.toFixed(2)}` : '—'}
