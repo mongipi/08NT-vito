@@ -7,7 +7,7 @@ import { ProductForm } from '../_ProductForm'
 export default async function EditProdottoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const [product, lines] = await Promise.all([
-    prisma.product.findUnique({ where: { id }, include: { line: true } }),
+    prisma.product.findUnique({ where: { id }, include: { line: true, ingredients: { orderBy: { order: 'asc' } } } }),
     prisma.line.findMany({ orderBy: { name: 'asc' } }),
   ])
   if (!product) notFound()

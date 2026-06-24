@@ -5,12 +5,16 @@ import { auth } from '@/auth'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
 import { calcSubtotal, calcDiscount, calcTotal } from '@/lib/cart'
 
-interface ShippingAddress {
-  name: string
+export interface ShippingAddress {
+  firstName: string
+  lastName: string
+  company?: string
+  vatNumber?: string
+  fiscalCode?: string
   address: string
   city: string
   postalCode: string
-  province: string
+  province?: string
   country: string
   phone?: string
 }
@@ -42,10 +46,11 @@ export async function createPaymentIntent(
       couponCode: coupon?.code ?? '',
       items: JSON.stringify(
         items.map((i) => ({
-          product: i.productId,
-          productName: i.name,
-          qty: i.qty,
+          productId: i.productId,
+          slug: i.slug,
+          name: i.name,
           unitPrice: i.price,
+          qty: i.qty,
         }))
       ),
       shippingAddress: JSON.stringify(shippingAddress),

@@ -1,4 +1,4 @@
-import type { Line, Product } from '@prisma/client'
+import type { Line, Product, Ingredient } from '@prisma/client'
 import { s } from '../_components/styles'
 import { ImageUploader } from './_ImageUploader'
 import { ToggleField } from '../_components/ToggleField'
@@ -7,7 +7,7 @@ import { IngredientsEditor } from './_IngredientsEditor'
 interface Props {
   lines: Line[]
   action: (fd: FormData) => Promise<void>
-  product?: Product & { line: Line }
+  product?: Product & { line: Line; ingredients: Ingredient[] }
   deleteAction?: (fd: FormData) => Promise<void>
 }
 
@@ -89,7 +89,7 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
             {/* Ingredienti */}
             <div style={s.cardPad}>
               <p style={s.cardTitle}>Ingredienti · Contenuti medi per dose</p>
-              <IngredientsEditor defaultValue={(product?.ingredients ?? []) as { name: string; dosage: string }[]} />
+              <IngredientsEditor defaultValue={product?.ingredients ?? []} />
             </div>
 
             <div style={s.cardPad}>

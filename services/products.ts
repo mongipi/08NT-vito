@@ -1,19 +1,43 @@
 import { prisma } from '@/lib/prisma'
-import type { Product, Ingredient, ProductImages } from '@/types'
+import type { Product, ProductImages } from '@/types'
+
+const KEY_TO_URL_PATH: Record<string, string> = {
+  fronte: 'fronte',
+  infografica: 'infografica',
+  lato1: 'lato-1',
+  lato2: 'lato-2',
+  etichetta: 'etichetta',
+}
+
+function buildImageMap(productId: string, productImages: { key: string }[]): ProductImages {
+  const result: ProductImages = {}
+  for (const img of productImages) {
+    const path = KEY_TO_URL_PATH[img.key]
+    if (path) {
+      (result as Record<string, string>)[img.key] = `/api/product-images/${productId}/${path}`
+    }
+  }
+  return result
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapProduct(p: any): Product {
   return {
     ...p,
-    ingredients: (p.ingredients ?? []) as Ingredient[],
-    images: (p.images ?? {}) as ProductImages,
+    images: buildImageMap(p.id, p.productImages ?? []),
   }
 }
+
+const productInclude = {
+  line: true,
+  ingredients: { orderBy: { order: 'asc' as const } },
+  productImages: { select: { key: true } },
+} as const
 
 export async function getProducts(): Promise<Product[]> {
   const products = await prisma.product.findMany({
     where: { published: true },
-    include: { line: true },
+    include: productInclude,
     orderBy: { order: 'asc' },
   })
   return products.map(mapProduct)
@@ -22,7 +46,7 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const p = await prisma.product.findFirst({
     where: { slug, published: true },
-    include: { line: true, b2bPricing: true },
+    include: { ...productInclude, b2bPricing: true },
   })
   if (!p) return null
   return mapProduct(p)

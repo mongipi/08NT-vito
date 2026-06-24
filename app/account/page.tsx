@@ -29,6 +29,7 @@ export default async function AccountPage() {
 
   const orders = await prisma.order.findMany({
     where: { userId: session.user.id },
+    include: { items: { select: { qty: true } } },
     orderBy: { createdAt: 'desc' },
     take: 20,
   })
@@ -139,8 +140,7 @@ export default async function AccountPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {orders.map((order) => {
               const sc = STATUS_STYLE[order.status] ?? STATUS_STYLE.pending
-              const items = order.items as { qty: number; name: string }[]
-              const itemCount = items.reduce((n, i) => n + i.qty, 0)
+              const itemCount = order.items.reduce((n, i) => n + i.qty, 0)
 
               return (
                 <div key={order.id} style={{ background: 'white', border: '1px solid var(--border)' }}>

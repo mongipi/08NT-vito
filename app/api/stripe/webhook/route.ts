@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
+import type { ShippingAddress } from '@/lib/actions/checkout'
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
@@ -20,35 +21,62 @@ export async function POST(req: NextRequest) {
     const meta = pi.metadata
 
     try {
-      const items = JSON.parse(meta.items ?? '[]')
+      const items: { productId?: string; slug?: string; name: string; unitPrice: number; qty: number }[] =
+        JSON.parse(meta.items ?? '[]')
+      const addr: ShippingAddress = JSON.parse(meta.shippingAddress ?? '{}')
 
       await prisma.order.create({
         data: {
           userId: meta.userId,
-          items,
           subtotal: Number(meta.subtotal),
           discountAmount: Number(meta.discountAmount ?? 0),
           total: pi.amount / 100,
           couponCode: meta.couponCode || null,
           status: 'paid',
           stripePaymentIntentId: pi.id,
-          shippingAddress: JSON.parse(meta.shippingAddress ?? '{}'),
+          items: {
+            create: items.map((i) => ({
+              productId: i.productId ?? null,
+              slug: i.slug ?? null,
+              name: i.name,
+              unitPrice: Number(i.unitPrice),
+              qty: Number(i.qty),
+            })),
+          },
+          shippingAddress: {
+            create: {
+              firstName: addr.firstName,
+              lastName: addr.lastName,
+              company: addr.company ?? null,
+              vatNumber: addr.vatNumber ?? null,
+              fiscalCode: addr.fiscalCode ?? null,
+              address: addr.address,
+              city: addr.city,
+              postalCode: addr.postalCode,
+              province: addr.province ?? null,
+              country: addr.country ?? 'IT',
+              phone: addr.phone ?? null,
+            },
+          },
         },
       })
 
-      for (const item of items) {
-        await prisma.product.update({
-          where: { id: item.product },
-          data: { stock: { decrement: item.qty } },
-        })
-      }
-
-      if (meta.couponCode) {
-        await prisma.discount.update({
-          where: { code: meta.couponCode.toUpperCase() },
-          data: { usedCount: { increment: 1 } },
-        })
-      }
+      await Promise.all([
+        ...items
+          .filter((i) => i.productId)
+          .map((i) =>
+            prisma.product.update({
+              where: { id: i.productId! },
+              data: { stock: { decrement: i.qty } },
+            })
+          ),
+        meta.couponCode
+          ? prisma.discount.update({
+              where: { code: meta.couponCode.toUpperCase() },
+              data: { usedCount: { increment: 1 } },
+            })
+          : Promise.resolve(),
+      ])
     } catch (err) {
       console.error('Webhook handler error:', err)
       return NextResponse.json({ error: 'Handler failed' }, { status: 500 })

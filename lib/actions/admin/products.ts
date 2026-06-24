@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 const IMAGE_KEYS = ['fronte', 'infografica', 'lato1', 'lato2', 'etichetta'] as const
 type ImageKey = typeof IMAGE_KEYS[number]
 
-const FILE_NAMES: Record<ImageKey, string> = {
+const KEY_TO_PATH: Record<ImageKey, string> = {
   fronte: 'fronte',
   infografica: 'infografica',
   lato1: 'lato-1',
@@ -14,27 +14,34 @@ const FILE_NAMES: Record<ImageKey, string> = {
   etichetta: 'etichetta',
 }
 
-async function saveImages(productId: string, formData: FormData, existing: Record<string, string> = {}) {
-  const images: Record<string, string> = { ...existing }
-
+async function saveImages(productId: string, formData: FormData) {
   for (const key of IMAGE_KEYS) {
     const file = formData.get(`img_${key}`) as File | null
     if (!file || file.size === 0) continue
-
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    const buffer = Buffer.from(await file.arrayBuffer())
     const mimeType = file.type || 'image/png'
-
     await prisma.productImage.upsert({
       where: { productId_key: { productId, key } },
       create: { productId, key, data: buffer, mimeType },
       update: { data: buffer, mimeType },
     })
-
-    images[key] = `/api/product-images/${productId}/${FILE_NAMES[key]}`
   }
+}
 
-  return images
+async function syncIngredients(productId: string, formData: FormData) {
+  interface RawIngredient { name: string; dosage?: string }
+  const raw: RawIngredient[] = JSON.parse((formData.get('ingredients') as string) || '[]')
+  await prisma.ingredient.deleteMany({ where: { productId } })
+  if (raw.length > 0) {
+    await prisma.ingredient.createMany({
+      data: raw.map((ing, i) => ({
+        productId,
+        name: ing.name,
+        dosage: ing.dosage ?? null,
+        order: i,
+      })),
+    })
+  }
 }
 
 function slugify(name: string) {
@@ -70,44 +77,34 @@ function parseProductData(formData: FormData) {
 
 export async function createProduct(formData: FormData) {
   const slug = slugify(formData.get('name') as string)
-
   const product = await prisma.product.create({
     data: {
       slug,
       ...parseProductData(formData),
       line: { connect: { id: formData.get('lineId') as string } },
-      ingredients: JSON.parse((formData.get('ingredients') as string) || '[]'),
-      images: {},
     },
   })
-
-  const images = await saveImages(product.id, formData)
-
-  await prisma.product.update({
-    where: { id: product.id },
-    data: { images },
-  })
-
+  await Promise.all([
+    saveImages(product.id, formData),
+    syncIngredients(product.id, formData),
+  ])
   revalidatePath('/admin/prodotti')
   redirect('/admin/prodotti')
 }
 
 export async function updateProduct(formData: FormData) {
   const id = formData.get('id') as string
-  const existing = await prisma.product.findUnique({ where: { id }, select: { slug: true, images: true } })
-  if (!existing) return
-
-  const images = await saveImages(id, formData, existing.images as Record<string, string>)
-
   await prisma.product.update({
     where: { id },
     data: {
       ...parseProductData(formData),
       line: { connect: { id: formData.get('lineId') as string } },
-      ingredients: JSON.parse((formData.get('ingredients') as string) || '[]'),
-      images,
     },
   })
+  await Promise.all([
+    saveImages(id, formData),
+    syncIngredients(id, formData),
+  ])
   revalidatePath('/admin/prodotti')
   revalidatePath(`/admin/prodotti/${id}`)
   redirect(`/admin/prodotti/${id}`)

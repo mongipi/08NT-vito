@@ -5,7 +5,7 @@ import { getProductBySlug } from '@/services/products'
 import { ProductGallery } from '@/components/ui/ProductGallery'
 import { AddToCartButton } from '@/components/ui/AddToCartButton'
 import type { Metadata } from 'next'
-import type { Ingredient, ProductImages } from '@/types'
+import type { ProductImages } from '@/types'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -30,8 +30,8 @@ export default async function ProductPage({ params }: Props) {
     usage, target, capsules, days,
     dosage, notificationMs, format,
   } = product
-  const ingredients = (product.ingredients ?? []) as Ingredient[]
-  const images = (product.images ?? {}) as ProductImages
+  const ingredients = product.ingredients
+  const images = product.images as ProductImages
 
   // Hero carousel: fronte first, then all detail shots
   const heroSlides = [

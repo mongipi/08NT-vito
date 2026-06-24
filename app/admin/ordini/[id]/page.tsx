@@ -16,33 +16,16 @@ const STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Annullato' },
 ]
 
-interface OrderItem {
-  name?: string
-  productName?: string
-  slug?: string
-  qty: number
-  unitPrice?: number
-  price?: number
-  image?: string
-}
-
-interface ShippingAddress {
-  name?: string
-  address?: string
-  city?: string
-  postalCode?: string
-  province?: string
-  country?: string
-  phone?: string
-}
-
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const order = await prisma.order.findUnique({ where: { id }, include: { user: true } })
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { user: true, items: true, shippingAddress: true },
+  })
   if (!order) notFound()
 
-  const items = order.items as unknown as OrderItem[]
-  const address = order.shippingAddress as unknown as ShippingAddress
+  const items = order.items
+  const address = order.shippingAddress
 
   return (
     <div>
@@ -67,29 +50,25 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <div style={s.cardPad}>
             <p style={s.cardTitle}>Articoli ordinati</p>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {items.map((item, i) => {
-                const name = item.name ?? item.productName ?? '—'
-                const price = item.unitPrice ?? item.price ?? 0
-                return (
-                  <div key={i} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    gap: '1rem', padding: '0.75rem 0',
-                    borderBottom: i < items.length - 1 ? '0.5px solid #f0f1f3' : 'none',
-                  }}>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {name}
-                      </p>
-                      <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '0.125rem 0 0' }}>
-                        Qtà {item.qty} · €{Number(price).toFixed(2)} cad.
-                      </p>
-                    </div>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#111827', flexShrink: 0 }}>
-                      €{(Number(price) * item.qty).toFixed(2)}
-                    </span>
+              {items.map((item, i) => (
+                <div key={item.id} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  gap: '1rem', padding: '0.75rem 0',
+                  borderBottom: i < items.length - 1 ? '0.5px solid #f0f1f3' : 'none',
+                }}>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.name}
+                    </p>
+                    <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '0.125rem 0 0' }}>
+                      Qtà {item.qty} · €{item.unitPrice.toFixed(2)} cad.
+                    </p>
                   </div>
-                )
-              })}
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#111827', flexShrink: 0 }}>
+                    €{(item.unitPrice * item.qty).toFixed(2)}
+                  </span>
+                </div>
+              ))}
             </div>
 
             {/* Totali */}
@@ -110,19 +89,22 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           </div>
 
           {/* Indirizzo */}
-          {address && Object.values(address).some(Boolean) && (
+          {address && (
             <div style={s.cardPad}>
               <p style={s.cardTitle}>Indirizzo di spedizione</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1875rem' }}>
-                {address.name       && <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#111827' }}>{address.name}</span>}
-                {address.address    && <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>{address.address}</span>}
-                {(address.postalCode || address.city) && (
-                  <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
-                    {[address.postalCode, address.city, address.province].filter(Boolean).join(' ')}
-                  </span>
-                )}
-                {address.country    && <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>{address.country}</span>}
-                {address.phone      && <span style={{ fontSize: '0.8125rem', color: '#9ca3af', marginTop: '0.375rem' }}>{address.phone}</span>}
+                <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#111827' }}>
+                  {[address.firstName, address.lastName].filter(Boolean).join(' ')}
+                </span>
+                {address.company   && <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>{address.company}</span>}
+                {address.vatNumber && <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>P.IVA {address.vatNumber}</span>}
+                {address.fiscalCode && <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>C.F. {address.fiscalCode}</span>}
+                <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>{address.address}</span>
+                <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
+                  {[address.postalCode, address.city, address.province].filter(Boolean).join(' ')}
+                </span>
+                {address.country !== 'IT' && <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>{address.country}</span>}
+                {address.phone && <span style={{ fontSize: '0.8125rem', color: '#9ca3af', marginTop: '0.375rem' }}>{address.phone}</span>}
               </div>
             </div>
           )}

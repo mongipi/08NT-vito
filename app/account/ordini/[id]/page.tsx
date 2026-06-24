@@ -19,24 +19,6 @@ const STATUS_STYLE: Record<string, React.CSSProperties> = {
   cancelled: { background: '#fff5f5', color: '#dc2626' },
 }
 
-interface OrderItem {
-  productId: string
-  slug: string
-  name: string
-  price: number
-  qty: number
-  image?: string
-}
-interface ShippingAddress {
-  name?: string
-  address?: string
-  city?: string
-  postalCode?: string
-  province?: string
-  country?: string
-  phone?: string
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   return { title: `Ordine #${id.slice(-8).toUpperCase()} — 08 Natural Technology` }
@@ -47,11 +29,14 @@ export default async function OrderDetailPage({ params }: Props) {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
-  const order = await prisma.order.findUnique({ where: { id } })
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { items: true, shippingAddress: true },
+  })
   if (!order || order.userId !== session.user.id) notFound()
 
-  const items = order.items as unknown as OrderItem[]
-  const address = order.shippingAddress as unknown as ShippingAddress
+  const items = order.items
+  const address = order.shippingAddress
   const sc = STATUS_STYLE[order.status] ?? STATUS_STYLE.pending
   const itemCount = items.reduce((n, i) => n + i.qty, 0)
 
@@ -145,12 +130,12 @@ export default async function OrderDetailPage({ params }: Props) {
                   {item.name}
                 </Link>
                 <p style={{ fontSize: '0.75rem', color: 'var(--ink-4)', margin: '0.1875rem 0 0', fontWeight: 300 }}>
-                  Qtà {item.qty} · €{Number(item.price).toFixed(2)} cad.
+                  Qtà {item.qty} · €{item.unitPrice.toFixed(2)} cad.
                 </p>
               </div>
 
               <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--forest)', flexShrink: 0, fontFamily: 'var(--font-cormorant)' }}>
-                €{(Number(item.price) * item.qty).toFixed(2)}
+                €{(item.unitPrice * item.qty).toFixed(2)}
               </span>
             </div>
           ))}
@@ -186,13 +171,19 @@ export default async function OrderDetailPage({ params }: Props) {
               <SectionLabel>Indirizzo di spedizione</SectionLabel>
             </div>
             <div style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.1875rem' }}>
-              {address.name      && <p style={addrLine}>{address.name}</p>}
-              {address.address   && <p style={addrLine}>{address.address}</p>}
-              {(address.postalCode || address.city) && (
-                <p style={addrLine}>{[address.postalCode, address.city, address.province].filter(Boolean).join(' ')}</p>
+              {address ? (
+                <>
+                  <p style={addrLine}>{[address.firstName, address.lastName].filter(Boolean).join(' ')}</p>
+                  {address.company   && <p style={addrLine}>{address.company}</p>}
+                  {address.vatNumber && <p style={{ ...addrLine, color: 'var(--ink-4)', fontSize: '0.75rem' }}>P.IVA {address.vatNumber}</p>}
+                  <p style={addrLine}>{address.address}</p>
+                  <p style={addrLine}>{[address.postalCode, address.city, address.province].filter(Boolean).join(' ')}</p>
+                  {address.country !== 'IT' && <p style={addrLine}>{address.country}</p>}
+                  {address.phone && <p style={{ ...addrLine, marginTop: '0.625rem', color: 'var(--ink-4)' }}>{address.phone}</p>}
+                </>
+              ) : (
+                <p style={{ ...addrLine, color: 'var(--ink-4)' }}>—</p>
               )}
-              {address.country   && <p style={addrLine}>{address.country}</p>}
-              {address.phone     && <p style={{ ...addrLine, marginTop: '0.625rem', color: 'var(--ink-4)' }}>{address.phone}</p>}
             </div>
           </div>
         </div>

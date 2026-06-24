@@ -25,8 +25,18 @@ const labelStyle: React.CSSProperties = {
   color: 'var(--ink-3)', marginBottom: '0.375rem',
 }
 
-const FIELDS = [
-  { key: 'name',       label: 'Nome e cognome',        required: true },
+const PERSONAL_FIELDS = [
+  { key: 'firstName',  label: 'Nome',                   required: true },
+  { key: 'lastName',   label: 'Cognome',                required: true },
+  { key: 'fiscalCode', label: 'Codice fiscale',         required: false },
+] as const
+
+const B2B_FIELDS = [
+  { key: 'company',    label: 'Ragione sociale',        required: false },
+  { key: 'vatNumber',  label: 'Partita IVA',            required: false },
+] as const
+
+const ADDRESS_FIELDS = [
   { key: 'address',    label: 'Indirizzo',              required: true },
   { key: 'city',       label: 'Città',                  required: true },
   { key: 'postalCode', label: 'CAP',                    required: true },
@@ -42,8 +52,13 @@ export function CheckoutClient() {
   const [couponError, setCouponError] = useState<string | null>(null)
   const [couponLoading, setCouponLoading] = useState(false)
   const [loading, setLoading] = useState(false)
+  const nameParts = (session?.user?.name ?? '').split(' ')
   const [address, setAddress] = useState({
-    name: session?.user?.name ?? '',
+    firstName: nameParts[0] ?? '',
+    lastName: nameParts.slice(1).join(' '),
+    company: '',
+    vatNumber: '',
+    fiscalCode: '',
     address: '', city: '', postalCode: '', province: '', country: 'IT', phone: '',
   })
   const [step, setStep] = useState<'address' | 'payment'>('address')
@@ -69,7 +84,7 @@ export function CheckoutClient() {
     }
   }
 
-  const canProceed = address.name && address.address && address.city && address.postalCode
+  const canProceed = address.firstName && address.lastName && address.address && address.city && address.postalCode
 
   if (cart.itemCount === 0) {
     return (
@@ -93,12 +108,40 @@ export function CheckoutClient() {
             </h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {FIELDS.map(({ key, label, required }) => (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {PERSONAL_FIELDS.map(({ key, label, required }) => (
+                  <div key={key} style={key === 'fiscalCode' ? { gridColumn: '1 / -1' } : {}}>
+                    <label style={labelStyle}>{label}{required && <span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>}</label>
+                    <input
+                      type="text"
+                      value={address[key as keyof typeof address]}
+                      onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))}
+                      style={inputStyle}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {B2B_FIELDS.map(({ key, label }) => (
+                  <div key={key}>
+                    <label style={labelStyle}>{label} <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(aziende)</span></label>
+                    <input
+                      type="text"
+                      value={address[key as keyof typeof address]}
+                      onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))}
+                      style={inputStyle}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {ADDRESS_FIELDS.map(({ key, label, required }) => (
                 <div key={key}>
                   <label style={labelStyle}>{label}{required && <span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>}</label>
                   <input
                     type="text"
-                    value={address[key]}
+                    value={address[key as keyof typeof address]}
                     onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))}
                     style={inputStyle}
                   />

@@ -8,6 +8,8 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// ─── Prodotti ────────────────────────────────────────────────────────────────
+
 model Line {
   id         String    @id @default(cuid())
   slug       String    @unique
@@ -20,16 +22,16 @@ model Line {
 }
 
 model Product {
-  id               String      @id @default(cuid())
-  slug             String      @unique
+  id               String         @id @default(cuid())
+  slug             String         @unique
   name             String
   lineId           String
-  line             Line        @relation(fields: [lineId], references: [id])
+  line             Line           @relation(fields: [lineId], references: [id])
   price            Float
   comparePrice     Float?
-  stock            Int         @default(0)
-  published        Boolean     @default(false)
-  order            Int         @default(99)
+  stock            Int            @default(0)
+  published        Boolean        @default(false)
+  order            Int            @default(99)
   shortDescription String
   longDescription  String
   usage            String?
@@ -39,31 +41,37 @@ model Product {
   days             Int?
   dosage           String?
   notificationMs   String?
-  ingredients      Json        @default("[]")
-  images           Json        @default("{}")
   metaTitle        String?
   metaDescription  String?
-  b2bPricing       B2BPricing?
+  ingredients      Ingredient[]
   productImages    ProductImage[]
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  orderItems       OrderItem[]
+  b2bPricing       B2BPricing?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 }
 
-model Article {
-  id              String   @id @default(cuid())
-  slug            String   @unique
-  title           String
-  excerpt         String
-  body            String   @db.Text
-  tag             String
-  publishedAt     DateTime
-  readingTime     Int?
-  published       Boolean  @default(false)
-  metaTitle       String?
-  metaDescription String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+model Ingredient {
+  id          String  @id @default(cuid())
+  productId   String
+  name        String
+  dosage      String?
+  order       Int     @default(0)
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  key       String
+  mimeType  String  @default("image/png")
+  data      Bytes
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, key])
+}
+
+// ─── Utenti ──────────────────────────────────────────────────────────────────
 
 enum Role {
   consumer
@@ -72,20 +80,46 @@ enum Role {
 }
 
 model User {
-  id               String    @id @default(cuid())
-  email            String    @unique
+  id               String        @id @default(cuid())
+  email            String        @unique
   emailVerified    DateTime?
   name             String?
   image            String?
   password         String?
-  role             Role      @default(consumer)
-  company          String?
-  vatNumber        String?
+  role             Role          @default(consumer)
+  phone            String?
+  fiscalCode       String?       // Codice fiscale (privati e ditte)
+  company          String?       // Ragione sociale
+  vatNumber        String?       // Partita IVA
+  pec              String?       // PEC per fatturazione elettronica
+  sdiCode          String?       // Codice SDI / codice destinatario
   stripeCustomerId String?
   accounts         Account[]
   orders           Order[]
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  addresses        UserAddress[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model UserAddress {
+  id         String   @id @default(cuid())
+  userId     String
+  label      String?  // es. "Casa", "Ufficio", "Magazzino"
+  isDefault  Boolean  @default(false)
+  firstName  String
+  lastName   String
+  company    String?
+  vatNumber  String?
+  fiscalCode String?
+  address    String
+  city       String
+  postalCode String
+  province   String?
+  country    String   @default("IT")
+  phone      String?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Account {
@@ -114,6 +148,8 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// ─── Ordini ──────────────────────────────────────────────────────────────────
+
 enum OrderStatus {
   pending
   paid
@@ -123,20 +159,51 @@ enum OrderStatus {
 }
 
 model Order {
-  id                    String      @id @default(cuid())
+  id                    String        @id @default(cuid())
   userId                String
-  user                  User        @relation(fields: [userId], references: [id])
-  items                 Json
+  user                  User          @relation(fields: [userId], references: [id])
+  items                 OrderItem[]
+  shippingAddress       OrderAddress?
   subtotal              Float
-  discountAmount        Float       @default(0)
+  discountAmount        Float         @default(0)
   total                 Float
   couponCode            String?
-  status                OrderStatus @default(pending)
+  status                OrderStatus   @default(pending)
   stripePaymentIntentId String?
-  shippingAddress       Json
-  createdAt             DateTime    @default(now())
-  updatedAt             DateTime    @updatedAt
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
 }
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String?
+  slug      String?
+  name      String
+  unitPrice Float
+  qty       Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+model OrderAddress {
+  id         String  @id @default(cuid())
+  orderId    String  @unique
+  firstName  String
+  lastName   String
+  company    String?
+  vatNumber  String?
+  fiscalCode String?
+  address    String
+  city       String
+  postalCode String
+  province   String?
+  country    String  @default("IT")
+  phone      String?
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+// ─── Sconti ──────────────────────────────────────────────────────────────────
 
 enum DiscountType {
   percent
@@ -172,16 +239,7 @@ model B2BPricing {
   minQty    Int     @default(1)
 }
 
-model ProductImage {
-  id        String  @id @default(cuid())
-  productId String
-  key       String
-  mimeType  String  @default("image/png")
-  data      Bytes
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([productId, key])
-}
+// ─── Media ───────────────────────────────────────────────────────────────────
 
 model Media {
   id        String   @id @default(cuid())

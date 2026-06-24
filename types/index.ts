@@ -11,8 +11,10 @@ export interface Line {
 }
 
 export interface Ingredient {
+  id: string
   name: string
-  dosage?: string
+  dosage?: string | null
+  order: number
 }
 
 export interface ProductImages {
@@ -42,10 +44,10 @@ export interface Product {
   days?: number | null
   dosage?: string | null
   notificationMs?: string | null
-  ingredients: Ingredient[]
-  images?: ProductImages
   metaTitle?: string | null
   metaDescription?: string | null
+  ingredients: Ingredient[]
+  images: ProductImages
   createdAt: Date
   updatedAt: Date
 }
