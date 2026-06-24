@@ -1,6 +1,7 @@
 import type { Article } from '@prisma/client'
 import { s } from '../_components/styles'
 import { ToggleField } from '../_components/ToggleField'
+import { ConfirmSaveButton, ConfirmDeleteButton } from '../_components/ConfirmButtons'
 
 interface Props {
   action: (fd: FormData) => Promise<void>
@@ -75,9 +76,12 @@ export function ArticleForm({ action, article, deleteAction }: Props) {
               </div>
             </div>
 
-            <button type="submit" style={s.btnPrimary}>
-              {article ? 'Salva modifiche' : 'Pubblica articolo'}
-            </button>
+            <ConfirmSaveButton
+              label={article ? 'Salva modifiche' : 'Pubblica articolo'}
+              title={article ? 'Conferma salvataggio' : 'Pubblica articolo'}
+              message={article ? 'Vuoi salvare le modifiche a questo articolo?' : 'Vuoi pubblicare questo nuovo articolo?'}
+              style={s.btnPrimary}
+            />
           </div>
         </div>
       </form>
@@ -88,10 +92,14 @@ export function ArticleForm({ action, article, deleteAction }: Props) {
           <div style={{ ...s.cardPad, maxWidth: '16.25rem', borderColor: '#fecaca', background: '#fff5f5' }}>
             <p style={{ ...s.cardTitle, color: '#dc2626', marginBottom: '0.375rem' }}>Zona pericolosa</p>
             <p style={{ fontSize: '0.75rem', color: '#ef4444', marginBottom: '0.875rem', marginTop: 0 }}>Operazione irreversibile.</p>
-            <form action={deleteAction}>
-              <input type="hidden" name="id" value={article.id} />
-              <button type="submit" style={s.btnDanger}>Elimina articolo</button>
-            </form>
+            <ConfirmDeleteButton
+              formAction={deleteAction}
+              hiddenFields={{ id: article.id }}
+              title="Elimina articolo"
+              message={`Stai per eliminare "${article.title}". Questa operazione è irreversibile.`}
+              buttonLabel="Elimina articolo"
+              buttonStyle={s.btnDanger}
+            />
           </div>
         </div>
       )}

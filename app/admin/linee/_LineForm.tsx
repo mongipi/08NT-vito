@@ -2,6 +2,7 @@
 import type { Line } from '@prisma/client'
 import { useState } from 'react'
 import { s } from '../_components/styles'
+import { ConfirmSaveButton, ConfirmDeleteButton } from '../_components/ConfirmButtons'
 
 interface Props {
   action: (fd: FormData) => Promise<void>
@@ -82,9 +83,12 @@ export function LineForm({ action, line, deleteAction }: Props) {
           </div>
 
           <div style={{ marginTop: 12 }}>
-            <button type="submit" style={s.btnPrimary}>
-              {line ? 'Salva modifiche' : 'Crea linea'}
-            </button>
+            <ConfirmSaveButton
+              label={line ? 'Salva modifiche' : 'Crea linea'}
+              title={line ? 'Conferma salvataggio' : 'Crea linea'}
+              message={line ? 'Vuoi salvare le modifiche a questa linea?' : 'Vuoi creare questa nuova linea?'}
+              style={s.btnPrimary}
+            />
           </div>
         </div>
       </form>
@@ -96,10 +100,14 @@ export function LineForm({ action, line, deleteAction }: Props) {
             <p style={{ fontSize: 12, color: '#ef4444', marginBottom: 14, marginTop: 0 }}>
               Elimina la linea. I prodotti associati rimarranno senza linea.
             </p>
-            <form action={deleteAction}>
-              <input type="hidden" name="id" value={line.id} />
-              <button type="submit" style={s.btnDanger}>Elimina linea</button>
-            </form>
+            <ConfirmDeleteButton
+              formAction={deleteAction}
+              hiddenFields={{ id: line.id }}
+              title="Elimina linea"
+              message={`Stai per eliminare la linea "${line.name}". I prodotti associati rimarranno senza linea.`}
+              buttonLabel="Elimina linea"
+              buttonStyle={s.btnDanger}
+            />
           </div>
         </div>
       )}

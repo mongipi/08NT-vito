@@ -3,6 +3,7 @@ import { s } from '../_components/styles'
 import { ImageUploader } from './_ImageUploader'
 import { ToggleField } from '../_components/ToggleField'
 import { IngredientsEditor } from './_IngredientsEditor'
+import { ConfirmSaveButton, ConfirmDeleteButton } from '../_components/ConfirmButtons'
 
 interface Props {
   lines: Line[]
@@ -124,9 +125,12 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
               <ToggleField name="published" label="Pubblicato" defaultChecked={product?.published ?? false} />
             </div>
 
-            <button type="submit" style={s.btnPrimary}>
-              {product ? 'Salva modifiche' : 'Crea prodotto'}
-            </button>
+            <ConfirmSaveButton
+              label={product ? 'Salva modifiche' : 'Crea prodotto'}
+              title={product ? 'Conferma salvataggio' : 'Crea prodotto'}
+              message={product ? 'Vuoi salvare le modifiche a questo prodotto?' : 'Vuoi creare questo nuovo prodotto?'}
+              style={s.btnPrimary}
+            />
           </div>
         </div>
       </form>
@@ -137,10 +141,14 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
           <div style={{ ...s.cardPad, maxWidth: '16.25rem', borderColor: '#fecaca', background: '#fff5f5' }}>
             <p style={{ ...s.cardTitle, color: '#dc2626', marginBottom: '0.375rem' }}>Zona pericolosa</p>
             <p style={{ fontSize: '0.75rem', color: '#ef4444', marginBottom: '0.875rem', marginTop: 0 }}>Operazione irreversibile.</p>
-            <form action={deleteAction}>
-              <input type="hidden" name="id" value={product.id} />
-              <button type="submit" style={s.btnDanger}>Elimina prodotto</button>
-            </form>
+            <ConfirmDeleteButton
+              formAction={deleteAction}
+              hiddenFields={{ id: product.id }}
+              title="Elimina prodotto"
+              message={`Stai per eliminare "${product.name}". Questa operazione è irreversibile e rimuoverà anche immagini e ingredienti.`}
+              buttonLabel="Elimina prodotto"
+              buttonStyle={s.btnDanger}
+            />
           </div>
         </div>
       )}
