@@ -11,6 +11,9 @@ export interface ShippingAddress {
   company?: string
   vatNumber?: string
   fiscalCode?: string
+  sdiCode?: string
+  pec?: string
+  docType?: 'fattura' | 'scontrino' | null
   address: string
   city: string
   postalCode: string

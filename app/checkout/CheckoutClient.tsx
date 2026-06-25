@@ -25,24 +25,15 @@ const labelStyle: React.CSSProperties = {
   color: 'var(--ink-3)', marginBottom: '0.375rem',
 }
 
-const PERSONAL_FIELDS = [
-  { key: 'firstName',  label: 'Nome',                   required: true },
-  { key: 'lastName',   label: 'Cognome',                required: true },
-  { key: 'fiscalCode', label: 'Codice fiscale',         required: false },
-] as const
-
-const B2B_FIELDS = [
-  { key: 'company',    label: 'Ragione sociale',        required: false },
-  { key: 'vatNumber',  label: 'Partita IVA',            required: false },
-] as const
-
 const ADDRESS_FIELDS = [
-  { key: 'address',    label: 'Indirizzo',              required: true },
-  { key: 'city',       label: 'Città',                  required: true },
-  { key: 'postalCode', label: 'CAP',                    required: true },
-  { key: 'province',   label: 'Provincia (es. BA)',      required: false },
-  { key: 'phone',      label: 'Telefono (opzionale)',    required: false },
+  { key: 'address',    label: 'Indirizzo',           required: true },
+  { key: 'city',       label: 'Città',               required: true },
+  { key: 'postalCode', label: 'CAP',                 required: true },
+  { key: 'province',   label: 'Provincia (es. BA)',  required: false },
+  { key: 'phone',      label: 'Telefono (opzionale)',required: false },
 ] as const
+
+type DocType = 'none' | 'fattura' | 'scontrino'
 
 export function CheckoutClient() {
   const { data: session } = useSession()
@@ -56,12 +47,12 @@ export function CheckoutClient() {
   const [address, setAddress] = useState({
     firstName: nameParts[0] ?? '',
     lastName: nameParts.slice(1).join(' '),
-    company: '',
-    vatNumber: '',
-    fiscalCode: '',
+    company: '', vatNumber: '', fiscalCode: '',
+    sdiCode: '', pec: '',
     address: '', city: '', postalCode: '', province: '', country: 'IT', phone: '',
   })
   const [step, setStep] = useState<'address' | 'payment'>('address')
+  const [docType, setDocType] = useState<DocType>('none')
 
   async function applyCoupon() {
     if (!couponInput.trim()) return
@@ -76,7 +67,10 @@ export function CheckoutClient() {
   async function handleProceed() {
     setLoading(true)
     try {
-      const { clientSecret } = await createPaymentIntent(cart.items, cart.coupon, address)
+      const { clientSecret } = await createPaymentIntent(cart.items, cart.coupon, {
+        ...address,
+        docType: docType === 'none' ? null : docType,
+      })
       setClientSecret(clientSecret!)
       setStep('payment')
     } finally {
@@ -84,7 +78,9 @@ export function CheckoutClient() {
     }
   }
 
-  const canProceed = address.firstName && address.lastName && address.address && address.city && address.postalCode
+  const baseOk = !!(address.firstName && address.lastName && address.address && address.city && address.postalCode)
+  const docOk = docType === 'none' || (docType === 'scontrino' && !!address.fiscalCode) || (docType === 'fattura' && !!(address.company && address.vatNumber && (address.sdiCode || address.pec)))
+  const canProceed = baseOk && docOk
 
   if (cart.itemCount === 0) {
     return (
@@ -108,45 +104,79 @@ export function CheckoutClient() {
             </h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                {PERSONAL_FIELDS.map(({ key, label, required }) => (
-                  <div key={key} style={key === 'fiscalCode' ? { gridColumn: '1 / -1' } : {}}>
-                    <label style={labelStyle}>{label}{required && <span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>}</label>
-                    <input
-                      type="text"
-                      value={address[key as keyof typeof address]}
-                      onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))}
-                      style={inputStyle}
-                    />
-                  </div>
-                ))}
-              </div>
 
+              {/* Nome + Cognome */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                {B2B_FIELDS.map(({ key, label }) => (
+                {(['firstName', 'lastName'] as const).map((key) => (
                   <div key={key}>
-                    <label style={labelStyle}>{label} <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(aziende)</span></label>
-                    <input
-                      type="text"
-                      value={address[key as keyof typeof address]}
-                      onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))}
-                      style={inputStyle}
-                    />
+                    <label style={labelStyle}>{key === 'firstName' ? 'Nome' : 'Cognome'}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                    <input type="text" value={address[key]} onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))} style={inputStyle} />
                   </div>
                 ))}
               </div>
 
+              {/* Indirizzo + altri campi */}
               {ADDRESS_FIELDS.map(({ key, label, required }) => (
                 <div key={key}>
                   <label style={labelStyle}>{label}{required && <span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>}</label>
-                  <input
-                    type="text"
-                    value={address[key as keyof typeof address]}
-                    onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))}
-                    style={inputStyle}
-                  />
+                  <input type="text" value={address[key as keyof typeof address]} onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))} style={inputStyle} />
                 </div>
               ))}
+
+              {/* Documento fiscale */}
+              <div style={{ marginTop: '0.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
+                <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>Documento fiscale</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {([
+                    { value: 'none',      label: 'Nessun documento' },
+                    { value: 'scontrino', label: 'Scontrino con codice fiscale' },
+                    { value: 'fattura',   label: 'Fattura' },
+                  ] as { value: DocType; label: string }[]).map(opt => (
+                    <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', fontSize: '0.875rem', color: 'var(--ink)', cursor: 'pointer' }}>
+                      <input
+                        type="radio" name="docType" value={opt.value}
+                        checked={docType === opt.value}
+                        onChange={() => setDocType(opt.value)}
+                        style={{ accentColor: 'var(--forest)', width: '1rem', height: '1rem' }}
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+
+                {/* Scontrino: codice fiscale */}
+                {docType === 'scontrino' && (
+                  <div style={{ marginTop: '1rem' }}>
+                    <label style={labelStyle}>Codice fiscale</label>
+                    <input type="text" value={address.fiscalCode} onChange={e => setAddress(a => ({ ...a, fiscalCode: e.target.value }))} style={inputStyle} placeholder="RSSMRA80A01H501U" />
+                  </div>
+                )}
+
+                {/* Fattura: dati azienda */}
+                {docType === 'fattura' && (
+                  <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div>
+                      <label style={labelStyle}>Ragione sociale<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                      <input type="text" value={address.company} onChange={e => setAddress(a => ({ ...a, company: e.target.value }))} style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Partita IVA<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                      <input type="text" value={address.vatNumber} onChange={e => setAddress(a => ({ ...a, vatNumber: e.target.value }))} style={inputStyle} placeholder="IT12345678901" />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                      <div>
+                        <label style={labelStyle}>Codice SDI</label>
+                        <input type="text" value={address.sdiCode} onChange={e => setAddress(a => ({ ...a, sdiCode: e.target.value }))} style={inputStyle} placeholder="XXXXXXX" maxLength={7} />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>PEC</label>
+                        <input type="email" value={address.pec} onChange={e => setAddress(a => ({ ...a, pec: e.target.value }))} style={inputStyle} placeholder="pec@esempio.it" />
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', margin: 0 }}>Inserisci almeno Codice SDI oppure PEC.</p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Coupon */}

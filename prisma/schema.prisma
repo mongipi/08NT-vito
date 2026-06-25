@@ -191,6 +191,9 @@ model OrderAddress {
   company    String?
   vatNumber  String?
   fiscalCode String?
+  sdiCode    String?
+  pec        String?
+  docType    String? // 'fattura' | 'scontrino' | null
   address    String
   city       String
   postalCode String
