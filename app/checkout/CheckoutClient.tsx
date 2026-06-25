@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { useCart } from '@/contexts/CartContext'
 import { validateCoupon } from '@/lib/actions/coupon'
-import { createPaymentIntent } from '@/lib/actions/checkout'
+import { createPaymentIntent, createDirectOrder } from '@/lib/actions/checkout'
 import { useSession } from 'next-auth/react'
-import { formatPrice } from '@/lib/cart'
+import { formatPrice, COD_SURCHARGE } from '@/lib/cart'
 import Link from 'next/link'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
@@ -33,9 +33,22 @@ const ADDRESS_FIELDS = [
   { key: 'phone',      label: 'Telefono (opzionale)',required: false },
 ] as const
 
-type DocType = 'none' | 'fattura' | 'scontrino'
+type DocType = 'fattura' | 'scontrino'
+type PayMethod = 'stripe' | 'bonifico' | 'contrassegno'
 
-export function CheckoutClient() {
+interface Prefill {
+  firstName: string; lastName: string; phone: string
+  fiscalCode: string; company: string; vatNumber: string; pec: string; sdiCode: string
+  address: string; city: string; postalCode: string; province: string; country: string
+}
+
+const PAY_METHODS: { value: PayMethod; label: string; desc: string }[] = [
+  { value: 'stripe',       label: 'Carta / PayPal / Google Pay / Apple Pay', desc: 'Pagamento online sicuro con Stripe' },
+  { value: 'bonifico',     label: 'Bonifico bancario',                        desc: 'Riceverai IBAN e causale dopo la conferma' },
+  { value: 'contrassegno', label: 'Contrassegno',                             desc: `Paghi in contanti al corriere (+€${COD_SURCHARGE.toFixed(2)} supplemento)` },
+]
+
+export function CheckoutClient({ prefill }: { prefill?: Prefill }) {
   const { data: session } = useSession()
   const cart = useCart()
   const [clientSecret, setClientSecret] = useState<string | null>(null)
@@ -43,16 +56,25 @@ export function CheckoutClient() {
   const [couponError, setCouponError] = useState<string | null>(null)
   const [couponLoading, setCouponLoading] = useState(false)
   const [loading, setLoading] = useState(false)
-  const nameParts = (session?.user?.name ?? '').split(' ')
+  const [pending, startTransition] = useTransition()
   const [address, setAddress] = useState({
-    firstName: nameParts[0] ?? '',
-    lastName: nameParts.slice(1).join(' '),
-    company: '', vatNumber: '', fiscalCode: '',
-    sdiCode: '', pec: '',
-    address: '', city: '', postalCode: '', province: '', country: 'IT', phone: '',
+    firstName:  prefill?.firstName  ?? '',
+    lastName:   prefill?.lastName   ?? '',
+    company:    prefill?.company    ?? '',
+    vatNumber:  prefill?.vatNumber  ?? '',
+    fiscalCode: prefill?.fiscalCode ?? '',
+    sdiCode:    prefill?.sdiCode    ?? '',
+    pec:        prefill?.pec        ?? '',
+    address:    prefill?.address    ?? '',
+    city:       prefill?.city       ?? '',
+    postalCode: prefill?.postalCode ?? '',
+    province:   prefill?.province   ?? '',
+    country:    prefill?.country    ?? 'IT',
+    phone:      prefill?.phone      ?? '',
   })
   const [step, setStep] = useState<'address' | 'payment'>('address')
-  const [docType, setDocType] = useState<DocType>('none')
+  const [docType, setDocType] = useState<DocType>('scontrino')
+  const [payMethod, setPayMethod] = useState<PayMethod>('stripe')
 
   async function applyCoupon() {
     if (!couponInput.trim()) return
@@ -65,22 +87,28 @@ export function CheckoutClient() {
   }
 
   async function handleProceed() {
-    setLoading(true)
-    try {
-      const { clientSecret } = await createPaymentIntent(cart.items, cart.coupon, {
-        ...address,
-        docType: docType === 'none' ? null : docType,
+    if (payMethod === 'stripe') {
+      setLoading(true)
+      try {
+        const { clientSecret } = await createPaymentIntent(cart.items, cart.coupon, { ...address, docType })
+        setClientSecret(clientSecret!)
+        setStep('payment')
+      } finally {
+        setLoading(false)
+      }
+    } else {
+      startTransition(async () => {
+        await createDirectOrder(cart.items, cart.coupon, { ...address, docType }, payMethod)
       })
-      setClientSecret(clientSecret!)
-      setStep('payment')
-    } finally {
-      setLoading(false)
     }
   }
 
   const baseOk = !!(address.firstName && address.lastName && address.address && address.city && address.postalCode)
-  const docOk = docType === 'none' || (docType === 'scontrino' && !!address.fiscalCode) || (docType === 'fattura' && !!(address.company && address.vatNumber && (address.sdiCode || address.pec)))
+  const docOk = (docType === 'scontrino' && !!address.fiscalCode) || (docType === 'fattura' && !!(address.company && address.vatNumber && (address.sdiCode || address.pec)))
   const canProceed = baseOk && docOk
+
+  const isCod = payMethod === 'contrassegno'
+  const displayTotal = isCod ? cart.total + COD_SURCHARGE : cart.total
 
   if (cart.itemCount === 0) {
     return (
@@ -100,7 +128,7 @@ export function CheckoutClient() {
         {step === 'address' && (
           <div style={{ background: 'white', border: '1px solid var(--border)', padding: '1.75rem' }}>
             <h2 style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)', marginBottom: '1.5rem' }}>
-              Indirizzo di spedizione
+              Dati e spedizione
             </h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -115,24 +143,15 @@ export function CheckoutClient() {
                 ))}
               </div>
 
-              {/* Indirizzo + altri campi */}
-              {ADDRESS_FIELDS.map(({ key, label, required }) => (
-                <div key={key}>
-                  <label style={labelStyle}>{label}{required && <span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>}</label>
-                  <input type="text" value={address[key as keyof typeof address]} onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))} style={inputStyle} />
-                </div>
-              ))}
-
               {/* Documento fiscale */}
-              <div style={{ marginTop: '0.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
-                <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>Documento fiscale</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ paddingTop: '0.25rem' }}>
+                <p style={{ ...labelStyle, marginBottom: '0.625rem' }}>Documento fiscale</p>
+                <div style={{ display: 'flex', gap: '1.5rem' }}>
                   {([
-                    { value: 'none',      label: 'Nessun documento' },
-                    { value: 'scontrino', label: 'Scontrino con codice fiscale' },
+                    { value: 'scontrino', label: 'Scontrino con C.F.' },
                     { value: 'fattura',   label: 'Fattura' },
                   ] as { value: DocType; label: string }[]).map(opt => (
-                    <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', fontSize: '0.875rem', color: 'var(--ink)', cursor: 'pointer' }}>
+                    <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--ink)', cursor: 'pointer' }}>
                       <input
                         type="radio" name="docType" value={opt.value}
                         checked={docType === opt.value}
@@ -144,17 +163,15 @@ export function CheckoutClient() {
                   ))}
                 </div>
 
-                {/* Scontrino: codice fiscale */}
                 {docType === 'scontrino' && (
-                  <div style={{ marginTop: '1rem' }}>
-                    <label style={labelStyle}>Codice fiscale</label>
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <label style={labelStyle}>Codice fiscale<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
                     <input type="text" value={address.fiscalCode} onChange={e => setAddress(a => ({ ...a, fiscalCode: e.target.value }))} style={inputStyle} placeholder="RSSMRA80A01H501U" />
                   </div>
                 )}
 
-                {/* Fattura: dati azienda */}
                 {docType === 'fattura' && (
-                  <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <div>
                       <label style={labelStyle}>Ragione sociale<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
                       <input type="text" value={address.company} onChange={e => setAddress(a => ({ ...a, company: e.target.value }))} style={inputStyle} />
@@ -177,6 +194,17 @@ export function CheckoutClient() {
                   </div>
                 )}
               </div>
+
+              {/* Separatore */}
+              <div style={{ borderTop: '1px solid var(--border)', marginTop: '0.25rem' }} />
+
+              {/* Indirizzo di spedizione */}
+              {ADDRESS_FIELDS.map(({ key, label, required }) => (
+                <div key={key}>
+                  <label style={labelStyle}>{label}{required && <span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>}</label>
+                  <input type="text" value={address[key as keyof typeof address]} onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))} style={inputStyle} />
+                </div>
+              ))}
             </div>
 
             {/* Coupon */}
@@ -206,17 +234,47 @@ export function CheckoutClient() {
               )}
             </div>
 
+            {/* Metodo di pagamento */}
+            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
+              <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>Metodo di pagamento</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {PAY_METHODS.map(opt => (
+                  <label key={opt.value} style={{
+                    display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer',
+                    padding: '0.875rem 1rem',
+                    border: payMethod === opt.value ? '1.5px solid var(--forest)' : '1px solid var(--border)',
+                    background: payMethod === opt.value ? '#f8faf9' : 'white',
+                  }}>
+                    <input
+                      type="radio" name="payMethod" value={opt.value}
+                      checked={payMethod === opt.value}
+                      onChange={() => setPayMethod(opt.value)}
+                      style={{ accentColor: 'var(--forest)', width: '1rem', height: '1rem', marginTop: '0.125rem', flexShrink: 0 }}
+                    />
+                    <span>
+                      <span style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--ink)', marginBottom: '0.1875rem' }}>{opt.label}</span>
+                      <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--ink-4)', fontWeight: 300 }}>{opt.desc}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <button
               onClick={handleProceed}
-              disabled={!canProceed || loading}
+              disabled={!canProceed || loading || pending}
               style={{
                 marginTop: '1.75rem', width: '100%', padding: '0.9375rem',
-                background: canProceed && !loading ? 'var(--forest)' : 'var(--ink-4)',
-                color: 'white', border: 'none', cursor: canProceed && !loading ? 'pointer' : 'not-allowed',
+                background: canProceed && !loading && !pending ? 'var(--forest)' : 'var(--ink-4)',
+                color: 'white', border: 'none', cursor: canProceed && !loading && !pending ? 'pointer' : 'not-allowed',
                 fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase',
               }}
             >
-              {loading ? 'Preparazione pagamento…' : 'Procedi al pagamento →'}
+              {loading || pending
+                ? 'Elaborazione…'
+                : payMethod === 'stripe'
+                  ? 'Procedi al pagamento →'
+                  : 'Conferma ordine →'}
             </button>
           </div>
         )}
@@ -267,14 +325,20 @@ export function CheckoutClient() {
               <span>−{formatPrice(cart.discountAmount)}</span>
             </div>
           )}
+          {isCod && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
+              <span>Supplemento contrassegno</span>
+              <span>+{formatPrice(COD_SURCHARGE)}</span>
+            </div>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.0625rem', fontWeight: 700, color: 'var(--forest)', borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 4 }}>
-            <span>Totale</span><span>{formatPrice(cart.total)}</span>
+            <span>Totale</span><span>{formatPrice(displayTotal)}</span>
           </div>
         </div>
 
         <div style={{ marginTop: '1.25rem', display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ink-4)', fontSize: '0.6875rem' }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Pagamento sicuro con Stripe
+          {payMethod === 'stripe' ? 'Pagamento sicuro con Stripe' : payMethod === 'bonifico' ? 'Riceverai le coordinate bancarie via email' : 'Paghi in contanti alla consegna'}
         </div>
       </div>
 

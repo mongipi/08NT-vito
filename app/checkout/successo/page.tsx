@@ -7,7 +7,18 @@ export const metadata: Metadata = {
   robots: { index: false },
 }
 
-export default function SuccessPage() {
+const IBAN = process.env.IBAN_BONIFICO ?? 'IT00 X000 0000 0000 0000 0000 000'
+const INTESTATARIO = process.env.INTESTATARIO_BONIFICO ?? 'VIPHARMA di Tatulli Vito & Co. S.A.S.'
+
+export default async function SuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ orderId?: string; method?: string }>
+}) {
+  const { orderId, method } = await searchParams
+  const isBonifico = method === 'bonifico'
+  const isContrassegno = method === 'contrassegno'
+
   return (
     <main style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <ClearCart />
@@ -18,7 +29,7 @@ export default function SuccessPage() {
         padding: '3rem 1.25rem',
         background: 'linear-gradient(160deg, var(--paper) 0%, #fff 60%)',
       }}>
-        <div style={{ width: '100%', maxWidth: 480, textAlign: 'center' }}>
+        <div style={{ width: '100%', maxWidth: 520, textAlign: 'center' }}>
           {/* Icona check */}
           <div style={{
             width: 72, height: 72, borderRadius: '50%',
@@ -33,7 +44,7 @@ export default function SuccessPage() {
 
           <div style={{ fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--green)', marginBottom: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
             <span style={{ width: 18, height: '1px', background: 'var(--green)', display: 'block' }} />
-            Ordine confermato
+            Ordine ricevuto
             <span style={{ width: 18, height: '1px', background: 'var(--green)', display: 'block' }} />
           </div>
 
@@ -45,9 +56,60 @@ export default function SuccessPage() {
             Grazie per il tuo acquisto.
           </h1>
 
-          <p style={{ fontSize: '0.875rem', color: 'var(--ink-3)', fontWeight: 300, lineHeight: 1.8, marginBottom: '2.5rem', maxWidth: 380, margin: '0 auto 2.5rem' }}>
-            Il tuo ordine è stato ricevuto e confermato. Riceverai una email con i dettagli della spedizione non appena il pacco sarà in partenza.
-          </p>
+          {/* Istruzioni bonifico */}
+          {isBonifico && (
+            <div style={{
+              textAlign: 'left', margin: '1.5rem 0 2rem',
+              background: '#f8faf9', border: '1px solid #bbf7d0', padding: '1.25rem 1.5rem',
+            }}>
+              <p style={{ fontSize: '0.625rem', fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--green)', marginBottom: '0.875rem' }}>
+                Istruzioni bonifico bancario
+              </p>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--ink-3)', fontWeight: 300, lineHeight: 1.7, margin: '0 0 0.875rem' }}>
+                Effettua il bonifico entro <strong>5 giorni lavorativi</strong>. L&apos;ordine sarà processato alla ricezione del pagamento.
+              </p>
+              <dl style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', margin: 0 }}>
+                {[
+                  { label: 'Intestatario', value: INTESTATARIO },
+                  { label: 'IBAN',         value: IBAN, mono: true },
+                  { label: 'Causale',      value: orderId ? `Ordine #${orderId.slice(-8).toUpperCase()}` : 'Numero ordine (vedi email)' },
+                ].map(({ label, value, mono }) => (
+                  <div key={label} style={{ display: 'flex', gap: '0.75rem', fontSize: '0.8125rem' }}>
+                    <dt style={{ color: 'var(--ink-4)', fontWeight: 500, minWidth: '6rem', flexShrink: 0 }}>{label}</dt>
+                    <dd style={{ color: 'var(--ink)', fontWeight: mono ? 600 : 400, margin: 0, fontFamily: mono ? 'monospace' : 'inherit' }}>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+
+          {/* Istruzioni contrassegno */}
+          {isContrassegno && (
+            <div style={{
+              textAlign: 'left', margin: '1.5rem 0 2rem',
+              background: '#fffbeb', border: '1px solid #fde68a', padding: '1.25rem 1.5rem',
+            }}>
+              <p style={{ fontSize: '0.625rem', fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#a16207', marginBottom: '0.875rem' }}>
+                Pagamento alla consegna
+              </p>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--ink-3)', fontWeight: 300, lineHeight: 1.7, margin: 0 }}>
+                Il pagamento avviene direttamente al corriere al momento della consegna. Tieni pronto l&apos;importo esatto in contanti. Il supplemento contrassegno di <strong>€5,00</strong> è già incluso nel totale.
+              </p>
+            </div>
+          )}
+
+          {/* Stripe: messaggio standard */}
+          {!isBonifico && !isContrassegno && (
+            <p style={{ fontSize: '0.875rem', color: 'var(--ink-3)', fontWeight: 300, lineHeight: 1.8, maxWidth: 380, margin: '0 auto 2.5rem' }}>
+              Il tuo ordine è stato ricevuto e confermato. Riceverai una email con i dettagli della spedizione non appena il pacco sarà in partenza.
+            </p>
+          )}
+
+          {(isBonifico || isContrassegno) && (
+            <p style={{ fontSize: '0.8125rem', color: 'var(--ink-4)', fontWeight: 300, lineHeight: 1.7, marginBottom: '2rem' }}>
+              Riceverai una email di conferma con il riepilogo del tuo ordine.
+            </p>
+          )}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 320, margin: '0 auto' }}>
             <Link href="/account" style={{

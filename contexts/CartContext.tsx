@@ -93,7 +93,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     <CartContext.Provider
       value={{
         ...state,
-        addItem: (item) => dispatch({ type: 'ADD_ITEM', item }),
+        addItem: (item) => {
+          dispatch({ type: 'ADD_ITEM', item })
+          window.dispatchEvent(new Event('cart:open'))
+        },
         removeItem: (productId) => dispatch({ type: 'REMOVE_ITEM', productId }),
         updateQty: (productId, qty) => dispatch({ type: 'UPDATE_QTY', productId, qty }),
         applyCoupon: (coupon) => dispatch({ type: 'APPLY_COUPON', coupon }),

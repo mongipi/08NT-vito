@@ -157,6 +157,12 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
 
+  useEffect(() => {
+    const open = () => setCartOpen(true)
+    window.addEventListener('cart:open', open)
+    return () => window.removeEventListener('cart:open', open)
+  }, [])
+
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
 

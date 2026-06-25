@@ -1,3 +1,5 @@
+export const COD_SURCHARGE = 5.0
+
 export interface CartItem {
   productId: string
   slug: string

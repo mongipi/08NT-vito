@@ -17,7 +17,7 @@ export default async function NuovoIndirizzoPage() {
 
       <section style={{ background: 'linear-gradient(150deg, #0b2214 0%, var(--forest) 100%)', padding: '1.75rem 1.25rem' }}>
         <div style={{ maxWidth: '44rem', margin: '0 auto' }}>
-          <Link href="/account/indirizzi" style={{
+          <Link href="/account/profilo" style={{
             display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
             fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.14em',
             textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)',
@@ -26,7 +26,7 @@ export default async function NuovoIndirizzoPage() {
             <svg width="0.625rem" height="0.625rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
             </svg>
-            I miei indirizzi
+            Il mio profilo
           </Link>
           <h1 style={{
             fontFamily: 'var(--font-cormorant)', fontWeight: 300,

@@ -199,8 +199,7 @@ export default async function AccountPage() {
         {/* Link rapidi */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', marginTop: '2rem' }}>
           {[
-            { href: '/account/impostazioni', label: 'Impostazioni' },
-            { href: '/account/indirizzi', label: 'Indirizzi' },
+            { href: '/account/profilo', label: 'Il mio profilo' },
             { href: '/prodotti', label: 'Catalogo' },
             { href: '/contatti', label: 'Assistenza' },
           ].map(({ href, label }) => (

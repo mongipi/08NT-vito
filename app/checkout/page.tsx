@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { auth } from '@/auth'
+import { prisma } from '@/lib/prisma'
 import { CheckoutClient } from './CheckoutClient'
 
 export const metadata: Metadata = {
@@ -6,7 +8,42 @@ export const metadata: Metadata = {
   robots: { index: false },
 }
 
-export default function CheckoutPage() {
+export default async function CheckoutPage() {
+  const session = await auth()
+
+  let prefill: React.ComponentProps<typeof CheckoutClient>['prefill'] = undefined
+
+  if (session?.user) {
+    const [user, defaultAddr] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { name: true, phone: true, fiscalCode: true, company: true, vatNumber: true, pec: true, sdiCode: true },
+      }),
+      prisma.userAddress.findFirst({
+        where: { userId: session.user.id, isDefault: true },
+      }),
+    ])
+
+    const nameParts = (user?.name ?? '').split(' ')
+
+    prefill = {
+      firstName:  nameParts[0] ?? '',
+      lastName:   nameParts.slice(1).join(' '),
+      phone:      user?.phone ?? '',
+      fiscalCode: user?.fiscalCode ?? '',
+      company:    user?.company ?? '',
+      vatNumber:  user?.vatNumber ?? '',
+      pec:        user?.pec ?? '',
+      sdiCode:    user?.sdiCode ?? '',
+      // indirizzo predefinito
+      address:    defaultAddr?.address ?? '',
+      city:       defaultAddr?.city ?? '',
+      postalCode: defaultAddr?.postalCode ?? '',
+      province:   defaultAddr?.province ?? '',
+      country:    defaultAddr?.country ?? 'IT',
+    }
+  }
+
   return (
     <main style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <div style={{ height: 3, background: 'var(--forest)' }} />
@@ -21,7 +58,7 @@ export default function CheckoutPage() {
               Checkout
             </h1>
           </div>
-          <CheckoutClient />
+          <CheckoutClient prefill={prefill} />
         </div>
       </div>
     </main>

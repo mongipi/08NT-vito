@@ -23,8 +23,8 @@ export async function updateUserInfo(formData: FormData) {
   })
 
   revalidatePath('/account')
-  revalidatePath('/account/impostazioni')
-  redirect('/account/impostazioni?saved=1')
+  revalidatePath('/account/profilo')
+  redirect('/account/profilo?saved=1')
 }
 
 export async function createAddress(formData: FormData) {
@@ -59,8 +59,8 @@ export async function createAddress(formData: FormData) {
     },
   })
 
-  revalidatePath('/account/indirizzi')
-  redirect('/account/indirizzi')
+  revalidatePath('/account/profilo')
+  redirect('/account/profilo')
 }
 
 export async function updateAddress(formData: FormData) {
@@ -69,7 +69,7 @@ export async function updateAddress(formData: FormData) {
 
   const id = formData.get('id') as string
   const existing = await prisma.userAddress.findUnique({ where: { id } })
-  if (!existing || existing.userId !== session.user.id) redirect('/account/indirizzi')
+  if (!existing || existing.userId !== session.user.id) redirect('/account/profilo')
 
   const isDefault = formData.get('isDefault') === 'on'
 
@@ -99,8 +99,8 @@ export async function updateAddress(formData: FormData) {
     },
   })
 
-  revalidatePath('/account/indirizzi')
-  redirect('/account/indirizzi')
+  revalidatePath('/account/profilo')
+  redirect('/account/profilo')
 }
 
 export async function deleteAddress(formData: FormData) {
@@ -109,12 +109,12 @@ export async function deleteAddress(formData: FormData) {
 
   const id = formData.get('id') as string
   const existing = await prisma.userAddress.findUnique({ where: { id } })
-  if (!existing || existing.userId !== session.user.id) redirect('/account/indirizzi')
+  if (!existing || existing.userId !== session.user.id) redirect('/account/profilo')
 
   await prisma.userAddress.delete({ where: { id } })
 
-  revalidatePath('/account/indirizzi')
-  redirect('/account/indirizzi')
+  revalidatePath('/account/profilo')
+  redirect('/account/profilo')
 }
 
 export async function setDefaultAddress(formData: FormData) {
@@ -131,5 +131,5 @@ export async function setDefaultAddress(formData: FormData) {
   })
   await prisma.userAddress.update({ where: { id }, data: { isDefault: true } })
 
-  revalidatePath('/account/indirizzi')
+  revalidatePath('/account/profilo')
 }

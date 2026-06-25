@@ -169,6 +169,8 @@ model Order {
   couponCode            String?
   status                OrderStatus   @default(pending)
   stripePaymentIntentId String?
+  paymentMethod         String        @default("stripe")
+  codSurcharge          Float         @default(0)
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
 }
