@@ -42,7 +42,19 @@ interface Prefill {
   address: string; city: string; postalCode: string; province: string; country: string
 }
 
-export function CheckoutClient({ prefill, codSurcharge = 5 }: { prefill?: Prefill; codSurcharge?: number }) {
+export function CheckoutClient({
+  prefill,
+  codSurcharge     = 5,
+  shippingThreshold = 50,
+  shippingPrice     = 5.90,
+  foreignSurcharge  = 10,
+}: {
+  prefill?: Prefill
+  codSurcharge?: number
+  shippingThreshold?: number
+  shippingPrice?: number
+  foreignSurcharge?: number
+}) {
   const PAY_METHODS: { value: PayMethod; label: string; desc: string }[] = [
     { value: 'stripe',       label: 'Carta / PayPal / Google Pay / Apple Pay', desc: 'Pagamento online sicuro con Stripe' },
     { value: 'bonifico',     label: 'Bonifico bancario',                        desc: 'Riceverai IBAN e causale dopo la conferma' },
@@ -89,7 +101,7 @@ export function CheckoutClient({ prefill, codSurcharge = 5 }: { prefill?: Prefil
     if (payMethod === 'stripe') {
       setLoading(true)
       try {
-        const { clientSecret } = await createPaymentIntent(cart.items, cart.coupon, { ...address, docType })
+        const { clientSecret } = await createPaymentIntent(cart.items, cart.coupon, { ...address, docType }, baseShipping)
         setClientSecret(clientSecret!)
         setStep('payment')
       } finally {
@@ -97,7 +109,7 @@ export function CheckoutClient({ prefill, codSurcharge = 5 }: { prefill?: Prefil
       }
     } else {
       startTransition(async () => {
-        await createDirectOrder(cart.items, cart.coupon, { ...address, docType }, payMethod)
+        await createDirectOrder(cart.items, cart.coupon, { ...address, docType }, payMethod, baseShipping)
       })
     }
   }
@@ -106,8 +118,12 @@ export function CheckoutClient({ prefill, codSurcharge = 5 }: { prefill?: Prefil
   const docOk = docType === 'nessuno' || docType === 'scontrino' || (docType === 'fattura' && !!(address.company && address.vatNumber && (address.sdiCode || address.pec)))
   const canProceed = baseOk && docOk
 
-  const isCod = payMethod === 'contrassegno'
-  const displayTotal = isCod ? cart.total + codSurcharge : cart.total
+  const isCod    = payMethod === 'contrassegno'
+  const isEstero = address.country !== 'IT'
+  const baseShipping = isEstero
+    ? (cart.total >= shippingThreshold ? foreignSurcharge : shippingPrice + foreignSurcharge)
+    : (cart.total >= shippingThreshold ? 0 : shippingPrice)
+  const displayTotal = cart.total + (isCod ? codSurcharge : 0) + baseShipping
 
   if (cart.itemCount === 0) {
     return (
@@ -205,6 +221,34 @@ export function CheckoutClient({ prefill, codSurcharge = 5 }: { prefill?: Prefil
                   <input type="text" value={address[key as keyof typeof address]} onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))} style={inputStyle} />
                 </div>
               ))}
+
+              {/* Paese */}
+              <div>
+                <label style={labelStyle}>Paese di spedizione</label>
+                <select
+                  value={address.country}
+                  onChange={e => setAddress(a => ({ ...a, country: e.target.value }))}
+                  style={{ ...inputStyle, cursor: 'pointer' }}
+                >
+                  <option value="IT">🇮🇹 Italia</option>
+                  <option value="DE">🇩🇪 Germania</option>
+                  <option value="FR">🇫🇷 Francia</option>
+                  <option value="ES">🇪🇸 Spagna</option>
+                  <option value="AT">🇦🇹 Austria</option>
+                  <option value="CH">🇨🇭 Svizzera</option>
+                  <option value="BE">🇧🇪 Belgio</option>
+                  <option value="NL">🇳🇱 Paesi Bassi</option>
+                  <option value="PT">🇵🇹 Portogallo</option>
+                  <option value="GR">🇬🇷 Grecia</option>
+                  <option value="PL">🇵🇱 Polonia</option>
+                  <option value="OTHER">Altro paese</option>
+                </select>
+                {address.country !== 'IT' && (
+                  <p style={{ fontSize: '0.6875rem', color: '#b45309', marginTop: '0.375rem' }}>
+                    Supplemento spedizione estera: +€{foreignSurcharge.toFixed(2)}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Coupon */}
@@ -324,6 +368,35 @@ export function CheckoutClient({ prefill, codSurcharge = 5 }: { prefill?: Prefil
               <span>Sconto ({cart.coupon?.code})</span>
               <span>−{formatPrice(cart.discountAmount)}</span>
             </div>
+          )}
+          {/* Spedizione */}
+          {baseShipping === 0 ? (
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#16a34a' }}>
+              <span>Spedizione</span><span>Gratuita</span>
+            </div>
+          ) : (
+            <>
+              {!isEstero && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
+                  <span>Spedizione</span><span>+{formatPrice(shippingPrice)}</span>
+                </div>
+              )}
+              {isEstero && cart.total >= shippingThreshold && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
+                  <span>Supplemento estero</span><span>+{formatPrice(foreignSurcharge)}</span>
+                </div>
+              )}
+              {isEstero && cart.total < shippingThreshold && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
+                    <span>Spedizione</span><span>+{formatPrice(shippingPrice)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
+                    <span>Supplemento estero</span><span>+{formatPrice(foreignSurcharge)}</span>
+                  </div>
+                </>
+              )}
+            </>
           )}
           {isCod && (
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>

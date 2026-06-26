@@ -30,7 +30,10 @@ export default async function ImpostazioniPage({
 
   const iban         = settings[SETTING_KEYS.IBAN]         ?? ''
   const intestatario = settings[SETTING_KEYS.INTESTATARIO] ?? ''
-  const codSurcharge = settings[SETTING_KEYS.COD_SURCHARGE] ?? '5'
+  const codSurcharge       = settings[SETTING_KEYS.COD_SURCHARGE]       ?? '5'
+  const speGratuita        = settings[SETTING_KEYS.SPEDIZIONE_GRATUITA] ?? '50'
+  const prezzoSpe          = settings[SETTING_KEYS.PREZZO_SPEDIZIONE]   ?? '5.90'
+  const supplementoEstero  = settings[SETTING_KEYS.SUPPLEMENTO_ESTERO]  ?? '10'
 
   return (
     <div>
@@ -97,6 +100,48 @@ export default async function ImpostazioniPage({
               style={{ ...input, maxWidth: '10rem' }}
             />
             <p style={hint}>Importo aggiunto al totale quando il cliente sceglie il pagamento alla consegna.</p>
+          </div>
+        </div>
+
+        {/* Spedizione */}
+        <div style={card}>
+          <h2 style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#111827', margin: '0 0 1.25rem', paddingBottom: '0.875rem', borderBottom: '1px solid #f0f1f3' }}>
+            Spedizione
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={label} htmlFor="speGratuita">Soglia spedizione gratuita (€)</label>
+              <input
+                id="speGratuita"
+                name={SETTING_KEYS.SPEDIZIONE_GRATUITA}
+                type="number" step="0.01" min="0"
+                defaultValue={speGratuita}
+                style={{ ...input, maxWidth: '10rem' }}
+              />
+              <p style={hint}>Sotto questa cifra si applica il costo di spedizione standard. Sopra, la spedizione è gratuita (solo Italia).</p>
+            </div>
+            <div>
+              <label style={label} htmlFor="prezzoSpe">Prezzo spedizione standard (€)</label>
+              <input
+                id="prezzoSpe"
+                name={SETTING_KEYS.PREZZO_SPEDIZIONE}
+                type="number" step="0.01" min="0"
+                defaultValue={prezzoSpe}
+                style={{ ...input, maxWidth: '10rem' }}
+              />
+              <p style={hint}>Costo fisso applicato quando il cliente non ha diritto alla spedizione gratuita.</p>
+            </div>
+            <div>
+              <label style={label} htmlFor="supEstero">Supplemento spedizione estera (€)</label>
+              <input
+                id="supEstero"
+                name={SETTING_KEYS.SUPPLEMENTO_ESTERO}
+                type="number" step="0.01" min="0"
+                defaultValue={supplementoEstero}
+                style={{ ...input, maxWidth: '10rem' }}
+              />
+              <p style={hint}>Aggiunto sempre per destinazioni fuori Italia, anche se la spedizione base è gratuita.</p>
+            </div>
           </div>
         </div>
 

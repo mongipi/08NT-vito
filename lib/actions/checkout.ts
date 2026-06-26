@@ -18,7 +18,7 @@ export interface ShippingAddress {
   fiscalCode?: string
   sdiCode?: string
   pec?: string
-  docType?: 'fattura' | 'scontrino' | null
+  docType?: 'fattura' | 'scontrino' | 'nessuno' | null
   address: string
   city: string
   postalCode: string
@@ -30,7 +30,8 @@ export interface ShippingAddress {
 export async function createPaymentIntent(
   items: CartItem[],
   coupon: AppliedCoupon | null,
-  shippingAddress: ShippingAddress
+  shippingAddress: ShippingAddress,
+  shippingCost = 0
 ) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -39,7 +40,7 @@ export async function createPaymentIntent(
 
   const subtotal = calcSubtotal(items)
   const discountAmount = calcDiscount(subtotal, coupon)
-  const total = calcTotal(subtotal, discountAmount)
+  const total = calcTotal(subtotal, discountAmount) + shippingCost
 
   const amountInCents = Math.round(total * 100)
   if (amountInCents < 50) throw new Error('Importo minimo €0.50')
@@ -51,6 +52,7 @@ export async function createPaymentIntent(
       userId: session.user.id,
       subtotal: String(subtotal),
       discountAmount: String(discountAmount),
+      shippingCost: String(shippingCost),
       couponCode: coupon?.code ?? '',
       items: JSON.stringify(
         items.map((i) => ({
@@ -73,7 +75,8 @@ export async function createDirectOrder(
   items: CartItem[],
   coupon: AppliedCoupon | null,
   shippingAddress: ShippingAddress,
-  paymentMethod: 'bonifico' | 'contrassegno'
+  paymentMethod: 'bonifico' | 'contrassegno',
+  shippingCost = 0
 ) {
   const session = await auth()
   if (!session?.user) throw new Error('Non autenticato')
@@ -85,7 +88,7 @@ export async function createDirectOrder(
   const discountAmount = calcDiscount(subtotal, coupon)
   const base = calcTotal(subtotal, discountAmount)
   const codSurcharge = paymentMethod === 'contrassegno' ? codSurchargeSetting : 0
-  const total = base + codSurcharge
+  const total = base + codSurcharge + shippingCost
 
   const order = await prisma.order.create({
     data: {

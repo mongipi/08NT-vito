@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
         JSON.parse(meta.items ?? '[]')
       const addr: ShippingAddress = JSON.parse(meta.shippingAddress ?? '{}')
       const discountAmount = Number(meta.discountAmount ?? 0)
+      const shippingCost   = Number(meta.shippingCost   ?? 0)
       const total = pi.amount / 100
 
       const order = await prisma.order.create({

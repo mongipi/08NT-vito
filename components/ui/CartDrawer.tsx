@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
 import { formatPrice } from '@/lib/cart'
 import { validateCoupon } from '@/lib/actions/coupon'
+import { getShippingConfig } from '@/lib/actions/public'
 import { useSession } from 'next-auth/react'
 
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -14,6 +15,11 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const [couponInput, setCouponInput] = useState('')
   const [couponError, setCouponError] = useState<string | null>(null)
   const [couponLoading, setCouponLoading] = useState(false)
+  const [shipping, setShipping] = useState<{ threshold: number; price: number; foreignSurcharge: number } | null>(null)
+
+  useEffect(() => {
+    getShippingConfig().then(setShipping).catch(() => {})
+  }, [])
 
   async function applyCoupon() {
     if (!couponInput.trim()) return
@@ -25,6 +31,13 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     else if (result.coupon) { cart.applyCoupon(result.coupon); setCouponInput('') }
     setCouponLoading(false)
   }
+
+  const freeThreshold  = shipping?.threshold ?? 50
+  const shippingPrice  = shipping?.price     ?? 5.90
+  const missingForFree = Math.max(0, freeThreshold - cart.total)
+  const hasFreeShipping = cart.total >= freeThreshold
+  const progressPct    = Math.min(100, (cart.total / freeThreshold) * 100)
+  const estimatedTotal = cart.total + (hasFreeShipping ? 0 : (shipping?.price ?? 0))
 
   return (
     <>
@@ -77,6 +90,29 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
           </button>
         </div>
 
+        {/* Banner spedizione gratuita */}
+        {cart.items.length > 0 && shipping && (
+          <div style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)', background: hasFreeShipping ? '#f0fdf4' : '#fafaf8' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.375rem' }}>
+              <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: hasFreeShipping ? '#15803d' : 'var(--ink-3)', letterSpacing: '0.05em' }}>
+                {hasFreeShipping
+                  ? '✓ Hai diritto alla spedizione gratuita!'
+                  : `Aggiungi ${formatPrice(missingForFree)} per la spedizione gratuita`}
+              </span>
+              {!hasFreeShipping && (
+                <span style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', flexShrink: 0, marginLeft: 8 }}>{formatPrice(shippingPrice)}</span>
+              )}
+            </div>
+            <div style={{ height: 3, background: '#e5e7eb', borderRadius: 99, overflow: 'hidden' }}>
+              <div style={{
+                height: '100%', width: `${progressPct}%`,
+                background: hasFreeShipping ? '#16a34a' : 'var(--forest)',
+                borderRadius: 99, transition: 'width 0.4s ease',
+              }} />
+            </div>
+          </div>
+        )}
+
         {/* Items */}
         <div style={{ flex: 1, overflowY: 'auto', padding: cart.items.length ? 0 : '3rem 1.5rem' }}>
           {cart.items.length === 0 ? (
@@ -100,7 +136,6 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   display: 'flex', gap: 14, padding: '1rem 1.5rem',
                   borderBottom: '1px solid var(--border)',
                 }}>
-                  {/* Immagine */}
                   <div style={{ width: 64, height: 64, flexShrink: 0, background: 'var(--paper)', position: 'relative', overflow: 'hidden' }}>
                     {item.image ? (
                       <Image src={item.image} alt={item.name} fill style={{ objectFit: 'contain', padding: 4 }} unoptimized />
@@ -113,28 +148,18 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                     )}
                   </div>
 
-                  {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--ink)', margin: '0 0 6px', lineHeight: 1.3 }}>{item.name}</p>
                     <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--forest)', margin: '0 0 10px' }}>
                       {formatPrice(item.price * item.qty)}
                     </p>
-
-                    {/* Qty controls */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                      <button
-                        onClick={() => cart.updateQty(item.productId, item.qty - 1)}
-                        style={qtyBtn}
-                      >−</button>
+                      <button onClick={() => cart.updateQty(item.productId, item.qty - 1)} style={qtyBtn}>−</button>
                       <span style={{ width: 32, textAlign: 'center', fontSize: '0.8125rem', fontWeight: 500 }}>{item.qty}</span>
-                      <button
-                        onClick={() => cart.updateQty(item.productId, item.qty + 1)}
-                        style={qtyBtn}
-                      >+</button>
+                      <button onClick={() => cart.updateQty(item.productId, item.qty + 1)} style={qtyBtn}>+</button>
                     </div>
                   </div>
 
-                  {/* Remove */}
                   <button
                     onClick={() => cart.removeItem(item.productId)}
                     style={{ alignSelf: 'flex-start', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-4)', padding: 4 }}
@@ -193,8 +218,14 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   <span>Sconto</span><span>−{formatPrice(cart.discountAmount)}</span>
                 </div>
               )}
+              {shipping && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: hasFreeShipping ? '#16a34a' : 'var(--ink-3)' }}>
+                  <span>Spedizione</span>
+                  <span>{hasFreeShipping ? 'Gratuita' : formatPrice(shippingPrice)}</span>
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 700, color: 'var(--forest)', borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 2 }}>
-                <span>Totale</span><span>{formatPrice(cart.total)}</span>
+                <span>Totale</span><span>{formatPrice(estimatedTotal)}</span>
               </div>
             </div>
 
@@ -213,7 +244,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             </Link>
 
             <p style={{ textAlign: 'center', fontSize: '0.6875rem', color: 'var(--ink-4)', margin: 0 }}>
-              Spedizione e tasse calcolate al checkout
+              Supplemento estero e contrassegno calcolati al checkout
             </p>
           </div>
         )}

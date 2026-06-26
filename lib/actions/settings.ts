@@ -10,7 +10,14 @@ export async function saveSettings(formData: FormData) {
   const session = await auth()
   if (!session?.user || (session.user as { role?: string }).role !== 'admin') redirect('/login')
 
-  const keys = [SETTING_KEYS.IBAN, SETTING_KEYS.INTESTATARIO, SETTING_KEYS.COD_SURCHARGE]
+  const keys = [
+    SETTING_KEYS.IBAN,
+    SETTING_KEYS.INTESTATARIO,
+    SETTING_KEYS.COD_SURCHARGE,
+    SETTING_KEYS.SPEDIZIONE_GRATUITA,
+    SETTING_KEYS.PREZZO_SPEDIZIONE,
+    SETTING_KEYS.SUPPLEMENTO_ESTERO,
+  ]
 
   await Promise.all(
     keys.map((key) => {

@@ -12,7 +12,10 @@ export const metadata: Metadata = {
 export default async function CheckoutPage() {
   const session = await auth()
   const settings = await getSettingsMap()
-  const codSurcharge = parseFloat(settings['COD_SURCHARGE'] ?? '5') || 5
+  const codSurcharge       = parseFloat(settings['COD_SURCHARGE']       ?? '5')    || 5
+  const shippingThreshold  = parseFloat(settings['SPEDIZIONE_GRATUITA'] ?? '50')   || 50
+  const shippingPrice      = parseFloat(settings['PREZZO_SPEDIZIONE']   ?? '5.90') || 5.90
+  const foreignSurcharge   = parseFloat(settings['SUPPLEMENTO_ESTERO']  ?? '10')   || 10
 
   let prefill: React.ComponentProps<typeof CheckoutClient>['prefill'] = undefined
 
@@ -61,7 +64,13 @@ export default async function CheckoutPage() {
               Checkout
             </h1>
           </div>
-          <CheckoutClient prefill={prefill} codSurcharge={codSurcharge} />
+          <CheckoutClient
+            prefill={prefill}
+            codSurcharge={codSurcharge}
+            shippingThreshold={shippingThreshold}
+            shippingPrice={shippingPrice}
+            foreignSurcharge={foreignSurcharge}
+          />
         </div>
       </div>
     </main>
