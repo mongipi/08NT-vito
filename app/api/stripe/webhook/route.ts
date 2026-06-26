@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import type { ShippingAddress } from '@/lib/actions/checkout'
+import { sendOrderConfirmation, sendAdminOrderNotification } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
@@ -24,13 +25,15 @@ export async function POST(req: NextRequest) {
       const items: { slug?: string; name: string; unitPrice: number; qty: number }[] =
         JSON.parse(meta.items ?? '[]')
       const addr: ShippingAddress = JSON.parse(meta.shippingAddress ?? '{}')
+      const discountAmount = Number(meta.discountAmount ?? 0)
+      const total = pi.amount / 100
 
-      await prisma.order.create({
+      const order = await prisma.order.create({
         data: {
           userId: meta.userId,
           subtotal: Number(meta.subtotal),
-          discountAmount: Number(meta.discountAmount ?? 0),
-          total: pi.amount / 100,
+          discountAmount,
+          total,
           couponCode: meta.couponCode || null,
           status: 'paid',
           stripePaymentIntentId: pi.id,
@@ -63,6 +66,30 @@ export async function POST(req: NextRequest) {
         },
       })
 
+      const user = await prisma.user.findUnique({
+        where: { id: meta.userId },
+        select: { name: true, email: true },
+      })
+
+      const emailData = {
+        orderId: order.id,
+        paymentMethod: 'stripe',
+        total,
+        subtotal: Number(meta.subtotal),
+        discountAmount,
+        couponCode: meta.couponCode || null,
+        codSurcharge: 0,
+        customerName: user?.name ?? 'Cliente',
+        customerEmail: user?.email ?? '',
+        items: items.map((i) => ({ name: i.name, qty: Number(i.qty), unitPrice: Number(i.unitPrice) })),
+        address: {
+          firstName: addr.firstName, lastName: addr.lastName,
+          address: addr.address, city: addr.city,
+          postalCode: addr.postalCode, province: addr.province ?? null,
+          country: addr.country ?? 'IT', phone: addr.phone ?? null,
+        },
+      }
+
       await Promise.all([
         ...items
           .filter((i) => i.slug)
@@ -78,6 +105,10 @@ export async function POST(req: NextRequest) {
               data: { usedCount: { increment: 1 } },
             })
           : Promise.resolve(),
+        emailData.customerEmail
+          ? sendOrderConfirmation(emailData).catch((e) => console.error('Email conferma failed:', e))
+          : Promise.resolve(),
+        sendAdminOrderNotification(emailData).catch((e) => console.error('Email admin failed:', e)),
       ])
     } catch (err) {
       console.error('Webhook handler error:', err)

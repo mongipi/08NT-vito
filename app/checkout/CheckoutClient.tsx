@@ -33,7 +33,7 @@ const ADDRESS_FIELDS = [
   { key: 'phone',      label: 'Telefono (opzionale)',required: false },
 ] as const
 
-type DocType = 'fattura' | 'scontrino'
+type DocType = 'fattura' | 'scontrino' | 'nessuno'
 type PayMethod = 'stripe' | 'bonifico' | 'contrassegno'
 
 interface Prefill {
@@ -72,7 +72,7 @@ export function CheckoutClient({ prefill, codSurcharge = 5 }: { prefill?: Prefil
     phone:      prefill?.phone      ?? '',
   })
   const [step, setStep] = useState<'address' | 'payment'>('address')
-  const [docType, setDocType] = useState<DocType>('scontrino')
+  const [docType, setDocType] = useState<DocType>('nessuno')
   const [payMethod, setPayMethod] = useState<PayMethod>('stripe')
 
   async function applyCoupon() {
@@ -103,7 +103,7 @@ export function CheckoutClient({ prefill, codSurcharge = 5 }: { prefill?: Prefil
   }
 
   const baseOk = !!(address.firstName && address.lastName && address.address && address.city && address.postalCode)
-  const docOk = (docType === 'scontrino' && !!address.fiscalCode) || (docType === 'fattura' && !!(address.company && address.vatNumber && (address.sdiCode || address.pec)))
+  const docOk = docType === 'nessuno' || docType === 'scontrino' || (docType === 'fattura' && !!(address.company && address.vatNumber && (address.sdiCode || address.pec)))
   const canProceed = baseOk && docOk
 
   const isCod = payMethod === 'contrassegno'
@@ -147,7 +147,8 @@ export function CheckoutClient({ prefill, codSurcharge = 5 }: { prefill?: Prefil
                 <p style={{ ...labelStyle, marginBottom: '0.625rem' }}>Documento fiscale</p>
                 <div style={{ display: 'flex', gap: '1.5rem' }}>
                   {([
-                    { value: 'scontrino', label: 'Scontrino con C.F.' },
+                    { value: 'nessuno',   label: 'Nessun documento' },
+                    { value: 'scontrino', label: 'Scontrino' },
                     { value: 'fattura',   label: 'Fattura' },
                   ] as { value: DocType; label: string }[]).map(opt => (
                     <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--ink)', cursor: 'pointer' }}>
@@ -164,7 +165,7 @@ export function CheckoutClient({ prefill, codSurcharge = 5 }: { prefill?: Prefil
 
                 {docType === 'scontrino' && (
                   <div style={{ marginTop: '0.75rem' }}>
-                    <label style={labelStyle}>Codice fiscale<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                    <label style={labelStyle}>Codice fiscale <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
                     <input type="text" value={address.fiscalCode} onChange={e => setAddress(a => ({ ...a, fiscalCode: e.target.value }))} style={inputStyle} placeholder="RSSMRA80A01H501U" />
                   </div>
                 )}

@@ -123,6 +123,17 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                   <option key={value} value={value}>{label}</option>
                 ))}
               </select>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 600, color: '#6b7280', letterSpacing: '0.06em', textTransform: 'uppercase' as const, marginBottom: '0.25rem' }}>
+                  N° tracking (opzionale)
+                </label>
+                <input
+                  name="trackingNumber"
+                  placeholder="es. 1Z999AA10123456784"
+                  style={{ ...s.select, fontFamily: 'monospace' }}
+                />
+                <p style={{ fontSize: '0.6875rem', color: '#9ca3af', marginTop: '0.25rem' }}>Incluso nell&apos;email di spedizione al cliente.</p>
+              </div>
               <button type="submit" style={s.btnPrimary}>Aggiorna stato</button>
             </form>
           </div>

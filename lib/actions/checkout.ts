@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
 import { calcSubtotal, calcDiscount, calcTotal } from '@/lib/cart'
 import { getSettingsMap } from '@/lib/settings'
+import { sendOrderConfirmation, sendAdminOrderNotification } from '@/lib/email'
 
 
 export interface ShippingAddress {
@@ -124,6 +125,35 @@ export async function createDirectOrder(
       },
     },
   })
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { name: true, email: true },
+  })
+
+  const emailData = {
+    orderId: order.id,
+    paymentMethod,
+    total,
+    subtotal,
+    discountAmount,
+    couponCode: coupon?.code ?? null,
+    codSurcharge,
+    customerName: user?.name ?? 'Cliente',
+    customerEmail: user?.email ?? '',
+    items: items.map((i) => ({ name: i.name, qty: i.qty, unitPrice: i.price })),
+    address: {
+      firstName: shippingAddress.firstName, lastName: shippingAddress.lastName,
+      address: shippingAddress.address, city: shippingAddress.city,
+      postalCode: shippingAddress.postalCode, province: shippingAddress.province ?? null,
+      country: shippingAddress.country, phone: shippingAddress.phone ?? null,
+    },
+  }
+
+  if (emailData.customerEmail) {
+    sendOrderConfirmation(emailData).catch((e) => console.error('Email conferma failed:', e))
+  }
+  sendAdminOrderNotification(emailData).catch((e) => console.error('Email admin failed:', e))
 
   redirect(`/checkout/successo?orderId=${order.id}&method=${paymentMethod}`)
 }
