@@ -1,21 +1,21 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ClearCart } from './ClearCart'
+import { getSettingsMap } from '@/lib/settings'
 
 export const metadata: Metadata = {
   title: 'Ordine confermato — 08 Natural Technology',
   robots: { index: false },
 }
 
-const IBAN = process.env.IBAN_BONIFICO ?? 'IT00 X000 0000 0000 0000 0000 000'
-const INTESTATARIO = process.env.INTESTATARIO_BONIFICO ?? 'VIPHARMA di Tatulli Vito & Co. S.A.S.'
-
 export default async function SuccessPage({
   searchParams,
 }: {
   searchParams: Promise<{ orderId?: string; method?: string }>
 }) {
-  const { orderId, method } = await searchParams
+  const [{ orderId, method }, settings] = await Promise.all([searchParams, getSettingsMap()])
+  const IBAN = settings['IBAN_BONIFICO'] ?? 'IT00 X000 0000 0000 0000 0000 000'
+  const INTESTATARIO = settings['INTESTATARIO_BONIFICO'] ?? 'VIPHARMA di Tatulli Vito & Co. S.A.S.'
   const isBonifico = method === 'bonifico'
   const isContrassegno = method === 'contrassegno'
 

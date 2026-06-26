@@ -7,7 +7,7 @@ import { useCart } from '@/contexts/CartContext'
 import { validateCoupon } from '@/lib/actions/coupon'
 import { createPaymentIntent, createDirectOrder } from '@/lib/actions/checkout'
 import { useSession } from 'next-auth/react'
-import { formatPrice, COD_SURCHARGE } from '@/lib/cart'
+import { formatPrice } from '@/lib/cart'
 import Link from 'next/link'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
@@ -42,13 +42,12 @@ interface Prefill {
   address: string; city: string; postalCode: string; province: string; country: string
 }
 
-const PAY_METHODS: { value: PayMethod; label: string; desc: string }[] = [
-  { value: 'stripe',       label: 'Carta / PayPal / Google Pay / Apple Pay', desc: 'Pagamento online sicuro con Stripe' },
-  { value: 'bonifico',     label: 'Bonifico bancario',                        desc: 'Riceverai IBAN e causale dopo la conferma' },
-  { value: 'contrassegno', label: 'Contrassegno',                             desc: `Paghi in contanti al corriere (+€${COD_SURCHARGE.toFixed(2)} supplemento)` },
-]
-
-export function CheckoutClient({ prefill }: { prefill?: Prefill }) {
+export function CheckoutClient({ prefill, codSurcharge = 5 }: { prefill?: Prefill; codSurcharge?: number }) {
+  const PAY_METHODS: { value: PayMethod; label: string; desc: string }[] = [
+    { value: 'stripe',       label: 'Carta / PayPal / Google Pay / Apple Pay', desc: 'Pagamento online sicuro con Stripe' },
+    { value: 'bonifico',     label: 'Bonifico bancario',                        desc: 'Riceverai IBAN e causale dopo la conferma' },
+    { value: 'contrassegno', label: 'Contrassegno',                             desc: `Paghi in contanti al corriere (+€${codSurcharge.toFixed(2)} supplemento)` },
+  ]
   const { data: session } = useSession()
   const cart = useCart()
   const [clientSecret, setClientSecret] = useState<string | null>(null)
@@ -108,7 +107,7 @@ export function CheckoutClient({ prefill }: { prefill?: Prefill }) {
   const canProceed = baseOk && docOk
 
   const isCod = payMethod === 'contrassegno'
-  const displayTotal = isCod ? cart.total + COD_SURCHARGE : cart.total
+  const displayTotal = isCod ? cart.total + codSurcharge : cart.total
 
   if (cart.itemCount === 0) {
     return (
@@ -328,7 +327,7 @@ export function CheckoutClient({ prefill }: { prefill?: Prefill }) {
           {isCod && (
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
               <span>Supplemento contrassegno</span>
-              <span>+{formatPrice(COD_SURCHARGE)}</span>
+              <span>+{formatPrice(codSurcharge)}</span>
             </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.0625rem', fontWeight: 700, color: 'var(--forest)', borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 4 }}>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { getSettingsMap } from '@/lib/settings'
 import { CheckoutClient } from './CheckoutClient'
 
 export const metadata: Metadata = {
@@ -10,6 +11,8 @@ export const metadata: Metadata = {
 
 export default async function CheckoutPage() {
   const session = await auth()
+  const settings = await getSettingsMap()
+  const codSurcharge = parseFloat(settings['COD_SURCHARGE'] ?? '5') || 5
 
   let prefill: React.ComponentProps<typeof CheckoutClient>['prefill'] = undefined
 
@@ -58,7 +61,7 @@ export default async function CheckoutPage() {
               Checkout
             </h1>
           </div>
-          <CheckoutClient prefill={prefill} />
+          <CheckoutClient prefill={prefill} codSurcharge={codSurcharge} />
         </div>
       </div>
     </main>

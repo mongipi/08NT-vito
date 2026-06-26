@@ -5,7 +5,8 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
-import { calcSubtotal, calcDiscount, calcTotal, COD_SURCHARGE } from '@/lib/cart'
+import { calcSubtotal, calcDiscount, calcTotal } from '@/lib/cart'
+import { getSettingsMap } from '@/lib/settings'
 
 
 export interface ShippingAddress {
@@ -76,10 +77,13 @@ export async function createDirectOrder(
   const session = await auth()
   if (!session?.user) throw new Error('Non autenticato')
 
+  const settings = await getSettingsMap()
+  const codSurchargeSetting = parseFloat(settings['COD_SURCHARGE'] ?? '5') || 5
+
   const subtotal = calcSubtotal(items)
   const discountAmount = calcDiscount(subtotal, coupon)
   const base = calcTotal(subtotal, discountAmount)
-  const codSurcharge = paymentMethod === 'contrassegno' ? COD_SURCHARGE : 0
+  const codSurcharge = paymentMethod === 'contrassegno' ? codSurchargeSetting : 0
   const total = base + codSurcharge
 
   const order = await prisma.order.create({

@@ -157,6 +157,12 @@ enum OrderStatus {
   cancelled
 }
 
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model Order {
   id                    String        @id @default(cuid())
   userId                String
