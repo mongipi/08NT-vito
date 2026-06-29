@@ -101,6 +101,7 @@ body {
   .strip { padding-left: 48px; padding-right: 48px; }
 }
 
+
 /* ─── Hero columns — pixel-perfect to mockup ─── */
 .hero-col {
   padding: 48px 24px;
@@ -109,6 +110,7 @@ body {
   .hero-col-l { padding: 72px 56px 72px 48px; }
   .hero-col-r { padding: 64px 48px; }
 }
+
 
 /* ─── Ticker animation ─── */
 @keyframes tick {

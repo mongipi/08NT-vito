@@ -17,127 +17,65 @@ export default async function HomePage() {
         style={{
           background: 'radial-gradient(circle at 72% 28%, rgba(184,144,60,0.13), transparent 28%), linear-gradient(135deg, var(--forest) 0%, #092212 100%)',
           borderBottom: '1px solid rgba(184,144,60,0.25)',
+          position: 'relative',
         }}
       >
-        <div
-          className="grid grid-cols-1 lg:grid-cols-2"
-          style={{ minHeight: 620 }}
-        >
+        {/* Mobile: banner immagine in cima */}
+        <div className="lg:hidden" style={{ position: 'relative', height: 380, overflow: 'hidden' }}>
+          <Image src="/home-bg.jpg" alt="08 Natural Technology" fill style={{ objectFit: 'cover', objectPosition: '40% 60%' }} priority />
+        </div>
+
+        {/* Overlay sfumatura che attraversa il confine tra colonne — solo desktop */}
+        <div className="hidden lg:block" style={{
+          position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none',
+          background: 'linear-gradient(to right, #092212 30%, rgba(9,34,18,0.6) 48%, transparent 68%)',
+        }} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2" style={{ minHeight: 620, position: 'relative' }}>
           {/* Left */}
-          <div
-            className="hero-col hero-col-l flex flex-col justify-center"
-            style={{ borderRight: '0.5px solid rgba(184,144,60,0.18)' }}
-          >
-            <div
-              className="flex items-center gap-2.5"
-              style={{
-                fontSize: '0.5625rem',
-                fontWeight: 500,
-                letterSpacing: '0.28em',
-                textTransform: 'uppercase',
-                color: 'var(--amber)',
-                marginBottom: '1.125rem',
-              }}
-            >
+          <div className="hero-col hero-col-l flex flex-col justify-center" style={{ position: 'relative', zIndex: 3 }}>
+            <div className="flex items-center gap-2.5" style={{ fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '1.125rem' }}>
               <span style={{ display: 'block', width: 24, height: '0.5px', background: 'var(--amber)', opacity: 0.75, flexShrink: 0 }} />
               Integratori alimentari
             </div>
-
-            <h1
-              style={{
-                fontFamily: 'var(--font-cormorant), Georgia, serif',
-                fontSize: 'clamp(36px, 5vw, 64px)',
-                fontWeight: 300,
-                lineHeight: 1.03,
-                letterSpacing: '-0.02em',
-                color: 'var(--silver-3)',
-                marginBottom: '1.5rem',
-              }}
-            >
+            <h1 style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 300, lineHeight: 1.03, letterSpacing: '-0.02em', color: 'var(--silver-3)', marginBottom: '1.5rem' }}>
               L&apos;<em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>Eccellenza</em>
               <br />
               come Standard.
             </h1>
-
-            <p
-              style={{
-                fontSize: '0.8125rem',
-                fontWeight: 300,
-                color: 'rgba(253,246,232,0.66)',
-                lineHeight: 1.9,
-                maxWidth: 520,
-                marginBottom: '2.125rem',
-              }}
-            >
+            <p style={{ fontSize: '0.8125rem', fontWeight: 300, color: 'rgba(253,246,232,0.66)', lineHeight: 1.9, maxWidth: 520, marginBottom: '2.125rem' }}>
               Integratori alimentari italiani formulati con ingredienti selezionati, ricerca e
               attenzione ai dettagli. 08 Natural Technology nasce per trasformare qualità,
               trasparenza e cura formulativa in una promessa quotidiana di benessere.
             </p>
-
             <div className="flex flex-wrap gap-3">
-              <Link
-                href="/prodotti"
-                style={{
-                  fontSize: '0.5625rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  padding: '0.8125rem 1.625rem',
-                  background: 'var(--amber)',
-                  color: 'var(--forest)',
-                  border: '1px solid var(--amber)',
-                }}
-              >
+              <Link href="/prodotti" style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', padding: '0.8125rem 1.625rem', background: 'var(--amber)', color: 'var(--forest)', border: '1px solid var(--amber)' }}>
                 Scopri i prodotti
               </Link>
-              <Link
-                href="/metodo"
-                style={{
-                  fontSize: '0.5625rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  padding: '0.8125rem 1.625rem',
-                  background: 'transparent',
-                  color: 'rgba(253,246,232,0.78)',
-                  border: '1px solid rgba(253,246,232,0.22)',
-                }}
-              >
+              <Link href="/metodo" style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', padding: '0.8125rem 1.625rem', background: 'transparent', color: 'rgba(253,246,232,0.78)', border: '1px solid rgba(253,246,232,0.22)' }}>
                 Qualità 08
               </Link>
             </div>
-
-            <div
-              style={{
-                marginTop: '2.125rem',
-                borderLeft: '1px solid rgba(184,144,60,0.42)',
-                paddingLeft: '1.125rem',
-                color: 'rgba(253,246,232,0.43)',
-                fontSize: '0.66rem',
-                fontWeight: 300,
-                lineHeight: 1.8,
-              }}
-            >
+            <div style={{ marginTop: '2.125rem', borderLeft: '1px solid rgba(184,144,60,0.42)', paddingLeft: '1.125rem', color: 'rgba(253,246,232,0.43)', fontSize: '0.66rem', fontWeight: 300, lineHeight: 1.8 }}>
               Ogni informazione regolatoria e ogni claim devono essere verificati sulla singola
               scheda prodotto prima della pubblicazione definitiva.
             </div>
           </div>
 
-          {/* Right: logo */}
-          <div className="hero-col hero-col-r flex items-center justify-center">
+          {/* Right: hand + logo image */}
+          <div className="hidden lg:block" style={{ position: 'relative', overflow: 'hidden' }}>
             <Image
-              src="/logo.png"
+              src="/home-bg.jpg"
               alt="08 Natural Technology"
-              width={340}
-              height={340}
-              style={{
-                width: 'clamp(200px, 28vw, 340px)',
-                height: 'auto',
-                objectFit: 'contain',
-                filter: 'brightness(0) invert(1) opacity(0.55)',
-              }}
+              fill
+              style={{ objectFit: 'cover', objectPosition: '40% 60%' }}
               priority
             />
+            {/* Fade bordo sinistro per nascondere la giuntura */}
+            <div style={{
+              position: 'absolute', inset: 0, pointerEvents: 'none',
+              display: 'none',
+            }} />
           </div>
         </div>
       </section>
