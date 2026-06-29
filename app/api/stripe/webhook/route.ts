@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import type { ShippingAddress } from '@/lib/actions/checkout'
 import { sendOrderConfirmation, sendAdminOrderNotification } from '@/lib/email'
+import { saveCheckoutDataToProfile, createAccountFromCheckout } from '@/lib/actions/checkout'
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
@@ -25,19 +26,48 @@ export async function POST(req: NextRequest) {
       const items: { slug?: string; name: string; unitPrice: number; qty: number }[] =
         JSON.parse(meta.items ?? '[]')
       const addr: ShippingAddress = JSON.parse(meta.shippingAddress ?? '{}')
-      const discountAmount = Number(meta.discountAmount ?? 0)
-      const shippingCost   = Number(meta.shippingCost   ?? 0)
+      const discountAmount    = Number(meta.discountAmount    ?? 0)
+      const shippingCost      = Number(meta.shippingCost      ?? 0)
+      const foreignSurcharge  = Number(meta.foreignSurcharge  ?? 0)
+      const freeShipping      = meta.freeShipping === 'true'
+      const saveForNextTime   = meta.saveForNextTime === 'true'
+      const createAccount     = meta.createAccount === 'true'
       const total = pi.amount / 100
 
       const order = await prisma.order.create({
         data: {
-          userId: meta.userId,
+          userId: meta.userId || undefined,
+          guestEmail: meta.guestEmail || undefined,
           subtotal: Number(meta.subtotal),
           discountAmount,
           total,
           couponCode: meta.couponCode || null,
           status: 'paid',
           stripePaymentIntentId: pi.id,
+          shippingCost,
+          foreignSurcharge,
+          freeShipping,
+          shippingNotes:      addr.shippingNotes      ?? null,
+          deliveryType:       addr.deliveryType       ?? 'home',
+          pickupCarrier:      addr.pickupCarrier      ?? null,
+          pickupPointCode:    addr.pickupPointCode    ?? null,
+          pickupPointAddress: addr.pickupPointAddress ?? null,
+          ...(addr.billingDifferent && addr.billingAddress ? {
+            billingAddress: {
+              create: {
+                firstName:  addr.billingFirstName  ?? addr.firstName,
+                lastName:   addr.billingLastName   ?? addr.lastName,
+                company:    addr.billingCompany    ?? null,
+                vatNumber:  addr.billingVatNumber  ?? null,
+                fiscalCode: addr.billingFiscalCode ?? null,
+                address:    addr.billingAddress,
+                city:       addr.billingCity       ?? '',
+                postalCode: addr.billingPostalCode ?? '',
+                province:   addr.billingProvince   ?? null,
+                country:    addr.billingCountry    ?? 'IT',
+              },
+            },
+          } : {}),
           items: {
             create: items.map((i) => ({
               slug: i.slug ?? null,
@@ -67,10 +97,15 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      const user = await prisma.user.findUnique({
-        where: { id: meta.userId },
-        select: { name: true, email: true },
-      })
+      const user = meta.userId
+        ? await prisma.user.findUnique({
+            where: { id: meta.userId },
+            select: { name: true, email: true },
+          })
+        : null
+
+      const customerName = user?.name ?? `${addr.firstName} ${addr.lastName}`.trim()
+      const customerEmail = user?.email ?? meta.guestEmail ?? ''
 
       const emailData = {
         orderId: order.id,
@@ -80,8 +115,8 @@ export async function POST(req: NextRequest) {
         discountAmount,
         couponCode: meta.couponCode || null,
         codSurcharge: 0,
-        customerName: user?.name ?? 'Cliente',
-        customerEmail: user?.email ?? '',
+        customerName,
+        customerEmail,
         items: items.map((i) => ({ name: i.name, qty: Number(i.qty), unitPrice: Number(i.unitPrice) })),
         address: {
           firstName: addr.firstName, lastName: addr.lastName,
@@ -110,6 +145,12 @@ export async function POST(req: NextRequest) {
           ? sendOrderConfirmation(emailData).catch((e) => console.error('Email conferma failed:', e))
           : Promise.resolve(),
         sendAdminOrderNotification(emailData).catch((e) => console.error('Email admin failed:', e)),
+        saveForNextTime && meta.userId
+          ? saveCheckoutDataToProfile(meta.userId, addr).catch((e) => console.error('Save profile failed:', e))
+          : Promise.resolve(),
+        createAccount && !meta.userId && customerEmail && meta.guestPasswordHash
+          ? createAccountFromCheckout(customerEmail, { ...addr, guestPasswordHash: meta.guestPasswordHash }).catch((e) => console.error('Create account failed:', e))
+          : Promise.resolve(),
       ])
     } catch (err) {
       console.error('Webhook handler error:', err)

@@ -165,10 +165,12 @@ model Setting {
 
 model Order {
   id                    String        @id @default(cuid())
-  userId                String
-  user                  User          @relation(fields: [userId], references: [id])
+  userId                String?
+  guestEmail            String?
+  user                  User?         @relation(fields: [userId], references: [id])
   items                 OrderItem[]
   shippingAddress       OrderAddress?
+  billingAddress        OrderBillingAddress?
   subtotal              Float
   discountAmount        Float         @default(0)
   total                 Float
@@ -177,6 +179,14 @@ model Order {
   stripePaymentIntentId String?
   paymentMethod         String        @default("stripe")
   codSurcharge          Float         @default(0)
+  shippingCost          Float         @default(0)
+  foreignSurcharge      Float         @default(0)
+  freeShipping          Boolean       @default(false)
+  shippingNotes         String?
+  deliveryType          String        @default("home")
+  pickupCarrier         String?
+  pickupPointCode       String?
+  pickupPointAddress    String?
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
 }
@@ -208,6 +218,22 @@ model OrderAddress {
   province   String?
   country    String  @default("IT")
   phone      String?
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model OrderBillingAddress {
+  id         String  @id @default(cuid())
+  orderId    String  @unique
+  firstName  String
+  lastName   String
+  company    String?
+  vatNumber  String?
+  fiscalCode String?
+  address    String
+  city       String
+  postalCode String
+  province   String?
+  country    String  @default("IT")
   order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 

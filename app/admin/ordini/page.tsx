@@ -36,7 +36,7 @@ export default async function OrdiniPage() {
                         #{o.id.slice(-8).toUpperCase()}
                       </Link>
                     </td>
-                    <td style={td}>{o.user.name ?? o.user.email}</td>
+                    <td style={td}>{o.user?.name ?? o.user?.email ?? o.guestEmail ?? '—'}</td>
                     <td style={{ ...td, color: '#9ca3af' }}>{o.items.length}</td>
                     <td style={td}>€{o.subtotal.toFixed(2)}</td>
                     <td style={{ ...td, color: o.discountAmount > 0 ? '#dc2626' : '#9ca3af' }}>

@@ -86,7 +86,7 @@ export default async function AdminDashboard() {
                       #{order.id.slice(-8).toUpperCase()}
                     </Link>
                   </td>
-                  <td style={td}>{order.user.name ?? order.user.email}</td>
+                  <td style={td}>{order.user?.name ?? order.user?.email ?? order.guestEmail ?? '—'}</td>
                   <td style={{ ...td, fontWeight: 600, color: '#111827' }}>€{order.total.toFixed(2)}</td>
                   <td style={td}><Badge value={order.status} /></td>
                   <td style={{ ...td, color: '#9ca3af' }}>{formatDate(order.createdAt)}</td>

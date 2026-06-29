@@ -1,4 +1,5 @@
 import type { UserAddress } from '@prisma/client'
+import { COUNTRIES } from '@/lib/countries'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -74,9 +75,7 @@ export function AddressForm({ action, address, submitLabel }: Props) {
         <div>
           <label style={labelStyle}>Paese</label>
           <select name="country" defaultValue={address?.country ?? 'IT'} style={{ ...inputStyle, appearance: 'auto' }}>
-            <option value="IT">Italia</option>
-            <option value="SM">San Marino</option>
-            <option value="VA">Città del Vaticano</option>
+            {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
           </select>
         </div>
       </div>

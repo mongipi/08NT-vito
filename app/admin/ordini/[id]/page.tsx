@@ -148,22 +148,28 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '0.75rem', fontWeight: 600,
               }}>
-                {(order.user.name ?? order.user.email ?? 'U')[0].toUpperCase()}
+                {(order.user?.name ?? order.user?.email ?? order.guestEmail ?? 'O')[0].toUpperCase()}
               </div>
               <div style={{ minWidth: 0 }}>
                 <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {order.user.name ?? '—'}
+                  {order.user?.name ?? (order.guestEmail ? 'Ospite' : '—')}
                 </p>
                 <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: '0.0625rem 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {order.user.email}
+                  {order.user?.email ?? order.guestEmail ?? '—'}
                 </p>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Badge value={order.user.role} />
-              <Link href={`/admin/utenti/${order.user.id}`} style={{ fontSize: '0.75rem', fontWeight: 500, color: '#1a4a2e', textDecoration: 'none' }}>
-                Profilo →
-              </Link>
+              {order.user ? (
+                <>
+                  <Badge value={order.user.role} />
+                  <Link href={`/admin/utenti/${order.user.id}`} style={{ fontSize: '0.75rem', fontWeight: 500, color: '#1a4a2e', textDecoration: 'none' }}>
+                    Profilo →
+                  </Link>
+                </>
+              ) : (
+                <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>Ordine ospite</span>
+              )}
             </div>
           </div>
 
