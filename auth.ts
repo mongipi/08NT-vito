@@ -1,9 +1,13 @@
-import NextAuth from 'next-auth'
+import NextAuth, { CredentialsSignin } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import authConfig from './auth.config'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+
+class EmailNotVerifiedError extends CredentialsSignin {
+  code = 'email_not_verified'
+}
 
 declare module 'next-auth' {
   interface Session {
@@ -40,6 +44,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!user?.password) return null
         const valid = await bcrypt.compare(credentials.password as string, user.password)
         if (!valid) return null
+        if (!user.emailVerified) throw new EmailNotVerifiedError()
         return {
           id: user.id,
           email: user.email,
@@ -57,7 +62,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const existing = await prisma.user.findUnique({ where: { email: user.email! } })
         if (!existing) {
           await prisma.user.create({
-            data: { email: user.email!, name: user.name, image: user.image, role: 'consumer' },
+            data: {
+              email: user.email!,
+              name: user.name,
+              image: user.image,
+              role: 'consumer',
+              emailVerified: new Date(),
+            },
+          })
+        } else if (!existing.emailVerified) {
+          await prisma.user.update({
+            where: { id: existing.id },
+            data: { emailVerified: new Date() },
           })
         }
       }

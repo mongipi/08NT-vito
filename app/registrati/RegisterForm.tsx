@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -21,18 +20,26 @@ export function RegisterForm() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
     setError(null)
+
+    if (password !== confirmPassword) {
+      setError('Le password non coincidono')
+      return
+    }
+
+    setLoading(true)
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, confirmPassword }),
       })
       if (!res.ok) {
         const data = await res.json()
@@ -40,11 +47,29 @@ export function RegisterForm() {
         setLoading(false)
         return
       }
-      await signIn('credentials', { email, password, callbackUrl: '/account', redirect: true })
+      setSubmitted(true)
+      setLoading(false)
     } catch {
       setError('Errore di rete. Riprova.')
       setLoading(false)
     }
+  }
+
+  if (submitted) {
+    return (
+      <div style={{
+        padding: '1.25rem 1.5rem', background: 'var(--paper)',
+        border: '1px solid var(--border-2)', textAlign: 'center',
+      }}>
+        <p style={{ fontSize: '0.9375rem', color: 'var(--ink)', fontWeight: 500, marginBottom: '0.5rem' }}>
+          Controlla la tua email
+        </p>
+        <p style={{ fontSize: '0.8125rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
+          Ti abbiamo inviato un link a <strong>{email}</strong> per confermare il tuo indirizzo.
+          Clicca sul link entro 24 ore per attivare l&apos;account.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -75,6 +100,16 @@ export function RegisterForm() {
           type="password" required minLength={8} autoComplete="new-password"
           value={password} onChange={e => setPassword(e.target.value)}
           placeholder="Minimo 8 caratteri"
+          style={inputStyle}
+        />
+      </div>
+
+      <div>
+        <label style={labelStyle}>Conferma password</label>
+        <input
+          type="password" required minLength={8} autoComplete="new-password"
+          value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+          placeholder="Ripeti la password"
           style={inputStyle}
         />
       </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -12,23 +13,45 @@ const inputStyle: React.CSSProperties = {
   fontFamily: 'var(--font-montserrat)',
 }
 
+const VERIFY_BANNER: Record<string, { text: string; color: string; bg: string; border: string }> = {
+  success: { text: 'Email confermata! Ora puoi accedere.', color: '#166534', bg: '#f0fdf4', border: '#bbf7d0' },
+  expired: { text: 'Il link di conferma è scaduto. Richiedine uno nuovo qui sotto dopo aver effettuato l\'accesso.', color: '#a16207', bg: '#fffbeb', border: '#fde68a' },
+  invalid: { text: 'Link di conferma non valido.', color: '#dc2626', bg: '#fff5f5', border: '#fecaca' },
+}
+
+const RESET_BANNER: Record<string, { text: string; color: string; bg: string; border: string }> = {
+  success: { text: 'Password aggiornata! Accedi con la nuova password.', color: '#166534', bg: '#f0fdf4', border: '#bbf7d0' },
+}
+
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') ?? '/account'
+  const verifyBanner = VERIFY_BANNER[searchParams.get('verify') ?? '']
+  const resetBanner = RESET_BANNER[searchParams.get('reset') ?? '']
+  const banner = verifyBanner ?? resetBanner
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null)
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setUnverifiedEmail(null)
+    setResendState('idle')
     const res = await signIn('credentials', { email, password, redirect: false })
     if (res?.error) {
-      setError('Email o password non corretti.')
+      if (res.error === 'email_not_verified') {
+        setError('Devi prima confermare la tua email. Controlla la tua casella di posta.')
+        setUnverifiedEmail(email)
+      } else {
+        setError('Email o password non corretti.')
+      }
       setLoading(false)
     } else {
       const session = await getSession()
@@ -37,8 +60,28 @@ export function LoginForm() {
     }
   }
 
+  async function handleResend() {
+    if (!unverifiedEmail) return
+    setResendState('sending')
+    await fetch('/api/auth/resend-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: unverifiedEmail }),
+    })
+    setResendState('sent')
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {banner && (
+        <p style={{
+          fontSize: '0.8125rem', color: banner.color, lineHeight: 1.6,
+          padding: '0.75rem 1rem', background: banner.bg, border: `1px solid ${banner.border}`,
+        }}>
+          {banner.text}
+        </p>
+      )}
+
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div>
           <label style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-3)', marginBottom: '0.375rem' }}>
@@ -52,9 +95,14 @@ export function LoginForm() {
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-3)', marginBottom: '0.375rem' }}>
-            Password
-          </label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.375rem' }}>
+            <label style={{ fontSize: '0.6875rem', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
+              Password
+            </label>
+            <Link href="/password-dimenticata" style={{ fontSize: '0.75rem', color: 'var(--forest)', textDecoration: 'none', borderBottom: '1px solid var(--green-l)' }}>
+              Password dimenticata?
+            </Link>
+          </div>
           <input
             type="password" required autoComplete="current-password"
             value={password} onChange={e => setPassword(e.target.value)}
@@ -66,6 +114,21 @@ export function LoginForm() {
           <p style={{ fontSize: '0.8125rem', color: '#dc2626', padding: '0.625rem 0.875rem', background: '#fff5f5', border: '1px solid #fecaca' }}>
             {error}
           </p>
+        )}
+
+        {unverifiedEmail && (
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={resendState !== 'idle'}
+            style={{
+              alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0,
+              fontSize: '0.75rem', color: 'var(--forest)', textDecoration: 'underline',
+              cursor: resendState === 'idle' ? 'pointer' : 'default',
+            }}
+          >
+            {resendState === 'sent' ? 'Email inviata di nuovo' : resendState === 'sending' ? 'Invio in corso…' : 'Invia di nuovo l\'email di conferma'}
+          </button>
         )}
 
         <button

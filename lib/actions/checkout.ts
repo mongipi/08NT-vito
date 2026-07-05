@@ -8,6 +8,7 @@ import type { CartItem, AppliedCoupon } from '@/lib/cart'
 import { calcSubtotal, calcDiscount, calcTotal } from '@/lib/cart'
 import { getSettingsMap } from '@/lib/settings'
 import { sendOrderConfirmation, sendAdminOrderNotification } from '@/lib/email'
+import { issueVerificationEmail } from '@/lib/verification'
 import bcrypt from 'bcryptjs'
 
 
@@ -310,6 +311,8 @@ export async function createAccountFromCheckout(email: string, addr: ShippingAdd
       isDefault:  true,
     },
   })
+
+  await issueVerificationEmail(email, name)
 }
 
 export async function hashPasswordForCheckout(password: string): Promise<string> {
