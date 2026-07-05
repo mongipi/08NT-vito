@@ -132,7 +132,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
           ) : (
             <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
               {cart.items.map((item) => (
-                <li key={item.productId} style={{
+                <li key={item.productId + (item.variantId ?? '')} style={{
                   display: 'flex', gap: 14, padding: '1rem 1.5rem',
                   borderBottom: '1px solid var(--border)',
                 }}>
@@ -149,19 +149,22 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--ink)', margin: '0 0 6px', lineHeight: 1.3 }}>{item.name}</p>
+                    <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--ink)', margin: '0 0 2px', lineHeight: 1.3 }}>{item.name}</p>
+                    {item.variantLabel && (
+                      <p style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', margin: '0 0 6px' }}>{item.variantLabel}</p>
+                    )}
                     <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--forest)', margin: '0 0 10px' }}>
                       {formatPrice(item.price * item.qty)}
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                      <button onClick={() => cart.updateQty(item.productId, item.qty - 1)} style={qtyBtn}>−</button>
+                      <button onClick={() => cart.updateQty(item.productId, item.qty - 1, item.variantId)} style={qtyBtn}>−</button>
                       <span style={{ width: 32, textAlign: 'center', fontSize: '0.8125rem', fontWeight: 500 }}>{item.qty}</span>
-                      <button onClick={() => cart.updateQty(item.productId, item.qty + 1)} style={qtyBtn}>+</button>
+                      <button onClick={() => cart.updateQty(item.productId, item.qty + 1, item.variantId)} style={qtyBtn}>+</button>
                     </div>
                   </div>
 
                   <button
-                    onClick={() => cart.removeItem(item.productId)}
+                    onClick={() => cart.removeItem(item.productId, item.variantId)}
                     style={{ alignSelf: 'flex-start', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-4)', padding: 4 }}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

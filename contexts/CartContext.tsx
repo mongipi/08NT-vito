@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useReducer } from 'react'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
-import { calcSubtotal, calcDiscount, calcTotal } from '@/lib/cart'
+import { calcSubtotal, calcDiscount, calcTotal, cartItemKey } from '@/lib/cart'
 
 interface CartState {
   items: CartItem[]
@@ -11,8 +11,8 @@ interface CartState {
 
 type Action =
   | { type: 'ADD_ITEM'; item: CartItem }
-  | { type: 'REMOVE_ITEM'; productId: string }
-  | { type: 'UPDATE_QTY'; productId: string; qty: number }
+  | { type: 'REMOVE_ITEM'; productId: string; variantId?: string }
+  | { type: 'UPDATE_QTY'; productId: string; variantId?: string; qty: number }
   | { type: 'APPLY_COUPON'; coupon: AppliedCoupon }
   | { type: 'REMOVE_COUPON' }
   | { type: 'CLEAR' }
@@ -21,26 +21,31 @@ type Action =
 function reducer(state: CartState, action: Action): CartState {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const existing = state.items.find((i) => i.productId === action.item.productId)
+      const key = cartItemKey(action.item)
+      const existing = state.items.find((i) => cartItemKey(i) === key)
       if (existing) {
         return {
           ...state,
           items: state.items.map((i) =>
-            i.productId === action.item.productId ? { ...i, qty: i.qty + action.item.qty } : i
+            cartItemKey(i) === key ? { ...i, qty: i.qty + action.item.qty } : i
           ),
         }
       }
       return { ...state, items: [...state.items, action.item] }
     }
-    case 'REMOVE_ITEM':
-      return { ...state, items: state.items.filter((i) => i.productId !== action.productId) }
-    case 'UPDATE_QTY':
+    case 'REMOVE_ITEM': {
+      const key = cartItemKey(action)
+      return { ...state, items: state.items.filter((i) => cartItemKey(i) !== key) }
+    }
+    case 'UPDATE_QTY': {
+      const key = cartItemKey(action)
       return {
         ...state,
         items: state.items
-          .map((i) => (i.productId === action.productId ? { ...i, qty: action.qty } : i))
+          .map((i) => (cartItemKey(i) === key ? { ...i, qty: action.qty } : i))
           .filter((i) => i.qty > 0),
       }
+    }
     case 'APPLY_COUPON':
       return { ...state, coupon: action.coupon }
     case 'REMOVE_COUPON':
@@ -56,8 +61,8 @@ function reducer(state: CartState, action: Action): CartState {
 
 interface CartContextValue extends CartState {
   addItem: (item: CartItem) => void
-  removeItem: (productId: string) => void
-  updateQty: (productId: string, qty: number) => void
+  removeItem: (productId: string, variantId?: string) => void
+  updateQty: (productId: string, qty: number, variantId?: string) => void
   applyCoupon: (coupon: AppliedCoupon) => void
   removeCoupon: () => void
   clearCart: () => void
@@ -97,8 +102,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           dispatch({ type: 'ADD_ITEM', item })
           window.dispatchEvent(new Event('cart:open'))
         },
-        removeItem: (productId) => dispatch({ type: 'REMOVE_ITEM', productId }),
-        updateQty: (productId, qty) => dispatch({ type: 'UPDATE_QTY', productId, qty }),
+        removeItem: (productId, variantId) => dispatch({ type: 'REMOVE_ITEM', productId, variantId }),
+        updateQty: (productId, qty, variantId) => dispatch({ type: 'UPDATE_QTY', productId, qty, variantId }),
         applyCoupon: (coupon) => dispatch({ type: 'APPLY_COUPON', coupon }),
         removeCoupon: () => dispatch({ type: 'REMOVE_COUPON' }),
         clearCart: () => dispatch({ type: 'CLEAR' }),

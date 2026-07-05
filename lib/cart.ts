@@ -8,6 +8,13 @@ export interface CartItem {
   comparePrice?: number
   image?: string
   qty: number
+  variantId?: string
+  variantLabel?: string
+}
+
+/** Identifica univocamente una riga di carrello: stesso prodotto ma variante diversa = riga diversa. */
+export function cartItemKey(item: Pick<CartItem, 'productId' | 'variantId'>): string {
+  return item.variantId ? `${item.productId}::${item.variantId}` : item.productId
 }
 
 export interface AppliedCoupon {

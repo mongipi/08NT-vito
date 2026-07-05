@@ -32,6 +32,7 @@ const productInclude = {
   line: true,
   ingredients: { orderBy: { order: 'asc' as const } },
   productImages: { select: { key: true } },
+  variants: { orderBy: { order: 'asc' as const } },
 } as const
 
 export async function getProducts(): Promise<Product[]> {

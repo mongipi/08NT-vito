@@ -94,6 +94,8 @@ export async function createPaymentIntent(
           name: i.name,
           unitPrice: i.price,
           qty: i.qty,
+          variantId: i.variantId ?? null,
+          variantLabel: i.variantLabel ?? null,
         }))
       ),
       shippingAddress: JSON.stringify(shippingAddress),
@@ -159,10 +161,11 @@ export async function createDirectOrder(
       } : {}),
       items: {
         create: items.map((i) => ({
-          slug:      i.slug ?? null,
-          name:      i.name,
-          unitPrice: i.price,
-          qty:       i.qty,
+          slug:         i.slug ?? null,
+          name:         i.name,
+          variantLabel: i.variantLabel ?? null,
+          unitPrice:    i.price,
+          qty:          i.qty,
         })),
       },
       shippingAddress: {
@@ -185,6 +188,24 @@ export async function createDirectOrder(
       },
     },
   })
+
+  // Bonifico/contrassegno non hanno un webhook di conferma pagamento: le scorte
+  // si riservano subito alla creazione dell'ordine (a differenza di Stripe, che
+  // le scala solo a pagamento riuscito nel webhook).
+  await Promise.all(
+    items.map((i) => {
+      if (i.variantId) {
+        return prisma.productVariant.update({
+          where: { id: i.variantId },
+          data: { stock: { decrement: i.qty } },
+        })
+      }
+      return prisma.product.update({
+        where: { slug: i.slug },
+        data: { stock: { decrement: i.qty } },
+      })
+    })
+  )
 
   const user = session?.user?.id
     ? await prisma.user.findUnique({

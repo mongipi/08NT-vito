@@ -1,14 +1,15 @@
-import type { Line, Product, Ingredient, ProductImage } from '@prisma/client'
+import type { Line, Product, Ingredient, ProductImage, ProductVariant } from '@prisma/client'
 import { s } from '../_components/styles'
 import { ImageUploader } from './_ImageUploader'
 import { ToggleField } from '../_components/ToggleField'
 import { IngredientsEditor } from './_IngredientsEditor'
+import { VariantsEditor } from './_VariantsEditor'
 import { ConfirmSaveButton, ConfirmDeleteButton } from '../_components/ConfirmButtons'
 
 interface Props {
   lines: Line[]
   action: (fd: FormData) => Promise<void>
-  product?: Product & { line: Line; ingredients: Ingredient[]; productImages: Pick<ProductImage, 'key'>[] }
+  product?: Product & { line: Line; ingredients: Ingredient[]; productImages: Pick<ProductImage, 'key'>[]; variants: ProductVariant[] }
   deleteAction?: (fd: FormData) => Promise<void>
 }
 
@@ -85,6 +86,18 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
               </div>
             </div>
 
+            <div style={s.cardPad}>
+              <p style={s.cardTitle}>Varianti · Formati acquistabili</p>
+              <VariantsEditor defaultValue={product?.variants.map(v => ({
+                label: v.label,
+                quantity: v.quantity,
+                price: v.price,
+                comparePrice: v.comparePrice,
+                b2bPrice: v.b2bPrice,
+                stock: v.stock,
+              })) ?? []} />
+            </div>
+
             {/* Immagini */}
             <div style={s.cardPad}>
               <p style={s.cardTitle}>Immagini</p>
@@ -113,6 +126,9 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
           <div style={s.stack(16)}>
             <div style={s.cardPad}>
               <p style={s.cardTitle}>Prezzo & Stock</p>
+              <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '-0.375rem 0 0.875rem' }}>
+                Usati solo se il prodotto non ha varianti (vedi sotto).
+              </p>
               <div style={s.stack(12)}>
                 <Field label="Prezzo (€)" name="price" type="number" required defaultValue={product?.price} placeholder="0.00" />
                 <Field label="Prezzo barrato (€)" name="comparePrice" type="number" defaultValue={product?.comparePrice} placeholder="0.00" />

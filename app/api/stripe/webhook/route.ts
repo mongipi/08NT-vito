@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const meta = pi.metadata
 
     try {
-      const items: { slug?: string; name: string; unitPrice: number; qty: number }[] =
+      const items: { slug?: string; name: string; unitPrice: number; qty: number; variantId?: string | null; variantLabel?: string | null }[] =
         JSON.parse(meta.items ?? '[]')
       const addr: ShippingAddress = JSON.parse(meta.shippingAddress ?? '{}')
       const discountAmount    = Number(meta.discountAmount    ?? 0)
@@ -72,6 +72,7 @@ export async function POST(req: NextRequest) {
             create: items.map((i) => ({
               slug: i.slug ?? null,
               name: i.name,
+              variantLabel: i.variantLabel ?? null,
               unitPrice: Number(i.unitPrice),
               qty: Number(i.qty),
             })),
@@ -127,14 +128,21 @@ export async function POST(req: NextRequest) {
       }
 
       await Promise.all([
-        ...items
-          .filter((i) => i.slug)
-          .map((i) =>
-            prisma.product.update({
-              where: { slug: i.slug! },
+        ...items.map((i) => {
+          if (i.variantId) {
+            return prisma.productVariant.update({
+              where: { id: i.variantId },
               data: { stock: { decrement: i.qty } },
             })
-          ),
+          }
+          if (i.slug) {
+            return prisma.product.update({
+              where: { slug: i.slug },
+              data: { stock: { decrement: i.qty } },
+            })
+          }
+          return Promise.resolve()
+        }),
         meta.couponCode
           ? prisma.discount.update({
               where: { code: meta.couponCode.toUpperCase() },

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getProductBySlug } from '@/services/products'
 import { ProductGallery } from '@/components/ui/ProductGallery'
-import { AddToCartButton } from '@/components/ui/AddToCartButton'
+import { ProductPurchasePanel } from '@/components/ui/ProductPurchasePanel'
 import type { Metadata } from 'next'
 import type { ProductImages } from '@/types'
 
@@ -159,29 +159,18 @@ export default async function ProductPage({ params }: Props) {
             ))}
           </div>
 
-          {/* Prezzo + Aggiungi al carrello */}
-          <div style={{ marginTop: '1.75rem', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-              <span style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.625rem)', fontWeight: 700, color: line.color }}>
-                €{product.price.toFixed(2)}
-              </span>
-              {product.comparePrice && (
-                <span style={{ fontSize: '1rem', color: `${line.color}55`, textDecoration: 'line-through', fontWeight: 400 }}>
-                  €{product.comparePrice.toFixed(2)}
-                </span>
-              )}
-            </div>
-            <AddToCartButton
-              item={{
-                productId: product.id,
-                slug: product.slug,
-                name: product.name,
-                price: product.price,
-                comparePrice: product.comparePrice ?? undefined,
-                image: images.fronte,
-              }}
-              color={line.color}
+          {/* Prezzo + varianti + Aggiungi al carrello */}
+          <div style={{ marginTop: '1.75rem' }}>
+            <ProductPurchasePanel
+              productId={product.id}
+              slug={product.slug}
+              name={product.name}
+              image={images.fronte}
+              price={product.price}
+              comparePrice={product.comparePrice}
               stock={product.stock}
+              variants={product.variants}
+              color={line.color}
             />
           </div>
         </div>

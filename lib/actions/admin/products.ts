@@ -44,6 +44,33 @@ async function syncIngredients(productId: string, formData: FormData) {
   }
 }
 
+async function syncVariants(productId: string, formData: FormData) {
+  interface RawVariant {
+    label: string
+    quantity: number
+    price: number
+    comparePrice?: number | null
+    b2bPrice?: number | null
+    stock: number
+  }
+  const raw: RawVariant[] = JSON.parse((formData.get('variants') as string) || '[]')
+  await prisma.productVariant.deleteMany({ where: { productId } })
+  if (raw.length > 0) {
+    await prisma.productVariant.createMany({
+      data: raw.map((v, i) => ({
+        productId,
+        label: v.label,
+        quantity: v.quantity,
+        price: v.price,
+        comparePrice: v.comparePrice ?? null,
+        b2bPrice: v.b2bPrice ?? null,
+        stock: v.stock ?? 0,
+        order: i,
+      })),
+    })
+  }
+}
+
 function slugify(name: string) {
   return name
     .toLowerCase()
@@ -87,6 +114,7 @@ export async function createProduct(formData: FormData) {
   await Promise.all([
     saveImages(product.id, formData),
     syncIngredients(product.id, formData),
+    syncVariants(product.id, formData),
   ])
   revalidatePath('/admin/prodotti')
   redirect('/admin/prodotti')
@@ -104,6 +132,7 @@ export async function updateProduct(formData: FormData) {
   await Promise.all([
     saveImages(id, formData),
     syncIngredients(id, formData),
+    syncVariants(id, formData),
   ])
   revalidatePath('/admin/prodotti')
   revalidatePath(`/admin/prodotti/${id}`)
