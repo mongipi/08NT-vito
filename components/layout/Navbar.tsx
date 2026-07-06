@@ -11,29 +11,35 @@ import { cn } from '@/lib/utils'
 import { SOCIAL_LINKS } from '@/lib/social-links'
 import { useCart } from '@/contexts/CartContext'
 import { CartDrawer } from '@/components/ui/CartDrawer'
+import { useLocale, type Locale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
 const NAV_LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/prodotti', label: 'PRODOTTI & SHOP' },
-  { href: '/metodo', label: 'Qualita 08' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/lavora-con-noi', label: 'Lavora con noi' },
-  { href: '/contatti', label: 'Contatti' },
+  { href: '/', key: 'nav_home' },
+  { href: '/prodotti', key: 'nav_products' },
+  { href: '/metodo', key: 'nav_quality' },
+  { href: '/blog', key: 'nav_blog' },
+  { href: '/lavora-con-noi', key: 'nav_careers' },
+  { href: '/contatti', key: 'nav_contact' },
 ] as const
 
+// Solo IT/EN sono attive: hanno contenuti tradotti. Le altre restano visibili
+// ma disabilitate ("Prossimamente"), pronte per quando avranno traduzioni.
 const LANG_FLAGS = [
-  { code: 'it', label: 'Italiano', src: '/v61/flags/it.png' },
-  { code: 'en', label: 'English', src: '/v61/flags/gb.png' },
-  { code: 'es', label: 'Espanol', src: '/v61/flags/es.png' },
-  { code: 'fr', label: 'Francais', src: '/v61/flags/fr.png' },
-  { code: 'de', label: 'Deutsch', src: '/v61/flags/de.png' },
-  { code: 'pt', label: 'Portugues', src: '/v61/flags/pt.png' },
+  { code: 'it', label: 'Italiano', src: '/v61/flags/it.png', enabled: true },
+  { code: 'en', label: 'English', src: '/v61/flags/gb.png', enabled: true },
+  { code: 'es', label: 'Espanol', src: '/v61/flags/es.png', enabled: false },
+  { code: 'fr', label: 'Francais', src: '/v61/flags/fr.png', enabled: false },
+  { code: 'de', label: 'Deutsch', src: '/v61/flags/de.png', enabled: false },
+  { code: 'pt', label: 'Portugues', src: '/v61/flags/pt.png', enabled: false },
 ] as const
 
 function CartButton({ size = 18, onOpen }: { size?: number; onOpen: () => void }) {
   const cart = useCart()
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   return (
-    <button onClick={onOpen} aria-label="Carrello" className="v61-icon-button">
+    <button onClick={onOpen} aria-label={t('nav_cart')} className="v61-icon-button">
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="9" cy="20" r="1.35" />
         <circle cx="18" cy="20" r="1.35" />
@@ -47,6 +53,8 @@ function CartButton({ size = 18, onOpen }: { size?: number; onOpen: () => void }
 
 function UserMenu() {
   const { data: session, status } = useSession()
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -67,7 +75,7 @@ function UserMenu() {
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
           <circle cx="12" cy="7" r="4" />
         </svg>
-        Accedi
+        {t('nav_login')}
       </Link>
     )
   }
@@ -76,7 +84,7 @@ function UserMenu() {
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen((o) => !o)} aria-label="Menu utente" className="v61-user-button">
+      <button onClick={() => setOpen((o) => !o)} aria-label={t('nav_account')} className="v61-user-button">
         {initials}
       </button>
       {open && (
@@ -85,37 +93,21 @@ function UserMenu() {
             <p>{session.user.name ?? 'Utente'}</p>
             <span>{session.user.email}</span>
           </div>
-          <Link href="/account" onClick={() => setOpen(false)}>Il mio account</Link>
-          {session.user.role === 'admin' && <Link href="/admin" onClick={() => setOpen(false)}>Pannello admin</Link>}
-          <button onClick={() => { setOpen(false); signOut({ callbackUrl: '/' }) }}>Esci</button>
+          <Link href="/account" onClick={() => setOpen(false)}>{t('nav_account')}</Link>
+          {session.user.role === 'admin' && <Link href="/admin" onClick={() => setOpen(false)}>{t('nav_admin')}</Link>}
+          <button onClick={() => { setOpen(false); signOut({ callbackUrl: '/' }) }}>{t('nav_logout')}</button>
         </div>
       )}
     </div>
   )
 }
 
-function StaticLanguageFlags() {
-  return (
-    <div className="v61-language" aria-label="Selettore lingua grafico">
-      <button type="button" aria-label="Lingua corrente Italiano" className="v61-language-current">
-        <Image src="/v61/flags/it.png" alt="Italiano" width={24} height={17} />
-      </button>
-      <div className="v61-language-options" aria-hidden="true">
-        {LANG_FLAGS.map((flag) => (
-          <button key={flag.code} type="button" tabIndex={-1} aria-label={flag.label}>
-            <Image src={flag.src} alt={flag.label} width={22} height={16} />
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function MobileHeaderFlags() {
+function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
+  const { locale, setLocale } = useLocale()
+  const t = useTranslation(locale)
   const [open, setOpen] = useState(false)
-  const [selectedCode, setSelectedCode] = useState<(typeof LANG_FLAGS)[number]['code']>('it')
   const ref = useRef<HTMLDivElement>(null)
-  const selected = LANG_FLAGS.find((flag) => flag.code === selectedCode) ?? LANG_FLAGS[0]
+  const selected = LANG_FLAGS.find((flag) => flag.code === locale) ?? LANG_FLAGS[0]
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -126,11 +118,11 @@ function MobileHeaderFlags() {
   }, [])
 
   return (
-    <div ref={ref} className="v61-mobile-header-flags" aria-label="Selettore lingua grafico">
+    <div ref={ref} className={cn('v61-language-switcher', compact && 'compact')} aria-label={t('lang_selector')}>
       <button
         type="button"
-        className="v61-mobile-language-current"
-        aria-label={`Lingua selezionata ${selected.label}`}
+        className="v61-language-current"
+        aria-label={`${t('lang_selector')}: ${selected.label}`}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
@@ -138,17 +130,20 @@ function MobileHeaderFlags() {
         <span aria-hidden="true">▾</span>
       </button>
       {open && (
-        <div className="v61-mobile-language-options" role="listbox" aria-label="Lingue disponibili">
+        <div className="v61-language-options" role="listbox" aria-label={t('lang_selector')}>
           {LANG_FLAGS.map((flag) => (
             <button
               key={flag.code}
               type="button"
-              className={cn(flag.code === selectedCode && 'active')}
-              aria-label={flag.label}
-              aria-selected={flag.code === selectedCode}
+              disabled={!flag.enabled}
+              className={cn(flag.code === locale && 'active', !flag.enabled && 'disabled')}
+              aria-label={flag.enabled ? flag.label : `${flag.label} — ${t('lang_coming_soon')}`}
+              aria-selected={flag.code === locale}
+              title={flag.enabled ? flag.label : `${flag.label} — ${t('lang_coming_soon')}`}
               role="option"
               onClick={() => {
-                setSelectedCode(flag.code)
+                if (!flag.enabled) return
+                setLocale(flag.code as Locale)
                 setOpen(false)
               }}
             >
@@ -163,20 +158,22 @@ function MobileHeaderFlags() {
 
 function MobileAuth({ onClose }: { onClose: () => void }) {
   const { data: session, status } = useSession()
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   if (status === 'loading') return null
 
   if (!session) return (
     <div className="v61-mobile-auth">
-      <Link href="/login" onClick={onClose}>Accedi</Link>
-      <Link href="/registrati" onClick={onClose}>Registrati</Link>
+      <Link href="/login" onClick={onClose}>{t('nav_login')}</Link>
+      <Link href="/registrati" onClick={onClose}>{t('nav_register')}</Link>
     </div>
   )
 
   return (
     <div className="v61-mobile-auth">
-      <Link href="/account" onClick={onClose}>Il mio account</Link>
-      {session.user.role === 'admin' && <Link href="/admin" onClick={onClose}>Pannello admin</Link>}
-      <button onClick={() => { onClose(); signOut({ callbackUrl: '/' }) }}>Esci</button>
+      <Link href="/account" onClick={onClose}>{t('nav_account')}</Link>
+      {session.user.role === 'admin' && <Link href="/admin" onClick={onClose}>{t('nav_admin')}</Link>}
+      <button onClick={() => { onClose(); signOut({ callbackUrl: '/' }) }}>{t('nav_logout')}</button>
     </div>
   )
 }
@@ -193,6 +190,8 @@ export function Navbar() {
     return () => window.removeEventListener('cart:open', open)
   }, [])
 
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href)
 
   return (
@@ -202,10 +201,10 @@ export function Navbar() {
           <Logo variant="dark" height={70} className="v61-header-logo" />
 
           <ul className="v61-menu" role="list">
-            {NAV_LINKS.map(({ href, label }) => (
+            {NAV_LINKS.map(({ href, key }) => (
               <li key={href}>
                 <Link href={href} className={cn(isActive(href) && 'active')} aria-current={isActive(href) ? 'page' : undefined}>
-                  {label}
+                  {t(key)}
                 </Link>
               </li>
             ))}
@@ -217,13 +216,13 @@ export function Navbar() {
                 <Image src={`/v61/icons/${label.toLowerCase()}.svg`} alt="" width={17} height={17} />
               </a>
             ))}
-            <StaticLanguageFlags />
+            <LanguageSwitcher />
             <CartButton onOpen={() => setCartOpen(true)} />
             <UserMenu />
           </div>
 
           <div className="v61-mobile-actions">
-            <MobileHeaderFlags />
+            <LanguageSwitcher compact />
             <CartButton size={20} onOpen={() => { setMobileOpen(false); setCartOpen(true) }} />
             <button
               className="v61-mobile-toggle"
@@ -248,7 +247,7 @@ export function Navbar() {
         aria-label="Menu mobile"
       >
         <div className="v61-mobile-drawer-head">
-          <span>Menu</span>
+          <span>{t('nav_menu')}</span>
           <button type="button" onClick={() => setMobileOpen(false)} aria-label="Chiudi menu">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -258,9 +257,9 @@ export function Navbar() {
         </div>
         <div className="v61-mobile-drawer-body">
           <div className="v61-mobile-drawer-nav">
-            {NAV_LINKS.map(({ href, label }) => (
+            {NAV_LINKS.map(({ href, key }) => (
               <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={cn(isActive(href) && 'active')}>
-                {label}
+                {t(key)}
               </Link>
             ))}
           </div>

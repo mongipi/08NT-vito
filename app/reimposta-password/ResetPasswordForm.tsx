@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -21,6 +23,8 @@ const labelStyle: React.CSSProperties = {
 export function ResetPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const token = searchParams.get('token')
 
   const [password, setPassword] = useState('')
@@ -35,10 +39,10 @@ export function ResetPasswordForm() {
         border: '1px solid #fecaca', textAlign: 'center',
       }}>
         <p style={{ fontSize: '0.875rem', color: '#dc2626', marginBottom: '0.75rem' }}>
-          Link non valido.
+          {t('reset_invalid_link')}
         </p>
         <Link href="/password-dimenticata" style={{ fontSize: '0.8125rem', color: 'var(--forest)', fontWeight: 500 }}>
-          Richiedi un nuovo link →
+          {t('reset_request_new_link')}
         </Link>
       </div>
     )
@@ -49,7 +53,7 @@ export function ResetPasswordForm() {
     setError(null)
 
     if (password !== confirmPassword) {
-      setError('Le password non coincidono')
+      setError(t('reset_password_mismatch'))
       return
     }
 
@@ -62,7 +66,7 @@ export function ResetPasswordForm() {
 
     if (!res.ok) {
       const data = await res.json()
-      setError(data.error ?? 'Errore durante il reset della password')
+      setError(data.error ?? t('reset_generic_error'))
       setLoading(false)
       return
     }
@@ -73,21 +77,21 @@ export function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div>
-        <label style={labelStyle}>Nuova password</label>
+        <label style={labelStyle}>{t('reset_new_password')}</label>
         <input
           type="password" required minLength={8} autoComplete="new-password"
           value={password} onChange={e => setPassword(e.target.value)}
-          placeholder="Minimo 8 caratteri"
+          placeholder={t('register_password_placeholder')}
           style={inputStyle}
         />
       </div>
 
       <div>
-        <label style={labelStyle}>Conferma nuova password</label>
+        <label style={labelStyle}>{t('reset_confirm_new_password')}</label>
         <input
           type="password" required minLength={8} autoComplete="new-password"
           value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-          placeholder="Ripeti la password"
+          placeholder={t('register_confirm_password_placeholder')}
           style={inputStyle}
         />
       </div>
@@ -108,7 +112,7 @@ export function ResetPasswordForm() {
           transition: 'background 0.2s',
         }}
       >
-        {loading ? 'Salvataggio…' : 'Reimposta password'}
+        {loading ? t('reset_submitting') : t('reset_submit')}
       </button>
     </form>
   )

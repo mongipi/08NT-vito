@@ -119,6 +119,23 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
               <Field label="Elenco ingredienti" name="ingredientsText" defaultValue={product?.ingredientsText} rows={4} placeholder="es. Agnocasto, Vitamina B6, Magnesio, ..." />
             </div>
 
+            {/* Traduzione inglese */}
+            <div style={s.cardPad}>
+              <p style={s.cardTitle}>Traduzione inglese (EN)</p>
+              <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '-0.375rem 0 0.875rem' }}>
+                Mostrata sul sito quando il cliente seleziona EN. Se lasci un campo vuoto, resta visibile l&apos;italiano.
+              </p>
+              <div style={s.stack(14)}>
+                <Field label="Nome prodotto (EN)" name="nameEn" defaultValue={product?.nameEn} />
+                <Field label="Descrizione breve (EN)" name="shortDescriptionEn" defaultValue={product?.shortDescriptionEn} rows={2} />
+                <Field label="Descrizione lunga (EN)" name="longDescriptionEn" defaultValue={product?.longDescriptionEn} rows={5} />
+                <Field label="Uso consigliato (EN)" name="usageEn" defaultValue={product?.usageEn} rows={2} />
+                <Field label="Target (EN)" name="targetEn" defaultValue={product?.targetEn} rows={2} />
+                <Field label="Descrizione formato (EN)" name="formatEn" defaultValue={product?.formatEn} />
+                <Field label="Elenco ingredienti (EN)" name="ingredientsTextEn" defaultValue={product?.ingredientsTextEn} rows={4} />
+              </div>
+            </div>
+
             <div style={s.cardPad}>
               <p style={s.cardTitle}>SEO</p>
               <div style={s.stack(14)}>

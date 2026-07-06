@@ -11,6 +11,9 @@ import { formatPrice } from '@/lib/cart'
 import Link from 'next/link'
 import { COUNTRIES, DOMESTIC_COUNTRIES, ISLAND_PROVINCES } from '@/lib/countries'
 import { PosteLockerPicker } from './PosteLockerPicker'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
+import { richText } from '@/lib/i18n/richText'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
@@ -26,13 +29,6 @@ const labelStyle: React.CSSProperties = {
   letterSpacing: '0.1em', textTransform: 'uppercase',
   color: 'var(--ink-3)', marginBottom: '0.375rem',
 }
-
-const ADDRESS_FIELDS = [
-  { key: 'address',    label: 'Indirizzo',  required: true,  placeholder: 'Via e numero civico' },
-  { key: 'city',       label: 'Città',      required: true,  placeholder: 'Città di consegna' },
-  { key: 'postalCode', label: 'CAP',        required: true,  placeholder: 'Codice postale' },
-  { key: 'province',   label: 'Provincia',  required: false, placeholder: 'Sigla provincia' },
-] as const
 
 const PHONE_PREFIXES = [
   { country: 'Italia', code: '+39', flag: '🇮🇹' },
@@ -67,10 +63,20 @@ export function CheckoutClient({
   shippingPrice?: number
   foreignSurcharge?: number
 }) {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
+
+  const ADDRESS_FIELDS = [
+    { key: 'address',    label: t('checkout_address'),    required: true,  placeholder: t('checkout_address_placeholder') },
+    { key: 'city',       label: t('checkout_city'),        required: true,  placeholder: t('checkout_city_placeholder') },
+    { key: 'postalCode', label: t('checkout_postal_code'), required: true,  placeholder: t('checkout_postal_code_placeholder') },
+    { key: 'province',   label: t('checkout_province'),    required: false, placeholder: t('checkout_province_placeholder') },
+  ] as const
+
   const PAY_METHODS: { value: PayMethod; label: string; desc: string }[] = [
-    { value: 'stripe',       label: 'Carta / PayPal / Google Pay / Apple Pay', desc: 'Pagamento online sicuro con Stripe' },
-    { value: 'bonifico',     label: 'Bonifico bancario',                        desc: 'Riceverai IBAN e causale dopo la conferma' },
-    { value: 'contrassegno', label: 'Contrassegno',                             desc: `Paghi in contanti al corriere (+€${codSurcharge.toFixed(2)} supplemento)` },
+    { value: 'stripe',       label: t('checkout_pay_stripe_label'), desc: t('checkout_pay_stripe_desc') },
+    { value: 'bonifico',     label: t('checkout_pay_bank_label'),   desc: t('checkout_pay_bank_desc') },
+    { value: 'contrassegno', label: t('checkout_pay_cod_label'),    desc: t('checkout_pay_cod_desc', { amount: `€${codSurcharge.toFixed(2)}` }) },
   ]
   const { data: session } = useSession()
   const cart = useCart()
@@ -130,11 +136,11 @@ export function CheckoutClient({
 
   async function handleProceed() {
     if (!session && !guestEmail.includes('@')) {
-      setProceedError('Inserisci un indirizzo email valido per continuare.')
+      setProceedError(t('checkout_error_email'))
       return
     }
     if (!session && createAccount && guestPassword.length < 8) {
-      setProceedError('La password deve essere di almeno 8 caratteri.')
+      setProceedError(t('checkout_error_password'))
       return
     }
     setProceedError(null)
@@ -181,9 +187,9 @@ export function CheckoutClient({
   if (cart.itemCount === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'white', border: '1px solid var(--border)' }}>
-        <p style={{ fontSize: '0.875rem', color: 'var(--ink-3)', marginBottom: '1.5rem', fontWeight: 300 }}>Il carrello è vuoto.</p>
+        <p style={{ fontSize: '0.875rem', color: 'var(--ink-3)', marginBottom: '1.5rem', fontWeight: 300 }}>{t('checkout_empty')}</p>
         <Link href="/prodotti" style={{ display: 'inline-block', padding: '0.75rem 1.5rem', background: 'var(--forest)', color: 'white', textDecoration: 'none', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-          Vai ai prodotti
+          {t('checkout_go_to_products')}
         </Link>
       </div>
     )
@@ -196,7 +202,7 @@ export function CheckoutClient({
         {step === 'address' && (
           <div style={{ background: 'white', border: '1px solid var(--border)', padding: '1.75rem' }}>
             <h2 style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)', marginBottom: '1.5rem' }}>
-              Dati e spedizione
+              {t('checkout_data_shipping')}
             </h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -204,18 +210,18 @@ export function CheckoutClient({
               {/* Email ospite */}
               {!session && (
                 <div>
-                  <label style={labelStyle}>Email<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                  <label style={labelStyle}>{t('checkout_email')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
                   <input
                     type="email"
                     value={guestEmail}
                     onChange={e => setGuestEmail(e.target.value)}
                     style={inputStyle}
-                    placeholder="cliente@esempio.test"
+                    placeholder={t('checkout_email_placeholder')}
                     required
                   />
                   <p style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', marginTop: '0.375rem' }}>
-                    Riceverai la conferma dell&apos;ordine a questo indirizzo.{' '}
-                    <a href="/login" style={{ color: 'var(--forest)', textDecoration: 'underline' }}>Hai già un account?</a>
+                    {t('checkout_email_note')}{' '}
+                    <a href="/login" style={{ color: 'var(--forest)', textDecoration: 'underline' }}>{t('checkout_already_account')}</a>
                   </p>
                 </div>
               )}
@@ -230,21 +236,21 @@ export function CheckoutClient({
                       onChange={e => setCreateAccount(e.target.checked)}
                       style={{ accentColor: 'var(--forest)', width: '1rem', height: '1rem' }}
                     />
-                    Crea un account con questi dati
+                    {t('checkout_create_account')}
                   </label>
                   {createAccount && (
                     <div style={{ marginTop: '0.75rem' }}>
-                      <label style={labelStyle}>Password<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                      <label style={labelStyle}>{t('checkout_password')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
                       <input
                         type="password"
                         value={guestPassword}
                         onChange={e => setGuestPassword(e.target.value)}
                         style={inputStyle}
-                        placeholder="Crea una password sicura"
+                        placeholder={t('checkout_password_placeholder')}
                         autoComplete="new-password"
                       />
                       <p style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', marginTop: '0.375rem' }}>
-                        Potrai accedere con questa email e password per consultare i tuoi ordini.
+                        {t('checkout_password_note')}
                       </p>
                     </div>
                   )}
@@ -255,20 +261,20 @@ export function CheckoutClient({
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 {(['firstName', 'lastName'] as const).map((key) => (
                   <div key={key}>
-                    <label style={labelStyle}>{key === 'firstName' ? 'Nome' : 'Cognome'}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                    <input type="text" value={address[key]} onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))} style={inputStyle} placeholder={key === 'firstName' ? 'Nome intestatario' : 'Cognome intestatario'} />
+                    <label style={labelStyle}>{key === 'firstName' ? t('checkout_first_name') : t('checkout_last_name')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                    <input type="text" value={address[key]} onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))} style={inputStyle} placeholder={key === 'firstName' ? t('checkout_first_name_placeholder') : t('checkout_last_name_placeholder')} />
                   </div>
                 ))}
               </div>
 
               {/* Documento fiscale */}
               <div style={{ paddingTop: '0.25rem' }}>
-                <p style={{ ...labelStyle, marginBottom: '0.625rem' }}>Documento fiscale</p>
+                <p style={{ ...labelStyle, marginBottom: '0.625rem' }}>{t('checkout_fiscal_doc')}</p>
                 <div style={{ display: 'flex', gap: '1.5rem' }}>
                   {([
-                    { value: 'nessuno',   label: 'Nessun documento' },
-                    { value: 'scontrino', label: 'Scontrino' },
-                    { value: 'fattura',   label: 'Fattura' },
+                    { value: 'nessuno',   label: t('checkout_doc_none') },
+                    { value: 'scontrino', label: t('checkout_doc_receipt') },
+                    { value: 'fattura',   label: t('checkout_doc_invoice') },
                   ] as { value: DocType; label: string }[]).map(opt => (
                     <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--ink)', cursor: 'pointer' }}>
                       <input
@@ -284,32 +290,32 @@ export function CheckoutClient({
 
                 {docType === 'scontrino' && (
                   <div style={{ marginTop: '0.75rem' }}>
-                    <label style={labelStyle}>Codice fiscale <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
-                    <input type="text" value={address.fiscalCode} onChange={e => setAddress(a => ({ ...a, fiscalCode: e.target.value }))} style={inputStyle} placeholder="Codice fiscale se richiesto" />
+                    <label style={labelStyle}>{t('checkout_fiscal_code_optional')}</label>
+                    <input type="text" value={address.fiscalCode} onChange={e => setAddress(a => ({ ...a, fiscalCode: e.target.value }))} style={inputStyle} placeholder={t('checkout_fiscal_code_placeholder')} />
                   </div>
                 )}
 
                 {docType === 'fattura' && (
                   <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <div>
-                      <label style={labelStyle}>Ragione sociale<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                      <input type="text" value={address.company} onChange={e => setAddress(a => ({ ...a, company: e.target.value }))} style={inputStyle} placeholder="Nome azienda" />
+                      <label style={labelStyle}>{t('checkout_company')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                      <input type="text" value={address.company} onChange={e => setAddress(a => ({ ...a, company: e.target.value }))} style={inputStyle} placeholder={t('checkout_company_placeholder')} />
                     </div>
                     <div>
-                      <label style={labelStyle}>C. FISCALE o Partita IVA<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                      <input type="text" value={address.vatNumber} onChange={e => setAddress(a => ({ ...a, vatNumber: e.target.value }))} style={inputStyle} placeholder="Codice fiscale o partita IVA" />
+                      <label style={labelStyle}>{t('checkout_vat')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                      <input type="text" value={address.vatNumber} onChange={e => setAddress(a => ({ ...a, vatNumber: e.target.value }))} style={inputStyle} placeholder={t('checkout_vat_placeholder')} />
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                       <div>
-                        <label style={labelStyle}>Codice SDI</label>
-                        <input type="text" value={address.sdiCode} onChange={e => setAddress(a => ({ ...a, sdiCode: e.target.value }))} style={inputStyle} placeholder="Codice SDI" maxLength={7} />
+                        <label style={labelStyle}>{t('checkout_sdi_code')}</label>
+                        <input type="text" value={address.sdiCode} onChange={e => setAddress(a => ({ ...a, sdiCode: e.target.value }))} style={inputStyle} placeholder={t('checkout_sdi_code')} maxLength={7} />
                       </div>
                       <div>
-                        <label style={labelStyle}>PEC</label>
+                        <label style={labelStyle}>{t('checkout_pec')}</label>
                         <input type="email" value={address.pec} onChange={e => setAddress(a => ({ ...a, pec: e.target.value }))} style={inputStyle} placeholder="pec@azienda.test" />
                       </div>
                     </div>
-                    <p style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', margin: 0 }}>Inserisci almeno Codice SDI oppure PEC.</p>
+                    <p style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', margin: 0 }}>{t('checkout_sdi_or_pec_note')}</p>
                   </div>
                 )}
               </div>
@@ -326,13 +332,13 @@ export function CheckoutClient({
               ))}
 
               <div>
-                <label style={labelStyle}>Telefono <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
+                <label style={labelStyle}>{t('checkout_phone_optional')}</label>
                 <div className="checkout-phone-row">
                   <select
                     value={phonePrefix}
                     onChange={e => setPhonePrefix(e.target.value)}
                     style={{ ...inputStyle, cursor: 'pointer', paddingLeft: '0.75rem', paddingRight: '0.75rem' }}
-                    aria-label="Prefisso telefonico"
+                    aria-label={t('checkout_phone_prefix_label')}
                   >
                     {PHONE_PREFIXES.map(prefix => (
                       <option key={`${prefix.code}-${prefix.country}`} value={prefix.code}>
@@ -345,7 +351,7 @@ export function CheckoutClient({
                     value={address.phone}
                     onChange={e => setAddress(a => ({ ...a, phone: e.target.value }))}
                     style={inputStyle}
-                    placeholder="Numero di telefono"
+                    placeholder={t('checkout_phone_placeholder')}
                     inputMode="tel"
                   />
                 </div>
@@ -353,7 +359,7 @@ export function CheckoutClient({
 
               {/* Paese */}
               <div>
-                <label style={labelStyle}>Paese di spedizione</label>
+                <label style={labelStyle}>{t('checkout_shipping_country')}</label>
                 <select
                   value={address.country}
                   onChange={e => setAddress(a => ({ ...a, country: e.target.value }))}
@@ -363,7 +369,7 @@ export function CheckoutClient({
                 </select>
                 {isEstero && (
                   <p style={{ fontSize: '0.6875rem', color: '#b45309', marginTop: '0.375rem' }}>
-                    Supplemento spedizione estera: +€{foreignSurcharge.toFixed(2)}
+                    {t('checkout_foreign_surcharge_note', { amount: `€${foreignSurcharge.toFixed(2)}` })}
                   </p>
                 )}
               </div>
@@ -377,48 +383,48 @@ export function CheckoutClient({
                     onChange={e => setBillingDifferent(e.target.checked)}
                     style={{ accentColor: 'var(--forest)', width: '1rem', height: '1rem' }}
                   />
-                  L&apos;indirizzo di fatturazione è diverso da quello di spedizione
+                  {t('checkout_billing_different')}
                 </label>
 
                 {billingDifferent && (
                   <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem', background: '#f9faf8', border: '1px solid var(--border)' }}>
-                    <p style={{ ...labelStyle, margin: 0 }}>Indirizzo di fatturazione</p>
+                    <p style={{ ...labelStyle, margin: 0 }}>{t('checkout_billing_address_title')}</p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                       {(['firstName', 'lastName'] as const).map(k => (
                         <div key={k}>
-                          <label style={labelStyle}>{k === 'firstName' ? 'Nome' : 'Cognome'}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                          <input type="text" value={billing[k]} onChange={e => setBilling(b => ({ ...b, [k]: e.target.value }))} style={inputStyle} placeholder={k === 'firstName' ? 'Nome fatturazione' : 'Cognome fatturazione'} />
+                          <label style={labelStyle}>{k === 'firstName' ? t('checkout_first_name') : t('checkout_last_name')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                          <input type="text" value={billing[k]} onChange={e => setBilling(b => ({ ...b, [k]: e.target.value }))} style={inputStyle} placeholder={k === 'firstName' ? t('checkout_billing_first_name_placeholder') : t('checkout_billing_last_name_placeholder')} />
                         </div>
                       ))}
                     </div>
                     <div>
-                      <label style={labelStyle}>Azienda <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
-                      <input type="text" value={billing.company} onChange={e => setBilling(b => ({ ...b, company: e.target.value }))} style={inputStyle} placeholder="Nome azienda" />
+                      <label style={labelStyle}>{t('checkout_company_optional')}</label>
+                      <input type="text" value={billing.company} onChange={e => setBilling(b => ({ ...b, company: e.target.value }))} style={inputStyle} placeholder={t('checkout_company_placeholder')} />
                     </div>
                     <div>
-                      <label style={labelStyle}>C. FISCALE o Partita IVA <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
-                      <input type="text" value={billing.vatNumber || billing.fiscalCode} onChange={e => setBilling(b => ({ ...b, vatNumber: e.target.value }))} style={inputStyle} placeholder="Codice fiscale o partita IVA" />
+                      <label style={labelStyle}>{t('checkout_vat_optional')}</label>
+                      <input type="text" value={billing.vatNumber || billing.fiscalCode} onChange={e => setBilling(b => ({ ...b, vatNumber: e.target.value }))} style={inputStyle} placeholder={t('checkout_vat_placeholder')} />
                     </div>
                     <div>
-                      <label style={labelStyle}>Indirizzo<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                      <input type="text" value={billing.address} onChange={e => setBilling(b => ({ ...b, address: e.target.value }))} style={inputStyle} placeholder="Via e numero civico" />
+                      <label style={labelStyle}>{t('checkout_address')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                      <input type="text" value={billing.address} onChange={e => setBilling(b => ({ ...b, address: e.target.value }))} style={inputStyle} placeholder={t('checkout_address_placeholder')} />
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
                       <div>
-                        <label style={labelStyle}>CAP<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                        <input type="text" value={billing.postalCode} onChange={e => setBilling(b => ({ ...b, postalCode: e.target.value }))} style={inputStyle} placeholder="Codice postale" />
+                        <label style={labelStyle}>{t('checkout_postal_code')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                        <input type="text" value={billing.postalCode} onChange={e => setBilling(b => ({ ...b, postalCode: e.target.value }))} style={inputStyle} placeholder={t('checkout_postal_code_placeholder')} />
                       </div>
                       <div>
-                        <label style={labelStyle}>Città<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                        <input type="text" value={billing.city} onChange={e => setBilling(b => ({ ...b, city: e.target.value }))} style={inputStyle} placeholder="Città fatturazione" />
+                        <label style={labelStyle}>{t('checkout_city')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
+                        <input type="text" value={billing.city} onChange={e => setBilling(b => ({ ...b, city: e.target.value }))} style={inputStyle} placeholder={t('checkout_billing_city_placeholder')} />
                       </div>
                       <div>
-                        <label style={labelStyle}>Prov.</label>
-                        <input type="text" value={billing.province} onChange={e => setBilling(b => ({ ...b, province: e.target.value }))} style={inputStyle} placeholder="Sigla" maxLength={2} />
+                        <label style={labelStyle}>{t('checkout_province_short')}</label>
+                        <input type="text" value={billing.province} onChange={e => setBilling(b => ({ ...b, province: e.target.value }))} style={inputStyle} placeholder={t('checkout_province_placeholder')} maxLength={2} />
                       </div>
                     </div>
                     <div>
-                      <label style={labelStyle}>Paese</label>
+                      <label style={labelStyle}>{t('checkout_country')}</label>
                       <select value={billing.country} onChange={e => setBilling(b => ({ ...b, country: e.target.value }))} style={{ ...inputStyle, cursor: 'pointer' }}>
                         {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
                       </select>
@@ -436,17 +442,17 @@ export function CheckoutClient({
                     onChange={e => setSaveForNextTime(e.target.checked)}
                     style={{ accentColor: 'var(--forest)', width: '1rem', height: '1rem' }}
                   />
-                  Salva i dati per il prossimo ordine
+                  {t('checkout_save_next_time')}
                 </label>
               )}
 
               {/* Note spedizione */}
               <div>
-                <label style={labelStyle}>Note per la spedizione <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
+                <label style={labelStyle}>{t('checkout_shipping_notes')}</label>
                 <textarea
                   value={address.shippingNotes}
                   onChange={e => setAddress(a => ({ ...a, shippingNotes: e.target.value }))}
-                  placeholder="Es. citofono, piano, fascia oraria preferita"
+                  placeholder={t('checkout_shipping_notes_placeholder')}
                   rows={3}
                   style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5 }}
                 />
@@ -455,11 +461,11 @@ export function CheckoutClient({
 
             {/* Modalità di consegna */}
             <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-              <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>Modalità di consegna</p>
+              <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>{t('checkout_delivery_method')}</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {([
-                  { value: 'home',   label: 'Consegna a domicilio',   desc: 'Il corriere consegna all\'indirizzo indicato' },
-                  { value: 'pickup', label: 'Ritiro in punto di ritiro', desc: 'Scegli un punto BRT o Poste Italiane vicino a te' },
+                  { value: 'home',   label: t('checkout_delivery_home'),   desc: t('checkout_delivery_home_desc') },
+                  { value: 'pickup', label: t('checkout_delivery_pickup'), desc: t('checkout_delivery_pickup_desc') },
                 ] as { value: 'home' | 'pickup'; label: string; desc: string }[]).map(opt => (
                   <label key={opt.value} style={{
                     display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer',
@@ -486,11 +492,11 @@ export function CheckoutClient({
                   {/* Scelta corriere */}
                   {isIsland ? (
                     <div style={{ fontSize: '0.75rem', color: '#b45309', background: '#fffbeb', border: '1px solid #fde68a', padding: '0.625rem 0.875rem' }}>
-                      Per le isole è disponibile solo <strong>Poste Italiane</strong> come punto di ritiro.
+                      {richText(t('checkout_islands_poste_only'))}
                     </div>
                   ) : (
                     <div>
-                      <p style={{ ...labelStyle, marginBottom: '0.5rem' }}>Corriere</p>
+                      <p style={{ ...labelStyle, marginBottom: '0.5rem' }}>{t('checkout_carrier')}</p>
                       <div style={{ display: 'flex', gap: '0.75rem' }}>
                         {(['BRT', 'POSTE'] as const).map(c => (
                           <label key={c} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem' }}>
@@ -500,7 +506,7 @@ export function CheckoutClient({
                               onChange={() => setPickupCarrier(c)}
                               style={{ accentColor: 'var(--forest)', width: '1rem', height: '1rem' }}
                             />
-                            {c === 'BRT' ? 'BRT Fermopoint' : 'Poste Italiane'}
+                            {c === 'BRT' ? t('checkout_carrier_brt') : t('checkout_carrier_poste')}
                           </label>
                         ))}
                       </div>
@@ -519,32 +525,32 @@ export function CheckoutClient({
                     <>
                       {/* Link locator corriere */}
                       <div style={{ fontSize: '0.75rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
-                        Trova il punto più vicino a te:&nbsp;
+                        {t('checkout_find_nearest_point')}&nbsp;
                         <a href="https://www.brt.it/it/servizi/fermopoint.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--forest)', fontWeight: 500 }}>
-                          BRT Fermopoint →
+                          {t('checkout_carrier_brt')} →
                         </a>
                       </div>
 
                       {/* Inserimento punto */}
                       <div>
                         <label style={labelStyle}>
-                          Indirizzo punto di ritiro<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>
+                          {t('checkout_pickup_address')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>
                         </label>
                         <input
                           type="text"
                           value={pickupPointAddress}
                           onChange={e => setPickupPointAddress(e.target.value)}
-                          placeholder="es. Fermopoint Via Roma 1, Milano"
+                          placeholder={t('checkout_pickup_address_placeholder')}
                           style={inputStyle}
                         />
                       </div>
                       <div>
-                        <label style={labelStyle}>Codice punto <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
+                        <label style={labelStyle}>{t('checkout_pickup_code')}</label>
                         <input
                           type="text"
                           value={pickupPointCode}
                           onChange={e => setPickupPointCode(e.target.value)}
-                          placeholder="es. MI0042"
+                          placeholder={t('checkout_pickup_code_placeholder')}
                           style={{ ...inputStyle, fontFamily: 'monospace' }}
                         />
                       </div>
@@ -556,11 +562,11 @@ export function CheckoutClient({
 
             {/* Coupon */}
             <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-              <label style={labelStyle}>Codice sconto</label>
+              <label style={labelStyle}>{t('checkout_discount_code')}</label>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input
                   type="text"
-                  placeholder="Codice promozionale"
+                  placeholder={t('checkout_discount_code_placeholder')}
                   value={couponInput}
                   onChange={e => setCouponInput(e.target.value.toUpperCase())}
                   style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.08em' }}
@@ -569,21 +575,21 @@ export function CheckoutClient({
                   onClick={applyCoupon} disabled={couponLoading}
                   style={{ background: 'var(--paper)', border: '1px solid var(--border-2)', padding: '0 1rem', fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', color: 'var(--ink)', whiteSpace: 'nowrap', flexShrink: 0 }}
                 >
-                  {couponLoading ? '…' : 'Applica'}
+                  {couponLoading ? '…' : t('checkout_apply')}
                 </button>
               </div>
               {couponError && <p style={{ fontSize: '0.75rem', color: '#dc2626', marginTop: 6 }}>{couponError}</p>}
               {cart.coupon && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                  <span style={{ fontSize: '0.75rem', color: '#16a34a' }}>✓ Codice <strong>{cart.coupon.code}</strong> — sconto {formatPrice(cart.discountAmount)}</span>
-                  <button onClick={cart.removeCoupon} style={{ fontSize: '0.75rem', color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer' }}>Rimuovi</button>
+                  <span style={{ fontSize: '0.75rem', color: '#16a34a' }}>✓ {t('checkout_code_discount_applied', { code: cart.coupon.code, amount: formatPrice(cart.discountAmount) })}</span>
+                  <button onClick={cart.removeCoupon} style={{ fontSize: '0.75rem', color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer' }}>{t('checkout_remove')}</button>
                 </div>
               )}
             </div>
 
             {/* Metodo di pagamento */}
             <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-              <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>Metodo di pagamento</p>
+              <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>{t('checkout_payment_method')}</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {PAY_METHODS.map(opt => (
                   <label key={opt.value} style={{
@@ -618,10 +624,10 @@ export function CheckoutClient({
               }}
             >
               {loading || pending
-                ? 'Elaborazione…'
+                ? t('checkout_processing')
                 : payMethod === 'stripe'
-                  ? 'Procedi al pagamento →'
-                  : 'Conferma ordine →'}
+                  ? t('checkout_proceed_payment')
+                  : t('checkout_confirm_order')}
             </button>
             {proceedError && (
               <p style={{ color: '#ef4444', fontSize: '0.8125rem', marginTop: '0.75rem', textAlign: 'center' }}>
@@ -637,12 +643,12 @@ export function CheckoutClient({
               onClick={() => setStep('address')}
               style={{ fontSize: '0.75rem', color: 'var(--ink-3)', background: 'none', border: 'none', cursor: 'pointer', marginBottom: '1.5rem', padding: 0 }}
             >
-              ← Modifica indirizzo
+              ← {t('checkout_edit_address')}
             </button>
             <h2 style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)', marginBottom: '1.5rem' }}>
-              Pagamento
+              {t('checkout_payment_title')}
             </h2>
-            <Elements stripe={stripePromise} options={{ clientSecret, locale: 'it', appearance: { theme: 'stripe', variables: { colorPrimary: '#1a4a2e', borderRadius: '0px' } } }}>
+            <Elements stripe={stripePromise} options={{ clientSecret, locale: locale === 'en' ? 'en' : 'it', appearance: { theme: 'stripe', variables: { colorPrimary: '#1a4a2e', borderRadius: '0px' } } }}>
               <PaymentForm />
             </Elements>
           </div>
@@ -652,12 +658,12 @@ export function CheckoutClient({
       {/* Colonna destra: riepilogo */}
       <div style={{ background: 'white', border: '1px solid var(--border)', padding: '1.75rem', alignSelf: 'start' }}>
         <h2 style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)', marginBottom: '1.25rem' }}>
-          Riepilogo ordine
+          {t('checkout_order_summary')}
         </h2>
 
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
           {cart.items.map((item) => (
-            <li key={item.productId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, fontSize: '0.875rem' }}>
+            <li key={item.productId + (item.variantId ?? '')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, fontSize: '0.875rem' }}>
               <span style={{ color: 'var(--ink)', fontWeight: 400 }}>
                 {item.name}
                 <span style={{ color: 'var(--ink-4)', fontWeight: 300 }}> × {item.qty}</span>
@@ -669,38 +675,38 @@ export function CheckoutClient({
 
         <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
-            <span>Subtotale</span><span>{formatPrice(cart.subtotal)}</span>
+            <span>{t('cart_subtotal')}</span><span>{formatPrice(cart.subtotal)}</span>
           </div>
           {cart.discountAmount > 0 && (
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#16a34a' }}>
-              <span>Sconto ({cart.coupon?.code})</span>
+              <span>{t('checkout_discount_with_code', { code: cart.coupon?.code ?? '' })}</span>
               <span>−{formatPrice(cart.discountAmount)}</span>
             </div>
           )}
           {/* Spedizione */}
           {baseShipping === 0 ? (
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#16a34a' }}>
-              <span>Spedizione</span><span>Gratuita</span>
+              <span>{t('cart_shipping')}</span><span>{t('checkout_free')}</span>
             </div>
           ) : (
             <>
               {!isEstero && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
-                  <span>Spedizione</span><span>+{formatPrice(shippingPrice)}</span>
+                  <span>{t('cart_shipping')}</span><span>+{formatPrice(shippingPrice)}</span>
                 </div>
               )}
               {isEstero && cart.total >= shippingThreshold && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
-                  <span>Supplemento estero</span><span>+{formatPrice(foreignSurcharge)}</span>
+                  <span>{t('checkout_foreign_surcharge')}</span><span>+{formatPrice(foreignSurcharge)}</span>
                 </div>
               )}
               {isEstero && cart.total < shippingThreshold && (
                 <>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
-                    <span>Spedizione</span><span>+{formatPrice(shippingPrice)}</span>
+                    <span>{t('cart_shipping')}</span><span>+{formatPrice(shippingPrice)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
-                    <span>Supplemento estero</span><span>+{formatPrice(foreignSurcharge)}</span>
+                    <span>{t('checkout_foreign_surcharge')}</span><span>+{formatPrice(foreignSurcharge)}</span>
                   </div>
                 </>
               )}
@@ -708,18 +714,18 @@ export function CheckoutClient({
           )}
           {isCod && (
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
-              <span>Supplemento contrassegno</span>
+              <span>{t('checkout_cod_surcharge')}</span>
               <span>+{formatPrice(codSurcharge)}</span>
             </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.0625rem', fontWeight: 700, color: 'var(--forest)', borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 4 }}>
-            <span>Totale</span><span>{formatPrice(displayTotal)}</span>
+            <span>{t('cart_total')}</span><span>{formatPrice(displayTotal)}</span>
           </div>
         </div>
 
         <div style={{ marginTop: '1.25rem', display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ink-4)', fontSize: '0.6875rem' }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          {payMethod === 'stripe' ? 'Pagamento sicuro con Stripe' : payMethod === 'bonifico' ? 'Riceverai le coordinate bancarie via email' : 'Paghi in contanti alla consegna'}
+          {payMethod === 'stripe' ? t('checkout_trust_stripe') : payMethod === 'bonifico' ? t('checkout_trust_bank') : t('checkout_trust_cod')}
         </div>
       </div>
 
@@ -749,6 +755,8 @@ export function CheckoutClient({
 function PaymentForm() {
   const stripe = useStripe()
   const elements = useElements()
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -760,7 +768,7 @@ function PaymentForm() {
       elements,
       confirmParams: { return_url: `${window.location.origin}/checkout/successo` },
     })
-    if (error) setError(error.message ?? 'Errore nel pagamento')
+    if (error) setError(error.message ?? t('checkout_payment_error'))
     setLoading(false)
   }
 
@@ -782,7 +790,7 @@ function PaymentForm() {
           fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase',
         }}
       >
-        {loading ? 'Elaborazione…' : 'Conferma e paga'}
+        {loading ? t('checkout_processing') : t('checkout_confirm_and_pay')}
       </button>
     </form>
   )

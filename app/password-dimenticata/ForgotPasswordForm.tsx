@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
+import { richText } from '@/lib/i18n/richText'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -17,6 +20,8 @@ const labelStyle: React.CSSProperties = {
 }
 
 export function ForgotPasswordForm() {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -40,10 +45,10 @@ export function ForgotPasswordForm() {
         border: '1px solid var(--border-2)', textAlign: 'center',
       }}>
         <p style={{ fontSize: '0.9375rem', color: 'var(--ink)', fontWeight: 500, marginBottom: '0.5rem' }}>
-          Controlla la tua email
+          {t('forgot_check_email_title')}
         </p>
         <p style={{ fontSize: '0.8125rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
-          Se esiste un account associato a <strong>{email}</strong>, ti abbiamo inviato un link per reimpostare la password. Il link scade tra 1 ora.
+          {richText(t('forgot_check_email_body', { email }))}
         </p>
       </div>
     )
@@ -52,7 +57,7 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div>
-        <label style={labelStyle}>Email</label>
+        <label style={labelStyle}>{t('login_email')}</label>
         <input
           type="email" required autoComplete="email"
           value={email} onChange={e => setEmail(e.target.value)}
@@ -71,7 +76,7 @@ export function ForgotPasswordForm() {
           transition: 'background 0.2s',
         }}
       >
-        {loading ? 'Invio in corso…' : 'Invia link di reimpostazione'}
+        {loading ? t('forgot_submitting') : t('forgot_submit')}
       </button>
     </form>
   )

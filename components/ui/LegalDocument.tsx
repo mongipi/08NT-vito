@@ -1,66 +1,94 @@
+'use client'
+
 import type { ReactNode } from 'react'
+import { useLocale, pickLocalized } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
 export interface LegalSection {
   title: string
+  titleEn?: string
   paragraphs?: ReactNode[]
+  paragraphsEn?: ReactNode[]
   items?: ReactNode[]
+  itemsEn?: ReactNode[]
   subsections?: {
     title: string
+    titleEn?: string
     paragraphs: ReactNode[]
+    paragraphsEn?: ReactNode[]
   }[]
 }
 
 interface LegalDocumentProps {
   eyebrow: string
+  eyebrowEn?: string
   title: string
+  titleEn?: string
   subtitle: string
+  subtitleEn?: string
   updated: string
   sections: LegalSection[]
 }
 
-export function LegalDocument({ eyebrow, title, subtitle, updated, sections }: LegalDocumentProps) {
+export function LegalDocument({ eyebrow, eyebrowEn, title, titleEn, subtitle, subtitleEn, updated, sections }: LegalDocumentProps) {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
+  const en = locale === 'en'
+
   return (
     <main className="v61-legal-page">
       <section className="v61-legal-hero">
         <div className="v61-inner">
-          <div className="v61-eyebrow light">{eyebrow}</div>
-          <h1>{title}</h1>
-          <p>{subtitle}</p>
-          <span>Ultimo aggiornamento: {updated}</span>
+          <div className="v61-eyebrow light">{pickLocalized(locale, eyebrow, eyebrowEn)}</div>
+          <h1>{pickLocalized(locale, title, titleEn)}</h1>
+          <p>{pickLocalized(locale, subtitle, subtitleEn)}</p>
+          <span>{t('legal_last_updated')}: {updated}</span>
         </div>
       </section>
 
       <section className="section v61-legal-section">
         <div className="v61-legal-layout">
-          <aside className="v61-legal-index" aria-label="Indice pagina">
-            <p>Indice</p>
+          <aside className="v61-legal-index" aria-label={t('legal_index')}>
+            <p>{t('legal_index')}</p>
             <ol>
-              {sections.map((section) => (
-                <li key={section.title}>
-                  <a href={`#${slugify(section.title)}`}>{section.title.replace(/^\d+\.\s*/, '')}</a>
-                </li>
-              ))}
+              {sections.map((section) => {
+                const sectionTitle = en && section.titleEn ? section.titleEn : section.title
+                return (
+                  <li key={section.title}>
+                    <a href={`#${slugify(section.title)}`}>{sectionTitle.replace(/^\d+\.\s*/, '')}</a>
+                  </li>
+                )
+              })}
             </ol>
           </aside>
 
           <div className="v61-legal-content">
-            {sections.map((section) => (
-              <article key={section.title} id={slugify(section.title)}>
-                <h2>{section.title}</h2>
-                {section.paragraphs?.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
-                {section.items && (
-                  <ul>
-                    {section.items.map((item, index) => <li key={index}>{item}</li>)}
-                  </ul>
-                )}
-                {section.subsections?.map((subsection) => (
-                  <div key={subsection.title} className="v61-legal-subsection">
-                    <h3>{subsection.title}</h3>
-                    {subsection.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
-                  </div>
-                ))}
-              </article>
-            ))}
+            {sections.map((section) => {
+              const sectionTitle = en && section.titleEn ? section.titleEn : section.title
+              const paragraphs = en && section.paragraphsEn ? section.paragraphsEn : section.paragraphs
+              const items = en && section.itemsEn ? section.itemsEn : section.items
+              return (
+                <article key={section.title} id={slugify(section.title)}>
+                  <h2>{sectionTitle}</h2>
+                  {paragraphs?.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+                  {items && (
+                    <ul>
+                      {items.map((item, index) => <li key={index}>{item}</li>)}
+                    </ul>
+                  )}
+                  {section.subsections?.map((subsection) => {
+                    const subTitle = en && subsection.titleEn ? subsection.titleEn : subsection.title
+                    const subParagraphs = en && subsection.paragraphsEn ? subsection.paragraphsEn : subsection.paragraphs
+                    return (
+                      <div key={subsection.title} className="v61-legal-subsection">
+                        <h3>{subTitle}</h3>
+                        {subParagraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+                      </div>
+                    )
+                  })}
+                </article>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -72,7 +100,7 @@ function slugify(value: string) {
   return value
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
 }

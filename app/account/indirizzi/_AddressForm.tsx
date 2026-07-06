@@ -1,5 +1,9 @@
+'use client'
+
 import type { UserAddress } from '@prisma/client'
 import { COUNTRIES } from '@/lib/countries'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -27,10 +31,13 @@ function Field({ label, name, defaultValue, required, placeholder }: {
 interface Props {
   action: (fd: FormData) => Promise<void>
   address?: UserAddress
-  submitLabel: string
 }
 
-export function AddressForm({ action, address, submitLabel }: Props) {
+export function AddressForm({ action, address }: Props) {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
+  const submitLabel = address ? t('address_form_save_changes') : t('address_form_save_new')
+
   return (
     <form action={action} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {address && <input type="hidden" name="id" value={address.id} />}
@@ -39,41 +46,41 @@ export function AddressForm({ action, address, submitLabel }: Props) {
       <div style={{ background: 'white', border: '1px solid var(--border)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
           <div style={{ flex: 1 }}>
-            <Field label="Etichetta (opzionale)" name="label" defaultValue={address?.label} placeholder="es. Casa, Ufficio, Magazzino" />
+            <Field label={t('address_form_label')} name="label" defaultValue={address?.label} placeholder={t('address_form_label_placeholder')} />
           </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', color: 'var(--ink-3)', cursor: 'pointer', whiteSpace: 'nowrap', paddingBottom: '0.75rem' }}>
             <input type="checkbox" name="isDefault" defaultChecked={address?.isDefault ?? false} style={{ width: '1rem', height: '1rem', accentColor: 'var(--forest)' }} />
-            Predefinito
+            {t('address_form_default')}
           </label>
         </div>
       </div>
 
       {/* Intestatario */}
       <div style={{ background: 'white', border: '1px solid var(--border)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <p style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-4)', margin: '0 0 0.25rem', paddingBottom: '0.625rem', borderBottom: '0.5px solid var(--border)' }}>Intestatario</p>
+        <p style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-4)', margin: '0 0 0.25rem', paddingBottom: '0.625rem', borderBottom: '0.5px solid var(--border)' }}>{t('address_form_recipient')}</p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <Field label="Nome" name="firstName" defaultValue={address?.firstName} required />
-          <Field label="Cognome" name="lastName" defaultValue={address?.lastName} required />
+          <Field label={t('address_form_first_name')} name="firstName" defaultValue={address?.firstName} required />
+          <Field label={t('address_form_last_name')} name="lastName" defaultValue={address?.lastName} required />
         </div>
-        <Field label="Ragione sociale (aziende)" name="company" defaultValue={address?.company} />
+        <Field label={t('address_form_company')} name="company" defaultValue={address?.company} />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <Field label="Partita IVA" name="vatNumber" defaultValue={address?.vatNumber} />
-          <Field label="Codice fiscale" name="fiscalCode" defaultValue={address?.fiscalCode} />
+          <Field label={t('address_form_vat_number')} name="vatNumber" defaultValue={address?.vatNumber} />
+          <Field label={t('address_form_fiscal_code')} name="fiscalCode" defaultValue={address?.fiscalCode} />
         </div>
       </div>
 
       {/* Indirizzo */}
       <div style={{ background: 'white', border: '1px solid var(--border)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <p style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-4)', margin: '0 0 0.25rem', paddingBottom: '0.625rem', borderBottom: '0.5px solid var(--border)' }}>Indirizzo</p>
-        <Field label="Via / Piazza" name="address" defaultValue={address?.address} required placeholder="es. Via Roma 1" />
+        <p style={{ fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-4)', margin: '0 0 0.25rem', paddingBottom: '0.625rem', borderBottom: '0.5px solid var(--border)' }}>{t('address_form_address_section')}</p>
+        <Field label={t('address_form_street')} name="address" defaultValue={address?.address} required placeholder={t('address_form_street_placeholder')} />
         <div style={{ display: 'grid', gridTemplateColumns: '5rem 1fr 4rem', gap: '1rem' }}>
-          <Field label="CAP" name="postalCode" defaultValue={address?.postalCode} required />
-          <Field label="Città" name="city" defaultValue={address?.city} required />
-          <Field label="Prov." name="province" defaultValue={address?.province} placeholder="BA" />
+          <Field label={t('address_form_postal_code')} name="postalCode" defaultValue={address?.postalCode} required />
+          <Field label={t('address_form_city')} name="city" defaultValue={address?.city} required />
+          <Field label={t('address_form_province')} name="province" defaultValue={address?.province} placeholder="BA" />
         </div>
-        <Field label="Telefono" name="phone" defaultValue={address?.phone} placeholder="+39 000 000 0000" />
+        <Field label={t('address_form_phone')} name="phone" defaultValue={address?.phone} placeholder={t('address_form_phone_placeholder')} />
         <div>
-          <label style={labelStyle}>Paese</label>
+          <label style={labelStyle}>{t('address_form_country')}</label>
           <select name="country" defaultValue={address?.country ?? 'IT'} style={{ ...inputStyle, appearance: 'auto' }}>
             {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
           </select>

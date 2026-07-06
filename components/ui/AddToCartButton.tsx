@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useCart } from '@/contexts/CartContext'
 import type { CartItem } from '@/lib/cart'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
 interface Props {
   item: Omit<CartItem, 'qty'>
@@ -12,6 +14,8 @@ interface Props {
 
 export function AddToCartButton({ item, color, stock }: Props) {
   const { addItem } = useCart()
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
 
@@ -28,7 +32,7 @@ export function AddToCartButton({ item, color, stock }: Props) {
         border: `1px solid ${color}30`, color: `${color}70`,
         fontSize: '0.6875rem', fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase',
       }}>
-        Esaurito
+        {t('cart_out_of_stock')}
       </div>
     )
   }
@@ -38,7 +42,7 @@ export function AddToCartButton({ item, color, stock }: Props) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 0, width: 'fit-content' }}>
         <button
           onClick={() => setQty(q => Math.max(1, q - 1))}
-          aria-label="Diminuisci quantità"
+          aria-label={t('cart_decrease_qty')}
           style={{
             width: 36, height: 36, border: `1px solid ${color}30`,
             background: 'transparent', cursor: 'pointer', fontSize: '1.125rem',
@@ -54,7 +58,7 @@ export function AddToCartButton({ item, color, stock }: Props) {
         </span>
         <button
           onClick={() => setQty(q => Math.min(stock, q + 1))}
-          aria-label="Aumenta quantità"
+          aria-label={t('cart_increase_qty')}
           style={{
             width: 36, height: 36, border: `1px solid ${color}30`,
             background: 'transparent', cursor: 'pointer', fontSize: '1.125rem',
@@ -78,14 +82,14 @@ export function AddToCartButton({ item, color, stock }: Props) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            Aggiunto al carrello
+            {t('cart_added')}
           </>
         ) : (
           <>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
             </svg>
-            Aggiungi al carrello
+            {t('cart_add')}
           </>
         )}
       </button>

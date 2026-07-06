@@ -8,10 +8,14 @@ import { formatPrice } from '@/lib/cart'
 import { validateCoupon } from '@/lib/actions/coupon'
 import { getShippingConfig } from '@/lib/actions/public'
 import { useSession } from 'next-auth/react'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const cart = useCart()
   const { data: session } = useSession()
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const [couponInput, setCouponInput] = useState('')
   const [couponError, setCouponError] = useState<string | null>(null)
   const [couponLoading, setCouponLoading] = useState(false)
@@ -71,7 +75,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ color: 'white', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-              Carrello
+              {t('cart_title')}
             </span>
             {cart.itemCount > 0 && (
               <span style={{
@@ -96,8 +100,8 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.375rem' }}>
               <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: hasFreeShipping ? '#15803d' : 'var(--ink-3)', letterSpacing: '0.05em' }}>
                 {hasFreeShipping
-                  ? '✓ Hai diritto alla spedizione gratuita!'
-                  : `Aggiungi ${formatPrice(missingForFree)} per la spedizione gratuita`}
+                  ? `✓ ${t('cart_free_shipping_earned')}`
+                  : t('cart_free_shipping_missing', { amount: formatPrice(missingForFree) })}
               </span>
               {!hasFreeShipping && (
                 <span style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', flexShrink: 0, marginLeft: 8 }}>{formatPrice(shippingPrice)}</span>
@@ -120,13 +124,13 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--border-2)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 16 }}>
                 <circle cx="9" cy="20" r="1.35"/><circle cx="18" cy="20" r="1.35"/><path d="M3 4h2.2l2.15 10.25a2 2 0 0 0 1.95 1.58h7.7a2 2 0 0 0 1.9-1.38L21 8H6.1"/><path d="M8 11h10.8"/>
               </svg>
-              <p style={{ fontSize: '0.875rem', color: 'var(--ink-3)', fontWeight: 300, marginBottom: '1.5rem' }}>Il carrello è vuoto</p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--ink-3)', fontWeight: 300, marginBottom: '1.5rem' }}>{t('cart_empty')}</p>
               <button onClick={onClose} style={{
                 fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase',
                 color: 'var(--forest)', background: 'none', border: '1px solid var(--forest)',
                 padding: '0.625rem 1.25rem', cursor: 'pointer',
               }}>
-                Continua gli acquisti
+                {t('cart_continue_shopping')}
               </button>
             </div>
           ) : (
@@ -184,7 +188,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             <div style={{ display: 'flex', gap: 8 }}>
               <input
                 type="text"
-                placeholder="Codice sconto"
+                placeholder={t('cart_coupon_placeholder')}
                 value={couponInput}
                 onChange={e => setCouponInput(e.target.value.toUpperCase())}
                 style={{
@@ -200,35 +204,35 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   cursor: 'pointer', color: 'var(--ink)', whiteSpace: 'nowrap',
                 }}
               >
-                {couponLoading ? '…' : 'Applica'}
+                {couponLoading ? '…' : t('cart_coupon_apply')}
               </button>
             </div>
             {couponError && <p style={{ fontSize: '0.75rem', color: '#dc2626', margin: 0 }}>{couponError}</p>}
             {cart.coupon && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.75rem', color: '#16a34a' }}>✓ Codice {cart.coupon.code} applicato</span>
-                <button onClick={cart.removeCoupon} style={{ fontSize: '0.75rem', color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer' }}>Rimuovi</button>
+                <span style={{ fontSize: '0.75rem', color: '#16a34a' }}>✓ {t('cart_coupon_applied', { code: cart.coupon.code })}</span>
+                <button onClick={cart.removeCoupon} style={{ fontSize: '0.75rem', color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer' }}>{t('cart_coupon_remove')}</button>
               </div>
             )}
 
             {/* Totali */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
-                <span>Subtotale</span><span>{formatPrice(cart.subtotal)}</span>
+                <span>{t('cart_subtotal')}</span><span>{formatPrice(cart.subtotal)}</span>
               </div>
               {cart.discountAmount > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#16a34a' }}>
-                  <span>Sconto</span><span>−{formatPrice(cart.discountAmount)}</span>
+                  <span>{t('cart_discount')}</span><span>−{formatPrice(cart.discountAmount)}</span>
                 </div>
               )}
               {shipping && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: hasFreeShipping ? '#16a34a' : 'var(--ink-3)' }}>
-                  <span>Spedizione</span>
-                  <span>{hasFreeShipping ? 'Gratuita' : formatPrice(shippingPrice)}</span>
+                  <span>{t('cart_shipping')}</span>
+                  <span>{hasFreeShipping ? t('cart_shipping_free') : formatPrice(shippingPrice)}</span>
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 700, color: 'var(--forest)', borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 2 }}>
-                <span>Totale</span><span>{formatPrice(estimatedTotal)}</span>
+                <span>{t('cart_total')}</span><span>{formatPrice(estimatedTotal)}</span>
               </div>
             </div>
 
@@ -243,11 +247,11 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 boxSizing: 'border-box',
               }}
             >
-              Procedi all&apos;acquisto
+              {t('cart_checkout')}
             </Link>
 
             <p style={{ textAlign: 'center', fontSize: '0.6875rem', color: 'var(--ink-4)', margin: 0 }}>
-              Supplemento estero e contrassegno calcolati al checkout
+              {t('cart_checkout_note')}
             </p>
           </div>
         )}

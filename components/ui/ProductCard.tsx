@@ -2,23 +2,18 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Product } from '@/types'
+import { Localized } from '@/components/ui/Localized'
+import { ProductTitle } from '@/components/ui/ProductTitle'
 
 interface ProductCardProps {
   product: Product
   variant?: 'home' | 'catalog'
 }
 
-const V61_PRODUCT_IMAGES: Record<string, string> = {
-  'menopausa-complex': '/v61/img/menopausa-complex-front.png',
-  'capelli-pelle-unghie': '/v61/img/capelli-pelle-unghie-front.png',
-  'microcircolo-superior': '/v61/img/microcircolo-superior-front.png',
-  'multivitaminico-minerali': '/v61/img/multivitaminico-minerali-front.png',
-}
-
 export function ProductCard({ product, variant = 'home' }: ProductCardProps) {
-  const { line, name, shortDescription, ingredients, capsules, days, dosage, notificationMs, slug, images } = product
+  const { line, name, nameEn, shortDescription, shortDescriptionEn, ingredients, capsules, days, dosage, notificationMs, slug, images } = product
   const isCatalog = variant === 'catalog'
-  const imageSrc = V61_PRODUCT_IMAGES[slug] ?? images?.fronte
+  const imageSrc = images?.fronte
   const detailText = isCatalog && notificationMs
     ? `${capsules} capsule · ${dosage} · ${notificationMs}`
     : `${capsules} capsule · ${days} giorni`
@@ -35,8 +30,8 @@ export function ProductCard({ product, variant = 'home' }: ProductCardProps) {
         )}
       </div>
       <div className="v61-product-content">
-        <h3>{name}</h3>
-        <p>{shortDescription}</p>
+        <h3><ProductTitle name={name} nameEn={nameEn} join /></h3>
+        <p><Localized it={shortDescription} en={shortDescriptionEn} /></p>
         <div className="v61-product-chips">
           {ingredients.slice(0, isCatalog ? 4 : 3).map((ing, i) => <span key={`${ing.name}-${i}`}>{ing.name}</span>)}
         </div>

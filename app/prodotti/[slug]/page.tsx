@@ -7,6 +7,9 @@ import { ProductPurchasePanel } from '@/components/ui/ProductPurchasePanel'
 import type { Metadata } from 'next'
 import type { ProductImages } from '@/types'
 import { IngredientsDisclosure } from '@/components/ui/IngredientsDisclosure'
+import { ProductRegulatoryNotice } from '@/components/ui/ProductRegulatoryNotice'
+import { Localized } from '@/components/ui/Localized'
+import { ProductTitle } from '@/components/ui/ProductTitle'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -39,11 +42,11 @@ export default async function ProductPage({ params }: Props) {
     line, name, shortDescription, longDescription,
     usage, target, capsules, days,
     dosage, notificationMs, format, ingredientsText,
+    nameEn, shortDescriptionEn, longDescriptionEn, usageEn, targetEn, formatEn, ingredientsTextEn,
   } = product
 
   const images = product.images as ProductImages
   const gallerySlides = buildFallbackGallery(images, name)
-  const [mainName, emphasizedName] = splitProductName(name)
   const metaPills = [
     capsules ? `${capsules} capsule vegetali` : format,
     days ? `${days} giorni` : null,
@@ -68,9 +71,9 @@ export default async function ProductPage({ params }: Props) {
           <div>
             <div className="v61-eyebrow light">{line.name}</div>
             <h1 className="v61-title v61-product-detail-title">
-              {mainName} {emphasizedName && <em>{emphasizedName}.</em>}
+              <ProductTitle name={name} nameEn={nameEn} />
             </h1>
-            <p>{shortDescription}</p>
+            <p><Localized it={shortDescription} en={shortDescriptionEn} /></p>
           </div>
 
           {gallerySlides.length > 0 ? (
@@ -122,8 +125,10 @@ export default async function ProductPage({ params }: Props) {
 
           <div className="v61-product-detail-copy">
             <div className="v61-detail-kicker">{PRODUCT_KICKERS[slug] ?? `${line.name} - Formula mirata`}</div>
-            <h2>{name}</h2>
-            <p className="v61-product-detail-description">{longDescription || shortDescription}</p>
+            <h2><ProductTitle name={name} nameEn={nameEn} join /></h2>
+            <p className="v61-product-detail-description">
+              <Localized it={longDescription || shortDescription} en={longDescriptionEn || shortDescriptionEn} />
+            </p>
           </div>
         </div>
       </section>
@@ -136,21 +141,22 @@ export default async function ProductPage({ params }: Props) {
 
       <section className="section v61-detail-info-section">
         <div className="v61-inner v61-detail-grid">
-          <DetailCard title="Modo d'uso" color={line.color}>{usage ?? 'Seguire le indicazioni riportate in etichetta.'}</DetailCard>
-          <DetailCard title="A chi è rivolto" color={line.color}>{target ?? 'Pensato per chi cerca un supporto nutrizionale mirato.'}</DetailCard>
-          <DetailCard title="Formato e composizione" color={line.color}>{format ?? `${capsules ?? ''} capsule vegetali`.trim()}</DetailCard>
-          <DetailCard title="Ingredienti" color={line.color}>{ingredientsText ?? 'Ingredienti non ancora specificati.'}</DetailCard>
+          <DetailCard title="Modo d'uso" color={line.color}>
+            <Localized it={usage ?? "Seguire le indicazioni riportate in etichetta."} en={usageEn} />
+          </DetailCard>
+          <DetailCard title="A chi è rivolto" color={line.color}>
+            <Localized it={target ?? 'Pensato per chi cerca un supporto nutrizionale mirato.'} en={targetEn} />
+          </DetailCard>
+          <DetailCard title="Formato e composizione" color={line.color}>
+            <Localized it={format ?? `${capsules ?? ''} capsule vegetali`.trim()} en={formatEn} />
+          </DetailCard>
+          <DetailCard title="Ingredienti" color={line.color}>
+            <Localized it={ingredientsText ?? 'Ingredienti non ancora specificati.'} en={ingredientsTextEn} />
+          </DetailCard>
         </div>
       </section>
 
-      <div className="v61-regulatory-notice">
-        <div>
-          Integratore alimentare notificato al Ministero della Salute della Repubblica Italiana
-          {notificationMs ? ` (${notificationMs})` : ''}. Non superare la dose giornaliera consigliata.
-          Gli integratori alimentari non sostituiscono una dieta varia ed equilibrata e uno stile di vita sano.
-          Tenere fuori dalla portata dei bambini.
-        </div>
-      </div>
+      <ProductRegulatoryNotice notificationMs={notificationMs} />
     </main>
   )
 }
@@ -162,12 +168,6 @@ function buildFallbackGallery(images: ProductImages, name: string): GallerySlide
     images?.lato2 && { src: images.lato2, label: 'Retro etichetta', alt: `${name} - retro etichetta` },
     images?.etichetta && { src: images.etichetta, label: 'Etichetta', alt: `${name} - etichetta` },
   ].filter(Boolean) as GallerySlide[]
-}
-
-function splitProductName(name: string): [string, string] {
-  const words = name.split(' ')
-  if (words.length < 2) return [name, '']
-  return [words.slice(0, -1).join(' '), words[words.length - 1]]
 }
 
 function SectionLabel({ children, color }: { children: ReactNode; color: string }) {

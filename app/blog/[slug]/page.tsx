@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { getArticleBySlug } from '@/services/articles'
 import type { Metadata } from 'next'
 import { formatDate } from '@/lib/utils'
+import { Localized } from '@/components/ui/Localized'
+import { ArticleBody } from '@/components/ui/ArticleBody'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -21,11 +23,6 @@ export default async function ArticlePage({ params }: Props) {
   const { slug } = await params
   const article = await getArticleBySlug(slug)
   if (!article) notFound()
-
-  const bodyBlocks = article.body
-    .split(/\n{2,}/)
-    .map((block) => block.trim())
-    .filter(Boolean)
 
   return (
     <main>
@@ -78,7 +75,7 @@ export default async function ArticlePage({ params }: Props) {
             marginBottom: 16,
           }}
         >
-          {article.title}
+          <Localized it={article.title} en={article.titleEn} />
         </div>
 
         <div
@@ -108,61 +105,11 @@ export default async function ArticlePage({ params }: Props) {
               paddingLeft: 20,
             }}
           >
-            {article.excerpt}
+            <Localized it={article.excerpt} en={article.excerptEn} />
           </p>
 
           <div>
-            {bodyBlocks.map((block, index) => {
-              if (block.startsWith('### ')) {
-                return (
-                  <h3
-                    key={index}
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 700,
-                      color: 'var(--green)',
-                      lineHeight: 1.5,
-                      margin: '22px 0 8px',
-                    }}
-                  >
-                    {block.replace(/^###\s+/, '')}
-                  </h3>
-                )
-              }
-
-              if (block.startsWith('## ')) {
-                return (
-                  <h2
-                    key={index}
-                    style={{
-                      fontFamily: 'var(--font-cormorant), Georgia, serif',
-                      fontSize: 28,
-                      fontWeight: 400,
-                      color: 'var(--ink)',
-                      lineHeight: 1.2,
-                      margin: '30px 0 12px',
-                    }}
-                  >
-                    {block.replace(/^##\s+/, '')}
-                  </h2>
-                )
-              }
-
-              return (
-                <p
-                  key={index}
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 300,
-                    color: 'var(--ink-2)',
-                    lineHeight: 2,
-                    marginBottom: 18,
-                  }}
-                >
-                  {block}
-                </p>
-              )
-            })}
+            <ArticleBody body={article.body} bodyEn={article.bodyEn} />
           </div>
 
           <div style={{ marginTop: 48, paddingTop: 24, borderTop: '0.5px solid var(--border)' }}>

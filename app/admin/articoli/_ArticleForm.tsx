@@ -41,6 +41,27 @@ export function ArticleForm({ action, article, deleteAction }: Props) {
             </div>
 
             <div style={s.cardPad}>
+              <p style={s.cardTitle}>Traduzione inglese (EN)</p>
+              <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '-0.375rem 0 0.875rem' }}>
+                Mostrata sul sito quando il cliente seleziona EN. Se lasci un campo vuoto, resta visibile l&apos;italiano.
+              </p>
+              <div style={s.stack(14)}>
+                <div>
+                  <label style={s.label}>Titolo (EN)</label>
+                  <input name="titleEn" defaultValue={article?.titleEn ?? ''} style={s.input} />
+                </div>
+                <div>
+                  <label style={s.label}>Estratto (EN)</label>
+                  <textarea name="excerptEn" defaultValue={article?.excerptEn ?? ''} rows={2} style={{ ...s.input, resize: 'vertical' }} />
+                </div>
+                <div>
+                  <label style={s.label}>Corpo articolo (EN)</label>
+                  <textarea name="bodyEn" defaultValue={article?.bodyEn ?? ''} rows={14} style={{ ...s.input, resize: 'vertical' }} />
+                </div>
+              </div>
+            </div>
+
+            <div style={s.cardPad}>
               <p style={s.cardTitle}>SEO</p>
               <div style={s.stack(14)}>
                 <div>

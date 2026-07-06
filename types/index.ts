@@ -52,6 +52,13 @@ export interface Product {
   target?: string | null
   format?: string | null
   ingredientsText?: string | null
+  nameEn?: string | null
+  shortDescriptionEn?: string | null
+  longDescriptionEn?: string | null
+  usageEn?: string | null
+  targetEn?: string | null
+  formatEn?: string | null
+  ingredientsTextEn?: string | null
   capsules?: number | null
   days?: number | null
   dosage?: string | null
@@ -77,6 +84,9 @@ export interface Article {
   published: boolean
   metaTitle?: string | null
   metaDescription?: string | null
+  titleEn?: string | null
+  excerptEn?: string | null
+  bodyEn?: string | null
   createdAt: Date
   updatedAt: Date
 }
