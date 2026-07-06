@@ -28,11 +28,21 @@ const labelStyle: React.CSSProperties = {
 }
 
 const ADDRESS_FIELDS = [
-  { key: 'address',    label: 'Indirizzo',           required: true },
-  { key: 'city',       label: 'Città',               required: true },
-  { key: 'postalCode', label: 'CAP',                 required: true },
-  { key: 'province',   label: 'Provincia (es. BA)',  required: false },
-  { key: 'phone',      label: 'Telefono (opzionale)',required: false },
+  { key: 'address',    label: 'Indirizzo',  required: true,  placeholder: 'Via e numero civico' },
+  { key: 'city',       label: 'Città',      required: true,  placeholder: 'Città di consegna' },
+  { key: 'postalCode', label: 'CAP',        required: true,  placeholder: 'Codice postale' },
+  { key: 'province',   label: 'Provincia',  required: false, placeholder: 'Sigla provincia' },
+] as const
+
+const PHONE_PREFIXES = [
+  { country: 'Italia', code: '+39', flag: '🇮🇹' },
+  { country: 'Francia', code: '+33', flag: '🇫🇷' },
+  { country: 'Germania', code: '+49', flag: '🇩🇪' },
+  { country: 'Spagna', code: '+34', flag: '🇪🇸' },
+  { country: 'Portogallo', code: '+351', flag: '🇵🇹' },
+  { country: 'Regno Unito', code: '+44', flag: '🇬🇧' },
+  { country: 'Svizzera', code: '+41', flag: '🇨🇭' },
+  { country: 'Austria', code: '+43', flag: '🇦🇹' },
 ] as const
 
 type DocType = 'fattura' | 'scontrino' | 'nessuno'
@@ -71,6 +81,10 @@ export function CheckoutClient({
   const [loading, setLoading] = useState(false)
   const [proceedError, setProceedError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  const savedPhone = prefill?.phone?.trim() ?? ''
+  const savedPhonePrefix = PHONE_PREFIXES.find(({ code }) => savedPhone.startsWith(code))
+  const savedPhoneNumber = savedPhonePrefix ? savedPhone.slice(savedPhonePrefix.code.length).trim() : savedPhone
+  const [phonePrefix, setPhonePrefix] = useState<string>(savedPhonePrefix?.code ?? '+39')
   const [address, setAddress] = useState({
     firstName:  prefill?.firstName  ?? '',
     lastName:   prefill?.lastName   ?? '',
@@ -84,7 +98,7 @@ export function CheckoutClient({
     postalCode: prefill?.postalCode ?? '',
     province:   prefill?.province   ?? '',
     country:       prefill?.country ?? 'IT',
-    phone:         prefill?.phone      ?? '',
+    phone:         savedPhoneNumber,
     shippingNotes: '',
   })
   const [step, setStep] = useState<'address' | 'payment'>('address')
@@ -128,10 +142,14 @@ export function CheckoutClient({
     const guestPasswordHash = (!session && createAccount && guestPassword)
       ? await hashPasswordForCheckout(guestPassword)
       : undefined
+    const addressForOrder = {
+      ...address,
+      phone: address.phone.trim() ? `${phonePrefix} ${address.phone.trim()}` : '',
+    }
     if (payMethod === 'stripe') {
       setLoading(true)
       try {
-        const { clientSecret } = await createPaymentIntent(cart.items, cart.coupon, { ...address, docType, guestEmail: session ? undefined : guestEmail, createAccount: session ? undefined : createAccount, guestPasswordHash, saveForNextTime, deliveryType, pickupCarrier: deliveryType === 'pickup' ? effectiveCarrier : null, pickupPointCode: deliveryType === 'pickup' ? pickupPointCode : undefined, pickupPointAddress: deliveryType === 'pickup' ? pickupPointAddress : undefined, billingDifferent, ...(billingDifferent ? { billingFirstName: billing.firstName, billingLastName: billing.lastName, billingCompany: billing.company, billingVatNumber: billing.vatNumber, billingFiscalCode: billing.fiscalCode, billingAddress: billing.address, billingCity: billing.city, billingPostalCode: billing.postalCode, billingProvince: billing.province, billingCountry: billing.country } : {}) }, { shippingCost: shippingCostVal, foreignSurcharge: foreignSurchargeVal, freeShipping: hasFreeShip })
+        const { clientSecret } = await createPaymentIntent(cart.items, cart.coupon, { ...addressForOrder, docType, guestEmail: session ? undefined : guestEmail, createAccount: session ? undefined : createAccount, guestPasswordHash, saveForNextTime, deliveryType, pickupCarrier: deliveryType === 'pickup' ? effectiveCarrier : null, pickupPointCode: deliveryType === 'pickup' ? pickupPointCode : undefined, pickupPointAddress: deliveryType === 'pickup' ? pickupPointAddress : undefined, billingDifferent, ...(billingDifferent ? { billingFirstName: billing.firstName, billingLastName: billing.lastName, billingCompany: billing.company, billingVatNumber: billing.vatNumber, billingFiscalCode: billing.fiscalCode, billingAddress: billing.address, billingCity: billing.city, billingPostalCode: billing.postalCode, billingProvince: billing.province, billingCountry: billing.country } : {}) }, { shippingCost: shippingCostVal, foreignSurcharge: foreignSurchargeVal, freeShipping: hasFreeShip })
         setClientSecret(clientSecret!)
         setStep('payment')
       } finally {
@@ -139,7 +157,7 @@ export function CheckoutClient({
       }
     } else {
       startTransition(async () => {
-        await createDirectOrder(cart.items, cart.coupon, { ...address, docType, guestEmail: session ? undefined : guestEmail, createAccount: session ? undefined : createAccount, guestPasswordHash, saveForNextTime, deliveryType, pickupCarrier: deliveryType === 'pickup' ? effectiveCarrier : null, pickupPointCode: deliveryType === 'pickup' ? pickupPointCode : undefined, pickupPointAddress: deliveryType === 'pickup' ? pickupPointAddress : undefined, billingDifferent, ...(billingDifferent ? { billingFirstName: billing.firstName, billingLastName: billing.lastName, billingCompany: billing.company, billingVatNumber: billing.vatNumber, billingFiscalCode: billing.fiscalCode, billingAddress: billing.address, billingCity: billing.city, billingPostalCode: billing.postalCode, billingProvince: billing.province, billingCountry: billing.country } : {}) }, payMethod, { shippingCost: shippingCostVal, foreignSurcharge: foreignSurchargeVal, freeShipping: hasFreeShip })
+        await createDirectOrder(cart.items, cart.coupon, { ...addressForOrder, docType, guestEmail: session ? undefined : guestEmail, createAccount: session ? undefined : createAccount, guestPasswordHash, saveForNextTime, deliveryType, pickupCarrier: deliveryType === 'pickup' ? effectiveCarrier : null, pickupPointCode: deliveryType === 'pickup' ? pickupPointCode : undefined, pickupPointAddress: deliveryType === 'pickup' ? pickupPointAddress : undefined, billingDifferent, ...(billingDifferent ? { billingFirstName: billing.firstName, billingLastName: billing.lastName, billingCompany: billing.company, billingVatNumber: billing.vatNumber, billingFiscalCode: billing.fiscalCode, billingAddress: billing.address, billingCity: billing.city, billingPostalCode: billing.postalCode, billingProvince: billing.province, billingCountry: billing.country } : {}) }, payMethod, { shippingCost: shippingCostVal, foreignSurcharge: foreignSurchargeVal, freeShipping: hasFreeShip })
       })
     }
   }
@@ -192,7 +210,7 @@ export function CheckoutClient({
                     value={guestEmail}
                     onChange={e => setGuestEmail(e.target.value)}
                     style={inputStyle}
-                    placeholder="nome@email.it"
+                    placeholder="cliente@esempio.test"
                     required
                   />
                   <p style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', marginTop: '0.375rem' }}>
@@ -222,7 +240,7 @@ export function CheckoutClient({
                         value={guestPassword}
                         onChange={e => setGuestPassword(e.target.value)}
                         style={inputStyle}
-                        placeholder="Minimo 8 caratteri"
+                        placeholder="Crea una password sicura"
                         autoComplete="new-password"
                       />
                       <p style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', marginTop: '0.375rem' }}>
@@ -238,7 +256,7 @@ export function CheckoutClient({
                 {(['firstName', 'lastName'] as const).map((key) => (
                   <div key={key}>
                     <label style={labelStyle}>{key === 'firstName' ? 'Nome' : 'Cognome'}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                    <input type="text" value={address[key]} onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))} style={inputStyle} />
+                    <input type="text" value={address[key]} onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))} style={inputStyle} placeholder={key === 'firstName' ? 'Nome intestatario' : 'Cognome intestatario'} />
                   </div>
                 ))}
               </div>
@@ -267,7 +285,7 @@ export function CheckoutClient({
                 {docType === 'scontrino' && (
                   <div style={{ marginTop: '0.75rem' }}>
                     <label style={labelStyle}>Codice fiscale <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
-                    <input type="text" value={address.fiscalCode} onChange={e => setAddress(a => ({ ...a, fiscalCode: e.target.value }))} style={inputStyle} placeholder="RSSMRA80A01H501U" />
+                    <input type="text" value={address.fiscalCode} onChange={e => setAddress(a => ({ ...a, fiscalCode: e.target.value }))} style={inputStyle} placeholder="Codice fiscale se richiesto" />
                   </div>
                 )}
 
@@ -275,20 +293,20 @@ export function CheckoutClient({
                   <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <div>
                       <label style={labelStyle}>Ragione sociale<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                      <input type="text" value={address.company} onChange={e => setAddress(a => ({ ...a, company: e.target.value }))} style={inputStyle} />
+                      <input type="text" value={address.company} onChange={e => setAddress(a => ({ ...a, company: e.target.value }))} style={inputStyle} placeholder="Nome azienda" />
                     </div>
                     <div>
                       <label style={labelStyle}>C. FISCALE o Partita IVA<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                      <input type="text" value={address.vatNumber} onChange={e => setAddress(a => ({ ...a, vatNumber: e.target.value }))} style={inputStyle} placeholder="IT12345678901" />
+                      <input type="text" value={address.vatNumber} onChange={e => setAddress(a => ({ ...a, vatNumber: e.target.value }))} style={inputStyle} placeholder="Codice fiscale o partita IVA" />
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                       <div>
                         <label style={labelStyle}>Codice SDI</label>
-                        <input type="text" value={address.sdiCode} onChange={e => setAddress(a => ({ ...a, sdiCode: e.target.value }))} style={inputStyle} placeholder="XXXXXXX" maxLength={7} />
+                        <input type="text" value={address.sdiCode} onChange={e => setAddress(a => ({ ...a, sdiCode: e.target.value }))} style={inputStyle} placeholder="Codice SDI" maxLength={7} />
                       </div>
                       <div>
                         <label style={labelStyle}>PEC</label>
-                        <input type="email" value={address.pec} onChange={e => setAddress(a => ({ ...a, pec: e.target.value }))} style={inputStyle} placeholder="pec@esempio.it" />
+                        <input type="email" value={address.pec} onChange={e => setAddress(a => ({ ...a, pec: e.target.value }))} style={inputStyle} placeholder="pec@azienda.test" />
                       </div>
                     </div>
                     <p style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', margin: 0 }}>Inserisci almeno Codice SDI oppure PEC.</p>
@@ -300,12 +318,38 @@ export function CheckoutClient({
               <div style={{ borderTop: '1px solid var(--border)', marginTop: '0.25rem' }} />
 
               {/* Indirizzo di spedizione */}
-              {ADDRESS_FIELDS.map(({ key, label, required }) => (
+              {ADDRESS_FIELDS.map(({ key, label, required, placeholder }) => (
                 <div key={key}>
                   <label style={labelStyle}>{label}{required && <span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>}</label>
-                  <input type="text" value={address[key as keyof typeof address]} onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))} style={inputStyle} />
+                  <input type="text" value={address[key]} onChange={e => setAddress(a => ({ ...a, [key]: e.target.value }))} style={inputStyle} placeholder={placeholder} />
                 </div>
               ))}
+
+              <div>
+                <label style={labelStyle}>Telefono <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
+                <div className="checkout-phone-row">
+                  <select
+                    value={phonePrefix}
+                    onChange={e => setPhonePrefix(e.target.value)}
+                    style={{ ...inputStyle, cursor: 'pointer', paddingLeft: '0.75rem', paddingRight: '0.75rem' }}
+                    aria-label="Prefisso telefonico"
+                  >
+                    {PHONE_PREFIXES.map(prefix => (
+                      <option key={`${prefix.code}-${prefix.country}`} value={prefix.code}>
+                        {prefix.flag} {prefix.code} {prefix.country}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    value={address.phone}
+                    onChange={e => setAddress(a => ({ ...a, phone: e.target.value }))}
+                    style={inputStyle}
+                    placeholder="Numero di telefono"
+                    inputMode="tel"
+                  />
+                </div>
+              </div>
 
               {/* Paese */}
               <div>
@@ -343,34 +387,34 @@ export function CheckoutClient({
                       {(['firstName', 'lastName'] as const).map(k => (
                         <div key={k}>
                           <label style={labelStyle}>{k === 'firstName' ? 'Nome' : 'Cognome'}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                          <input type="text" value={billing[k]} onChange={e => setBilling(b => ({ ...b, [k]: e.target.value }))} style={inputStyle} />
+                          <input type="text" value={billing[k]} onChange={e => setBilling(b => ({ ...b, [k]: e.target.value }))} style={inputStyle} placeholder={k === 'firstName' ? 'Nome fatturazione' : 'Cognome fatturazione'} />
                         </div>
                       ))}
                     </div>
                     <div>
                       <label style={labelStyle}>Azienda <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
-                      <input type="text" value={billing.company} onChange={e => setBilling(b => ({ ...b, company: e.target.value }))} style={inputStyle} />
+                      <input type="text" value={billing.company} onChange={e => setBilling(b => ({ ...b, company: e.target.value }))} style={inputStyle} placeholder="Nome azienda" />
                     </div>
                     <div>
                       <label style={labelStyle}>C. FISCALE o Partita IVA <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
-                      <input type="text" value={billing.vatNumber || billing.fiscalCode} onChange={e => setBilling(b => ({ ...b, vatNumber: e.target.value }))} style={inputStyle} placeholder="IT12345678901 o RSSMRA80A01H501U" />
+                      <input type="text" value={billing.vatNumber || billing.fiscalCode} onChange={e => setBilling(b => ({ ...b, vatNumber: e.target.value }))} style={inputStyle} placeholder="Codice fiscale o partita IVA" />
                     </div>
                     <div>
                       <label style={labelStyle}>Indirizzo<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                      <input type="text" value={billing.address} onChange={e => setBilling(b => ({ ...b, address: e.target.value }))} style={inputStyle} />
+                      <input type="text" value={billing.address} onChange={e => setBilling(b => ({ ...b, address: e.target.value }))} style={inputStyle} placeholder="Via e numero civico" />
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
                       <div>
                         <label style={labelStyle}>CAP<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                        <input type="text" value={billing.postalCode} onChange={e => setBilling(b => ({ ...b, postalCode: e.target.value }))} style={inputStyle} />
+                        <input type="text" value={billing.postalCode} onChange={e => setBilling(b => ({ ...b, postalCode: e.target.value }))} style={inputStyle} placeholder="Codice postale" />
                       </div>
                       <div>
                         <label style={labelStyle}>Città<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span></label>
-                        <input type="text" value={billing.city} onChange={e => setBilling(b => ({ ...b, city: e.target.value }))} style={inputStyle} />
+                        <input type="text" value={billing.city} onChange={e => setBilling(b => ({ ...b, city: e.target.value }))} style={inputStyle} placeholder="Città fatturazione" />
                       </div>
                       <div>
                         <label style={labelStyle}>Prov.</label>
-                        <input type="text" value={billing.province} onChange={e => setBilling(b => ({ ...b, province: e.target.value }))} style={inputStyle} placeholder="BA" maxLength={2} />
+                        <input type="text" value={billing.province} onChange={e => setBilling(b => ({ ...b, province: e.target.value }))} style={inputStyle} placeholder="Sigla" maxLength={2} />
                       </div>
                     </div>
                     <div>
@@ -402,7 +446,7 @@ export function CheckoutClient({
                 <textarea
                   value={address.shippingNotes}
                   onChange={e => setAddress(a => ({ ...a, shippingNotes: e.target.value }))}
-                  placeholder="Citofono, piano, orari preferiti, istruzioni per il corriere…"
+                  placeholder="Es. citofono, piano, fascia oraria preferita"
                   rows={3}
                   style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5 }}
                 />
@@ -516,7 +560,7 @@ export function CheckoutClient({
               <div style={{ display: 'flex', gap: 8 }}>
                 <input
                   type="text"
-                  placeholder="es. ESTATE20"
+                  placeholder="Codice promozionale"
                   value={couponInput}
                   onChange={e => setCouponInput(e.target.value.toUpperCase())}
                   style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.08em' }}
@@ -680,6 +724,20 @@ export function CheckoutClient({
       </div>
 
       <style>{`
+        .checkout-grid input:focus::placeholder,
+        .checkout-grid textarea:focus::placeholder {
+          color: transparent;
+        }
+        .checkout-phone-row {
+          display: grid;
+          grid-template-columns: minmax(132px, 0.36fr) minmax(0, 1fr);
+          gap: 0.5rem;
+        }
+        @media (max-width: 520px) {
+          .checkout-phone-row {
+            grid-template-columns: 1fr;
+          }
+        }
         @media (min-width: 700px) {
           .checkout-grid { grid-template-columns: 1fr 340px !important; }
         }

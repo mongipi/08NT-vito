@@ -1,0 +1,30 @@
+08 Natural Technology — Audit pacchetto statico locale
+version: v20_language_switch_fix
+
+Correzioni eseguite:
+- Migliorata la meccanica dello switch lingue.
+- Eliminato il problema dei testi che restavano in inglese quando si passava da EN a ES/FR/DE/PT.
+- Aggiunto fallback pulito: se una stringa non ha traduzione nella lingua scelta, torna al testo italiano originale e non resta nella lingua precedente.
+- Allineata la copertura delle traduzioni ES/FR/DE/PT alle chiavi già presenti in inglese.
+- Aggiunta traduzione anche per attributi accessibili/visibili come alt, title, aria-label e placeholder.
+
+Conteggio finale:
+- html_files: 17
+- css_files: 2
+- js_files: 1
+- png_files: 21
+- svg_files: 5
+- total_files: 49
+
+Verifiche finali:
+- JavaScript: OK (node --check)
+- CSS: OK
+- HTML: OK
+- Assets locali: OK
+- Encoding UTF-8: OK
+- Link interni locali: OK
+- Translation keys EN/ES/FR/DE/PT: parità sulle 86 chiavi principali gestite dallo switch; home coperta, esclusi brand/nome azienda/indirizzi volutamente invariati
+
+missing_local_links: []
+blocking_errors: 0
+warnings: 0
