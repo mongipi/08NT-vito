@@ -108,6 +108,26 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </div>
             </div>
           )}
+
+          {/* Punto di ritiro */}
+          {order.deliveryType === 'pickup' && (
+            <div style={s.cardPad}>
+              <p style={s.cardTitle}>Ritiro in punto di consegna</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1875rem' }}>
+                <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#111827' }}>
+                  {order.pickupCarrier === 'POSTE' ? 'Poste Italiane' : order.pickupCarrier ?? '—'}
+                </span>
+                {order.pickupPointAddress && (
+                  <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>{order.pickupPointAddress}</span>
+                )}
+                {order.pickupPointCode && (
+                  <span style={{ fontSize: '0.75rem', color: '#9ca3af', fontFamily: 'monospace' }}>
+                    Codice: {order.pickupPointCode}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Sidebar ── */}
