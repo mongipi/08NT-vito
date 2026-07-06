@@ -37,6 +37,7 @@ model Product {
   usage            String?
   target           String?
   format           String?
+  ingredientsText  String?
   capsules         Int?
   days             Int?
   dosage           String?

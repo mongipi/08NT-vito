@@ -51,6 +51,7 @@ export interface Product {
   usage?: string | null
   target?: string | null
   format?: string | null
+  ingredientsText?: string | null
   capsules?: number | null
   days?: number | null
   dosage?: string | null

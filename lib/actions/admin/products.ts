@@ -93,6 +93,7 @@ function parseProductData(formData: FormData) {
     usage: (formData.get('usage') as string) || null,
     target: (formData.get('target') as string) || null,
     format: (formData.get('format') as string) || null,
+    ingredientsText: (formData.get('ingredientsText') as string) || null,
     capsules: formData.get('capsules') ? parseInt(formData.get('capsules') as string) : null,
     days: formData.get('days') ? parseInt(formData.get('days') as string) : null,
     dosage: (formData.get('dosage') as string) || null,

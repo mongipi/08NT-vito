@@ -20,7 +20,7 @@ export function IngredientsDisclosure({ ingredients, color }: Props) {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
       >
-        <span>Contenuti medi per dose giornaliera</span>
+        <span>Valori nutrizionali</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d={open ? 'm18 15-6-6-6 6' : 'm6 9 6 6 6-6'} />
         </svg>

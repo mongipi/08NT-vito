@@ -6,6 +6,7 @@ import { ProductGallery } from '@/components/ui/ProductGallery'
 import { ProductPurchasePanel } from '@/components/ui/ProductPurchasePanel'
 import type { Metadata } from 'next'
 import type { ProductImages } from '@/types'
+import { IngredientsDisclosure } from '@/components/ui/IngredientsDisclosure'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -14,29 +15,6 @@ interface Props {
 type GallerySlide = { src: string; label: string; alt: string }
 
 export const dynamic = 'force-dynamic'
-
-const V61_PRODUCT_GALLERIES: Record<string, GallerySlide[]> = {
-  'menopausa-complex': [
-    { src: '/v61/img/menopausa-complex-front.png', label: 'Fronte', alt: 'Menopausa Complex' },
-    { src: '/v61/img/menopausa-complex-composition.png', label: 'Composizione', alt: 'Menopausa Complex - composizione' },
-    { src: '/v61/img/menopausa-complex-retro.png', label: 'Retro etichetta', alt: 'Menopausa Complex - retro etichetta' },
-  ],
-  'capelli-pelle-unghie': [
-    { src: '/v61/img/capelli-pelle-unghie-front.png', label: 'Fronte', alt: 'Capelli, Pelle e Unghie' },
-    { src: '/v61/img/capelli-pelle-unghie-composition.png', label: 'Composizione', alt: 'Capelli, Pelle e Unghie - composizione' },
-    { src: '/v61/img/capelli-pelle-unghie-retro.png', label: 'Retro etichetta', alt: 'Capelli, Pelle e Unghie - retro etichetta' },
-  ],
-  'microcircolo-superior': [
-    { src: '/v61/img/microcircolo-superior-front.png', label: 'Fronte', alt: 'Microcircolo Superior' },
-    { src: '/v61/img/microcircolo-superior-composition.png', label: 'Composizione', alt: 'Microcircolo Superior - composizione' },
-    { src: '/v61/img/microcircolo-superior-retro.png', label: 'Retro etichetta', alt: 'Microcircolo Superior - retro etichetta' },
-  ],
-  'multivitaminico-minerali': [
-    { src: '/v61/img/multivitaminico-minerali-front.png', label: 'Fronte', alt: 'Multivitaminico e Minerali' },
-    { src: '/v61/img/multivitaminico-minerali-composition.png', label: 'Composizione', alt: 'Multivitaminico e Minerali - composizione' },
-    { src: '/v61/img/multivitaminico-minerali-retro.png', label: 'Retro etichetta', alt: 'Multivitaminico e Minerali - retro etichetta' },
-  ],
-}
 
 const PRODUCT_KICKERS: Record<string, string> = {
   'menopausa-complex': 'Linea Menopausa - Formula giorno e notte',
@@ -60,12 +38,11 @@ export default async function ProductPage({ params }: Props) {
   const {
     line, name, shortDescription, longDescription,
     usage, target, capsules, days,
-    dosage, notificationMs, format,
+    dosage, notificationMs, format, ingredientsText,
   } = product
 
   const images = product.images as ProductImages
-  const gallerySlides = V61_PRODUCT_GALLERIES[slug] ?? buildFallbackGallery(images, name)
-  const productImage = gallerySlides[0]?.src ?? images?.fronte
+  const gallerySlides = buildFallbackGallery(images, name)
   const [mainName, emphasizedName] = splitProductName(name)
   const metaPills = [
     capsules ? `${capsules} capsule vegetali` : format,
@@ -87,14 +64,38 @@ export default async function ProductPage({ params }: Props) {
       </div>
 
       <section className="page-hero product-single-hero">
-        <div className="v61-inner">
-          <div className="v61-eyebrow light">{line.name}</div>
-          <h1 className="v61-title v61-product-detail-title">
-            {mainName} {emphasizedName && <em>{emphasizedName}.</em>}
-          </h1>
-          <p>{shortDescription}</p>
+        <div className="v61-inner v61-product-hero-grid">
+          <div>
+            <div className="v61-eyebrow light">{line.name}</div>
+            <h1 className="v61-title v61-product-detail-title">
+              {mainName} {emphasizedName && <em>{emphasizedName}.</em>}
+            </h1>
+            <p>{shortDescription}</p>
+          </div>
+
+          {gallerySlides.length > 0 ? (
+            <ProductGallery slides={gallerySlides} color={line.color} contained />
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <BottleStub color={line.color} colorLight={line.colorLight} label={name} />
+            </div>
+          )}
         </div>
       </section>
+
+      <style>{`
+        .v61-product-hero-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 2.5rem;
+          align-items: center;
+        }
+        @media (min-width: 900px) {
+          .v61-product-hero-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+      `}</style>
 
       <section className="section v61-product-detail-section">
         <div className="v61-inner">
@@ -118,33 +119,11 @@ export default async function ProductPage({ params }: Props) {
               color={line.color}
             />
           </div>
-        </div>
 
-            <div className="v61-product-detail-copy">
-              <div className="v61-detail-kicker">{PRODUCT_KICKERS[slug] ?? `${line.name} - Formula mirata`}</div>
-              <h2>{name}</h2>
-              <p className="v61-product-detail-description">{longDescription || shortDescription}</p>
-
-              <div className="v61-product-purchase">
-                <div className="v61-price-row">
-                  <span>€ {product.price.toFixed(2).replace('.', ',')}</span>
-                  {product.comparePrice && <del>€ {product.comparePrice.toFixed(2).replace('.', ',')}</del>}
-                </div>
-
-                <AddToCartButton
-                  item={{
-                    productId: product.id,
-                    slug: product.slug,
-                    name: product.name,
-                    price: product.price,
-                    comparePrice: product.comparePrice ?? undefined,
-                    image: productImage,
-                  }}
-                  color={line.color}
-                  stock={product.stock}
-                />
-              </div>
-            </div>
+          <div className="v61-product-detail-copy">
+            <div className="v61-detail-kicker">{PRODUCT_KICKERS[slug] ?? `${line.name} - Formula mirata`}</div>
+            <h2>{name}</h2>
+            <p className="v61-product-detail-description">{longDescription || shortDescription}</p>
           </div>
         </div>
       </section>
@@ -160,6 +139,7 @@ export default async function ProductPage({ params }: Props) {
           <DetailCard title="Modo d'uso" color={line.color}>{usage ?? 'Seguire le indicazioni riportate in etichetta.'}</DetailCard>
           <DetailCard title="A chi è rivolto" color={line.color}>{target ?? 'Pensato per chi cerca un supporto nutrizionale mirato.'}</DetailCard>
           <DetailCard title="Formato e composizione" color={line.color}>{format ?? `${capsules ?? ''} capsule vegetali`.trim()}</DetailCard>
+          <DetailCard title="Ingredienti" color={line.color}>{ingredientsText ?? 'Ingredienti non ancora specificati.'}</DetailCard>
         </div>
       </section>
 

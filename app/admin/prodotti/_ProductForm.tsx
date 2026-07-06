@@ -107,10 +107,16 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
               </p>
             </div>
 
-            {/* Ingredienti */}
+            {/* Valori nutrizionali (tabella strutturata nome/dosaggio) */}
             <div style={s.cardPad}>
-              <p style={s.cardTitle}>Ingredienti · Contenuti medi per dose</p>
+              <p style={s.cardTitle}>Valori nutrizionali · Contenuti medi per dose</p>
               <IngredientsEditor defaultValue={product?.ingredients ?? []} />
+            </div>
+
+            {/* Ingredienti (testo libero, box separato in pagina prodotto) */}
+            <div style={s.cardPad}>
+              <p style={s.cardTitle}>Ingredienti</p>
+              <Field label="Elenco ingredienti" name="ingredientsText" defaultValue={product?.ingredientsText} rows={4} placeholder="es. Agnocasto, Vitamina B6, Magnesio, ..." />
             </div>
 
             <div style={s.cardPad}>
