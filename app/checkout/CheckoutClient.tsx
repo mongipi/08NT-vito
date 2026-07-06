@@ -10,6 +10,7 @@ import { useSession } from 'next-auth/react'
 import { formatPrice } from '@/lib/cart'
 import Link from 'next/link'
 import { COUNTRIES, DOMESTIC_COUNTRIES, ISLAND_PROVINCES } from '@/lib/countries'
+import { PosteLockerPicker } from './PosteLockerPicker'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
@@ -506,43 +507,49 @@ export function CheckoutClient({
                     </div>
                   )}
 
-                  {/* Link locator corriere */}
-                  <div style={{ fontSize: '0.75rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
-                    Trova il punto più vicino a te:&nbsp;
-                    {effectiveCarrier === 'BRT' ? (
-                      <a href="https://www.mybrt.it/it/mybrt/parcel-shops" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--forest)', fontWeight: 500 }}>
-                        BRT Fermopoint →
-                      </a>
-                    ) : (
-                      <a href="https://www.poste.it/prenotazione/vieni-in-poste?vieni-in-poste" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--forest)', fontWeight: 500 }}>
-                        Punti Poste Italiane →
-                      </a>
-                    )}
-                  </div>
+                  {effectiveCarrier === 'POSTE' ? (
+                    <PosteLockerPicker
+                      pickupPointCode={pickupPointCode}
+                      pickupPointAddress={pickupPointAddress}
+                      onSelect={(code, addr) => { setPickupPointCode(code); setPickupPointAddress(addr) }}
+                      inputStyle={inputStyle}
+                      labelStyle={labelStyle}
+                    />
+                  ) : (
+                    <>
+                      {/* Link locator corriere */}
+                      <div style={{ fontSize: '0.75rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
+                        Trova il punto più vicino a te:&nbsp;
+                        <a href="https://www.brt.it/it/servizi/fermopoint.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--forest)', fontWeight: 500 }}>
+                          BRT Fermopoint →
+                        </a>
+                      </div>
 
-                  {/* Inserimento punto */}
-                  <div>
-                    <label style={labelStyle}>
-                      Indirizzo punto di ritiro<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={pickupPointAddress}
-                      onChange={e => setPickupPointAddress(e.target.value)}
-                      placeholder={effectiveCarrier === 'BRT' ? 'Nome punto BRT e indirizzo completo' : 'Nome ufficio postale e indirizzo completo'}
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Codice punto <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
-                    <input
-                      type="text"
-                      value={pickupPointCode}
-                      onChange={e => setPickupPointCode(e.target.value)}
-                      placeholder="Codice punto se disponibile"
-                      style={{ ...inputStyle, fontFamily: 'monospace' }}
-                    />
-                  </div>
+                      {/* Inserimento punto */}
+                      <div>
+                        <label style={labelStyle}>
+                          Indirizzo punto di ritiro<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={pickupPointAddress}
+                          onChange={e => setPickupPointAddress(e.target.value)}
+                          placeholder="es. Fermopoint Via Roma 1, Milano"
+                          style={inputStyle}
+                        />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Codice punto <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
+                        <input
+                          type="text"
+                          value={pickupPointCode}
+                          onChange={e => setPickupPointCode(e.target.value)}
+                          placeholder="es. MI0042"
+                          style={{ ...inputStyle, fontFamily: 'monospace' }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>

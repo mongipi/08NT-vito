@@ -3,8 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getProductBySlug } from '@/services/products'
 import { ProductGallery } from '@/components/ui/ProductGallery'
-import { AddToCartButton } from '@/components/ui/AddToCartButton'
-import { IngredientsDisclosure } from '@/components/ui/IngredientsDisclosure'
+import { ProductPurchasePanel } from '@/components/ui/ProductPurchasePanel'
 import type { Metadata } from 'next'
 import type { ProductImages } from '@/types'
 
@@ -105,14 +104,21 @@ export default async function ProductPage({ params }: Props) {
             </div>
           </div>
 
-          <div className="v61-product-detail-shell">
-            <div className="v61-product-detail-gallery">
-              {gallerySlides.length > 0 ? (
-                <ProductGallery slides={gallerySlides} color={line.color} contained />
-              ) : (
-                <BottleStub color={line.color} colorLight={line.colorLight} label={name} />
-              )}
-            </div>
+          {/* Prezzo + varianti + Aggiungi al carrello */}
+          <div style={{ marginTop: '1.75rem' }}>
+            <ProductPurchasePanel
+              productId={product.id}
+              slug={product.slug}
+              name={product.name}
+              image={images.fronte}
+              price={product.price}
+              comparePrice={product.comparePrice}
+              stock={product.stock}
+              variants={product.variants}
+              color={line.color}
+            />
+          </div>
+        </div>
 
             <div className="v61-product-detail-copy">
               <div className="v61-detail-kicker">{PRODUCT_KICKERS[slug] ?? `${line.name} - Formula mirata`}</div>

@@ -25,6 +25,17 @@ export interface ProductImages {
   etichetta?: string
 }
 
+export interface ProductVariant {
+  id: string
+  label: string
+  quantity: number
+  price: number
+  comparePrice?: number | null
+  b2bPrice?: number | null
+  stock: number
+  order: number
+}
+
 export interface Product {
   id: string
   slug: string
@@ -48,6 +59,7 @@ export interface Product {
   metaDescription?: string | null
   ingredients: Ingredient[]
   images: ProductImages
+  variants: ProductVariant[]
   createdAt: Date
   updatedAt: Date
 }

@@ -376,6 +376,66 @@ export async function sendAdminOrderNotification(data: OrderData) {
   })
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// 6. CONFERMA EMAIL → nuovo account
+// ═══════════════════════════════════════════════════════════════════
+export async function sendVerificationEmail(email: string, name: string | null, token: string) {
+  const verifyUrl = `${SITE_URL}/api/auth/verify-email?token=${token}`
+
+  const html = layout(`
+    <p style="margin:0 0 0.25rem;font-size:0.625rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#9ca3af">Conferma la tua email</p>
+    <h1 style="margin:0 0 0.25rem;font-size:1.625rem;font-weight:300;color:${BRAND_GREEN};font-family:Georgia,serif;letter-spacing:0.02em">
+      Benvenuto${name ? `, ${name.split(' ')[0]}` : ''}.
+    </h1>
+    <p style="margin:0 0 1.5rem;font-size:0.875rem;color:#6b7280;font-weight:300;line-height:1.7">
+      Per completare la registrazione e attivare il tuo account, conferma il tuo indirizzo email cliccando qui sotto. Il link scade tra 24 ore.
+    </p>
+
+    ${cta(verifyUrl, 'Conferma la tua email →')}
+
+    <p style="margin:1.5rem 0 0;font-size:0.75rem;color:#9ca3af;line-height:1.6">
+      Se non hai richiesto tu questa registrazione, ignora pure questa email.
+    </p>
+  `)
+
+  await getTransporter().sendMail({
+    from: `"08 Natural Technology" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: 'Conferma la tua email — 08 Natural Technology',
+    html,
+  })
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 7. REIMPOSTA PASSWORD → utente
+// ═══════════════════════════════════════════════════════════════════
+export async function sendPasswordResetEmail(email: string, name: string | null, token: string) {
+  const resetUrl = `${SITE_URL}/reimposta-password?token=${token}`
+
+  const html = layout(`
+    <p style="margin:0 0 0.25rem;font-size:0.625rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#9ca3af">Reimposta password</p>
+    <h1 style="margin:0 0 0.25rem;font-size:1.625rem;font-weight:300;color:${BRAND_GREEN};font-family:Georgia,serif;letter-spacing:0.02em">
+      Ciao${name ? `, ${name.split(' ')[0]}` : ''}.
+    </h1>
+    <p style="margin:0 0 1.5rem;font-size:0.875rem;color:#6b7280;font-weight:300;line-height:1.7">
+      Abbiamo ricevuto una richiesta di reimpostazione della password per il tuo account. Clicca qui sotto per sceglierne una nuova. Il link scade tra 1 ora.
+    </p>
+
+    ${cta(resetUrl, 'Reimposta la password →')}
+
+    <p style="margin:1.5rem 0 0;font-size:0.75rem;color:#9ca3af;line-height:1.6">
+      Se non hai richiesto tu questa operazione, ignora pure questa email: la tua password resterà invariata.
+    </p>
+  `)
+
+  await getTransporter().sendMail({
+    from: `"08 Natural Technology" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: 'Reimposta la tua password — 08 Natural Technology',
+    html,
+  })
+}
+
 // ─── Lazy transporter ─────────────────────────────────────────────
 let _transporter: nodemailer.Transporter | null = null
 function getTransporter() {

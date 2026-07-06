@@ -45,9 +45,28 @@ model Product {
   metaDescription  String?
   ingredients      Ingredient[]
   productImages    ProductImage[]
+  variants         ProductVariant[]
   b2bPricing       B2BPricing?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
+}
+
+// Formati acquistabili di uno stesso prodotto (es. "30 pastiglie", "60 pastiglie"),
+// ognuno con il proprio prezzo/scorte. Un prodotto senza varianti usa price/stock
+// del Product direttamente.
+model ProductVariant {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label        String
+  quantity     Int
+  price        Float
+  comparePrice Float?
+  b2bPrice     Float?
+  stock        Int      @default(0)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Ingredient {
@@ -192,13 +211,14 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  slug      String?
-  name      String
-  unitPrice Float
-  qty       Int
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id           String  @id @default(cuid())
+  orderId      String
+  slug         String?
+  name         String
+  variantLabel String?
+  unitPrice    Float
+  qty          Int
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model OrderAddress {

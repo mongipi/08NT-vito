@@ -8,6 +8,8 @@ import type { CartItem, AppliedCoupon } from '@/lib/cart'
 import { calcSubtotal, calcDiscount, calcTotal } from '@/lib/cart'
 import { getSettingsMap } from '@/lib/settings'
 import { sendOrderConfirmation, sendAdminOrderNotification } from '@/lib/email'
+import { issueVerificationEmail } from '@/lib/verification'
+import { chunkMetadataValue } from '@/lib/stripe-metadata'
 import bcrypt from 'bcryptjs'
 
 
@@ -71,6 +73,18 @@ export async function createPaymentIntent(
   const amountInCents = Math.round(total * 100)
   if (amountInCents < 50) throw new Error('Importo minimo €0.50')
 
+  const itemsJson = JSON.stringify(
+    items.map((i) => ({
+      productId: i.productId,
+      slug: i.slug,
+      name: i.name,
+      unitPrice: i.price,
+      qty: i.qty,
+      variantId: i.variantId ?? null,
+      variantLabel: i.variantLabel ?? null,
+    }))
+  )
+
   const paymentIntent = await stripe.paymentIntents.create({
     amount: amountInCents,
     currency: 'eur',
@@ -86,16 +100,10 @@ export async function createPaymentIntent(
       freeShipping: String(shipping.freeShipping),
       saveForNextTime: String(shippingAddress.saveForNextTime ?? false),
       couponCode: coupon?.code ?? '',
-      items: JSON.stringify(
-        items.map((i) => ({
-          productId: i.productId,
-          slug: i.slug,
-          name: i.name,
-          unitPrice: i.price,
-          qty: i.qty,
-        }))
-      ),
-      shippingAddress: JSON.stringify(shippingAddress),
+      // Stripe limita ogni valore di metadata a 500 caratteri: items e shippingAddress
+      // vanno spezzati su più chiavi (vedi lib/stripe-metadata.ts).
+      ...chunkMetadataValue('items', itemsJson),
+      ...chunkMetadataValue('shippingAddress', JSON.stringify(shippingAddress)),
     },
     ...(session?.user?.stripeCustomerId ? { customer: session.user.stripeCustomerId } : {}),
   })
@@ -158,10 +166,11 @@ export async function createDirectOrder(
       } : {}),
       items: {
         create: items.map((i) => ({
-          slug:      i.slug ?? null,
-          name:      i.name,
-          unitPrice: i.price,
-          qty:       i.qty,
+          slug:         i.slug ?? null,
+          name:         i.name,
+          variantLabel: i.variantLabel ?? null,
+          unitPrice:    i.price,
+          qty:          i.qty,
         })),
       },
       shippingAddress: {
@@ -184,6 +193,25 @@ export async function createDirectOrder(
       },
     },
   })
+
+  // Bonifico/contrassegno non hanno un webhook di conferma pagamento: le scorte
+  // si riservano subito alla creazione dell'ordine (a differenza di Stripe, che
+  // le scala solo a pagamento riuscito nel webhook). updateMany invece di update:
+  // se la variante/prodotto non esiste più (es. cancellato) non deve far fallire l'ordine.
+  await Promise.all(
+    items.map((i) => {
+      if (i.variantId) {
+        return prisma.productVariant.updateMany({
+          where: { id: i.variantId },
+          data: { stock: { decrement: i.qty } },
+        })
+      }
+      return prisma.product.updateMany({
+        where: { slug: i.slug },
+        data: { stock: { decrement: i.qty } },
+      })
+    })
+  )
 
   const user = session?.user?.id
     ? await prisma.user.findUnique({
@@ -310,6 +338,8 @@ export async function createAccountFromCheckout(email: string, addr: ShippingAdd
       isDefault:  true,
     },
   })
+
+  await issueVerificationEmail(email, name)
 }
 
 export async function hashPasswordForCheckout(password: string): Promise<string> {

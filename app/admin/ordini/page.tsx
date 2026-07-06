@@ -1,7 +1,9 @@
 import { prisma } from '@/lib/prisma'
+import type { Prisma } from '@prisma/client'
 import Link from 'next/link'
 import { PageHeader } from '../_components/PageHeader'
 import { Badge } from '../_components/Badge'
+import { SearchInput } from '../_components/SearchInput'
 import { formatDate } from '@/lib/utils'
 
 export const metadata = { title: 'Ordini' }
@@ -9,15 +11,33 @@ export const metadata = { title: 'Ordini' }
 const th: React.CSSProperties = { padding: '0.625rem 1rem', textAlign: 'left', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#9ca3af', borderBottom: '1px solid #f0f1f3', whiteSpace: 'nowrap' }
 const td: React.CSSProperties = { padding: '0.6875rem 1rem', fontSize: '0.8125rem', color: '#374151', borderBottom: '1px solid #f7f8f9' }
 
-export default async function OrdiniPage() {
+interface Props {
+  searchParams: Promise<{ q?: string }>
+}
+
+export default async function OrdiniPage({ searchParams }: Props) {
+  const { q } = await searchParams
+
+  const where: Prisma.OrderWhereInput | undefined = q ? {
+    OR: [
+      { id: { contains: q, mode: 'insensitive' } },
+      { guestEmail: { contains: q, mode: 'insensitive' } },
+      { couponCode: { contains: q, mode: 'insensitive' } },
+      { user: { name: { contains: q, mode: 'insensitive' } } },
+      { user: { email: { contains: q, mode: 'insensitive' } } },
+    ],
+  } : undefined
+
   const orders = await prisma.order.findMany({
+    where,
     orderBy: { createdAt: 'desc' },
     include: { user: { select: { email: true, name: true } }, items: { select: { qty: true } } },
   })
 
   return (
     <div>
-      <PageHeader title="Ordini" description={`${orders.length} ordini totali`} />
+      <PageHeader title="Ordini" description={`${orders.length} ordini${q ? ' trovati' : ' totali'}`} />
+      <SearchInput placeholder="Cerca per ID ordine, cliente, email o coupon…" />
       <div style={{ background: 'white', borderRadius: '0.625rem', border: '1px solid #e8eaed', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '48rem' }}>
@@ -26,7 +46,9 @@ export default async function OrdiniPage() {
             </thead>
             <tbody>
               {orders.length === 0 && (
-                <tr><td colSpan={9} style={{ ...td, textAlign: 'center', color: '#9ca3af', padding: '2.5rem 1rem' }}>Nessun ordine</td></tr>
+                <tr><td colSpan={9} style={{ ...td, textAlign: 'center', color: '#9ca3af', padding: '2.5rem 1rem' }}>
+                  {q ? `Nessun ordine trovato per "${q}"` : 'Nessun ordine'}
+                </td></tr>
               )}
               {orders.map((o) => {
                 return (
