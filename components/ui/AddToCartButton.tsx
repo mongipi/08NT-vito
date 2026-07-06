@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useCart } from '@/contexts/CartContext'
@@ -35,10 +35,10 @@ export function AddToCartButton({ item, color, stock }: Props) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Quantità */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 0, width: 'fit-content' }}>
         <button
           onClick={() => setQty(q => Math.max(1, q - 1))}
+          aria-label="Diminuisci quantità"
           style={{
             width: 36, height: 36, border: `1px solid ${color}30`,
             background: 'transparent', cursor: 'pointer', fontSize: '1.125rem',
@@ -54,6 +54,7 @@ export function AddToCartButton({ item, color, stock }: Props) {
         </span>
         <button
           onClick={() => setQty(q => Math.min(stock, q + 1))}
+          aria-label="Aumenta quantità"
           style={{
             width: 36, height: 36, border: `1px solid ${color}30`,
             background: 'transparent', cursor: 'pointer', fontSize: '1.125rem',
@@ -62,7 +63,6 @@ export function AddToCartButton({ item, color, stock }: Props) {
         >+</button>
       </div>
 
-      {/* Bottone aggiungi */}
       <button
         onClick={handleAdd}
         style={{

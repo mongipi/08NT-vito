@@ -2,6 +2,7 @@
 import { usePathname } from 'next/navigation'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
+import { CookieConsent } from '@/components/ui/CookieConsent'
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -14,6 +15,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       <Navbar />
       {children}
       <Footer />
+      <CookieConsent />
     </div>
   )
 }

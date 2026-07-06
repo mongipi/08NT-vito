@@ -23,6 +23,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/metodo`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/trasparenza`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE_URL}/contatti`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${BASE_URL}/lavora-con-noi`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${BASE_URL}/resi-e-spedizioni`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.35 },
+    { url: `${BASE_URL}/termini-condizioni-vendita`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.25 },
+    { url: `${BASE_URL}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.25 },
+    { url: `${BASE_URL}/cookie`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.25 },
+    { url: `${BASE_URL}/note-legali`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.25 },
   ]
 
   const productRoutes: MetadataRoute.Sitemap = productSlugs.map((slug) => ({

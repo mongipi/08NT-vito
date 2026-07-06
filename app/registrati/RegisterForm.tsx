@@ -100,7 +100,7 @@ export function RegisterForm() {
 
       <p style={{ fontSize: '0.75rem', color: 'var(--ink-4)', textAlign: 'center', lineHeight: 1.6 }}>
         Registrandoti accetti i nostri{' '}
-        <a href="/termini" style={{ color: 'var(--forest)', textDecoration: 'none', borderBottom: '1px solid var(--green-l)' }}>Termini di servizio</a>
+        <a href="/termini-condizioni-vendita" style={{ color: 'var(--forest)', textDecoration: 'none', borderBottom: '1px solid var(--green-l)' }}>Termini e condizioni di vendita</a>
         {' '}e la{' '}
         <a href="/privacy" style={{ color: 'var(--forest)', textDecoration: 'none', borderBottom: '1px solid var(--green-l)' }}>Privacy Policy</a>.
       </p>

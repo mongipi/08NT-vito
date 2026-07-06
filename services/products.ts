@@ -9,6 +9,10 @@ const KEY_TO_URL_PATH: Record<string, string> = {
   etichetta: 'etichetta',
 }
 
+const PRODUCT_LINE_OVERRIDES: Record<string, { color: string; colorLight: string }> = {
+  'multivitaminico-minerali': { color: '#f47b20', colorLight: '#fff0e4' },
+}
+
 function buildImageMap(productId: string, productImages: { key: string }[]): ProductImages {
   const result: ProductImages = {}
   for (const img of productImages) {
@@ -22,8 +26,10 @@ function buildImageMap(productId: string, productImages: { key: string }[]): Pro
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapProduct(p: any): Product {
+  const lineOverride = PRODUCT_LINE_OVERRIDES[p.slug]
   return {
     ...p,
+    line: lineOverride ? { ...p.line, ...lineOverride } : p.line,
     images: buildImageMap(p.id, p.productImages ?? []),
   }
 }

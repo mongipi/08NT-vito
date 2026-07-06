@@ -117,8 +117,8 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         <div style={{ flex: 1, overflowY: 'auto', padding: cart.items.length ? 0 : '3rem 1.5rem' }}>
           {cart.items.length === 0 ? (
             <div style={{ textAlign: 'center' }}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--border-2)" strokeWidth="1" style={{ marginBottom: 16 }}>
-                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--border-2)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 16 }}>
+                <circle cx="9" cy="20" r="1.35"/><circle cx="18" cy="20" r="1.35"/><path d="M3 4h2.2l2.15 10.25a2 2 0 0 0 1.95 1.58h7.7a2 2 0 0 0 1.9-1.38L21 8H6.1"/><path d="M8 11h10.8"/>
               </svg>
               <p style={{ fontSize: '0.875rem', color: 'var(--ink-3)', fontWeight: 300, marginBottom: '1.5rem' }}>Il carrello è vuoto</p>
               <button onClick={onClose} style={{

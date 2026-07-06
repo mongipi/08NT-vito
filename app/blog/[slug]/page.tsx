@@ -22,9 +22,13 @@ export default async function ArticlePage({ params }: Props) {
   const article = await getArticleBySlug(slug)
   if (!article) notFound()
 
+  const bodyBlocks = article.body
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+
   return (
     <main>
-      {/* ── HEADER ── */}
       <div
         className="section"
         style={{
@@ -85,11 +89,10 @@ export default async function ArticlePage({ params }: Props) {
             letterSpacing: '0.04em',
           }}
         >
-          {formatDate(article.publishedAt)} · {article.readingTime} min di lettura
+          {formatDate(article.publishedAt)} · {article.readingTime ?? 5} min di lettura
         </div>
       </div>
 
-      {/* ── BODY ── */}
       <section className="section">
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
           <p
@@ -108,16 +111,59 @@ export default async function ArticlePage({ params }: Props) {
             {article.excerpt}
           </p>
 
-          <p
-            style={{
-              fontSize: 13,
-              fontWeight: 300,
-              color: 'var(--ink-2)',
-              lineHeight: 2,
-            }}
-          >
-            {article.body}
-          </p>
+          <div>
+            {bodyBlocks.map((block, index) => {
+              if (block.startsWith('### ')) {
+                return (
+                  <h3
+                    key={index}
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: 'var(--green)',
+                      lineHeight: 1.5,
+                      margin: '22px 0 8px',
+                    }}
+                  >
+                    {block.replace(/^###\s+/, '')}
+                  </h3>
+                )
+              }
+
+              if (block.startsWith('## ')) {
+                return (
+                  <h2
+                    key={index}
+                    style={{
+                      fontFamily: 'var(--font-cormorant), Georgia, serif',
+                      fontSize: 28,
+                      fontWeight: 400,
+                      color: 'var(--ink)',
+                      lineHeight: 1.2,
+                      margin: '30px 0 12px',
+                    }}
+                  >
+                    {block.replace(/^##\s+/, '')}
+                  </h2>
+                )
+              }
+
+              return (
+                <p
+                  key={index}
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 300,
+                    color: 'var(--ink-2)',
+                    lineHeight: 2,
+                    marginBottom: 18,
+                  }}
+                >
+                  {block}
+                </p>
+              )
+            })}
+          </div>
 
           <div style={{ marginTop: 48, paddingTop: 24, borderTop: '0.5px solid var(--border)' }}>
             <Link

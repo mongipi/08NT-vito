@@ -1,131 +1,87 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
+import Image from 'next/image'
 import { Logo } from './Logo'
 import { SOCIAL_LINKS } from '@/lib/social-links'
+import { CookiePreferencesButton } from '@/components/ui/CookieConsent'
 
 const FOOTER_LINKS = {
-  Prodotti: [
-    { label: 'Menopausa Complex',          href: '/prodotti/menopausa-complex' },
-    { label: 'Capelli, Pelle & Unghie',    href: '/prodotti/capelli-pelle-unghie' },
-    { label: 'Microcircolo Superior',      href: '/prodotti/microcircolo-superior' },
+  'PRODOTTI & SHOP': [
+    { label: 'Menopausa Complex', href: '/prodotti/menopausa-complex' },
+    { label: 'Capelli, Pelle & Unghie', href: '/prodotti/capelli-pelle-unghie' },
+    { label: 'Microcircolo Superior', href: '/prodotti/microcircolo-superior' },
     { label: 'Multivitaminico & Minerali', href: '/prodotti/multivitaminico-minerali' },
   ],
   Azienda: [
-    { label: 'Qualità 08',       href: '/metodo' },
-    { label: 'Blog',             href: '/blog' },
-    { label: 'Area Rivenditori', href: '/b2b' },
-    { label: 'Contatti',         href: '/contatti' },
+    { label: 'Qualita 08', href: '/metodo' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Lavora con noi', href: '/lavora-con-noi' },
+    { label: 'Resi e spedizioni', href: '/resi-e-spedizioni' },
+    { label: 'Contatti', href: '/contatti' },
   ],
   Legale: [
+    { label: 'Termini e condizioni', href: '/termini-condizioni-vendita' },
     { label: 'Privacy policy', href: '/privacy' },
-    { label: 'Cookie policy',  href: '/cookie' },
-    { label: 'Note legali',    href: '/note-legali' },
+    { label: 'Cookie policy', href: '/cookie' },
+    { label: 'Note legali', href: '/note-legali' },
   ],
 }
 
-/** Footer — Server Component. */
+const CONTACTS = [
+  { label: 'Telefono', href: 'tel:0803031103', text: '080 303 1103', icon: 'phone.svg' },
+  { label: 'WhatsApp', href: 'https://wa.me/393515078701', text: '351 507 8701', icon: 'whatsapp.svg' },
+  { label: 'Email', href: 'mailto:08naturaltechnology@gmail.com', text: '08naturaltechnology@gmail.com', icon: 'email.svg' },
+]
+
+const COURIERS = ['GLS', 'BRT', 'POSTE ITALIANE'] as const
+
 export function Footer() {
   return (
-    <footer
-      className="mt-auto"
-      style={{
-        background: 'var(--forest)',
-        borderTop: '1px solid var(--amber)',
-        padding: '3.25rem 1.5rem 1.5rem',
-      }}
-    >
-      {/* Grid: 1 col mobile → 2 col sm → 4 col lg (2fr 1fr 1fr 1fr) */}
-      <div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10 pb-10"
-        style={{
-          borderBottom: '0.5px solid rgba(184,144,60,0.15)',
-          marginBottom: '1.375rem',
-        }}
-      >
-        {/* Colonna brand */}
-        <div className="sm:col-span-2 lg:col-span-1">
-          {/* Logo footer */}
-          <div style={{ marginBottom: '0.875rem' }}>
-            <Logo variant="light" height={90} />
-          </div>
-
-          <p style={{ fontSize: '0.6875rem', fontWeight: 300, color: 'rgba(253,246,232,0.6)', lineHeight: 1.85, marginBottom: '1.25rem' }}>
+    <footer className="v61-footer">
+      <div className="v61-footer-grid">
+        <div className="v61-footer-brand">
+          <Logo variant="light" height={90} />
+          <p>
             VIPHARMA di Tatulli Vito & Co. S.A.S.<br />
-            Via Don Luigi Sturzo 44/46/48 — Bitonto (BA) 70032<br />
-            Tel. 080 303 1103<br />
-            08naturaltechnology@gmail.com
+            Via Don Luigi Sturzo 44/46/48 - Bitonto (BA) 70032
           </p>
-
+          <div className="v61-footer-contacts">
+            {CONTACTS.map((contact) => (
+              <a key={contact.label} href={contact.href} target={contact.href.startsWith('http') ? '_blank' : undefined} rel={contact.href.startsWith('http') ? 'noopener noreferrer' : undefined}>
+                <Image src={`/v61/icons/${contact.icon}`} alt={contact.label} width={16} height={16} />
+                <span>{contact.text}</span>
+              </a>
+            ))}
+          </div>
+          <div className="v61-footer-couriers" aria-label="Corrieri">
+            {COURIERS.map((courier) => (
+              <span key={courier}>{courier}</span>
+            ))}
+          </div>
         </div>
 
-        {/* Colonne link */}
-        {(Object.entries(FOOTER_LINKS) as [string, { label: string; href: string }[]][]).map(
-          ([section, links]) => (
-            <div key={section}>
-              <p
-                style={{
-                  fontSize: '0.53rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.2em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(184,144,60,0.85)',
-                  marginBottom: '0.875rem',
-                }}
-              >
-                {section}
-              </p>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                {links.map(({ label, href }) => (
-                  <li key={href} style={{ marginBottom: '0.5625rem' }}>
-                    <Link
-                      href={href}
-                      className="footer-link"
-                      style={{ fontSize: '0.72rem', fontWeight: 400 }}
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )
-        )}
+        {(Object.entries(FOOTER_LINKS) as [string, { label: string; href: string }[]][]).map(([section, links]) => (
+          <div key={section}>
+            <p className="v61-footer-title">{section}</p>
+            <ul>
+              {links.map(({ label, href }) => (
+                <li key={href}><Link href={href}>{label}</Link></li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
-      {/* Bottom bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p style={{ fontSize: '0.625rem', fontWeight: 300, color: 'rgba(253,246,232,0.5)', letterSpacing: '0.06em' }}>
-          © {new Date().getFullYear()} 08 Natural Technology · Tutti i diritti riservati
-        </p>
-
-        <div className="flex items-center gap-6">
-          {SOCIAL_LINKS.map(({ href, label, icon }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={label}
-              className="footer-link"
-              style={{ color: 'rgba(184,144,60,0.9)'}}
-            >
-              {icon}
+      <div className="v61-footer-bottom">
+        <span>© {new Date().getFullYear()} 08 Natural Technology · Tutti i diritti riservati</span>
+        <div className="v61-footer-socials">
+          {SOCIAL_LINKS.map(({ href, label }) => (
+            <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
+              <Image src={`/v61/icons/${label.toLowerCase()}.svg`} alt="" width={17} height={17} />
             </a>
           ))}
         </div>
-
-        <span
-          style={{
-            fontSize: '0.625rem',
-            fontWeight: 300,
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase',
-            color: 'rgba(184,144,60,0.9)',
-            border: '0.5px solid rgba(184,144,60,0.5)',
-            padding: '0.3125rem 1rem',
-          }}
-        >
-          Made in Italy
-        </span>
+        <CookiePreferencesButton />
+        <span className="v61-made">Made in Italy</span>
       </div>
     </footer>
   )
