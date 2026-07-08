@@ -37,6 +37,15 @@ model Product {
   usage            String?
   target           String?
   format           String?
+  ingredientsText  String?
+  // Traduzioni inglese (bozza automatica, da rivedere) — usate quando la lingua selezionata è EN
+  nameEn             String?
+  shortDescriptionEn String?
+  longDescriptionEn  String?
+  usageEn            String?
+  targetEn           String?
+  formatEn           String?
+  ingredientsTextEn  String?
   capsules         Int?
   days             Int?
   dosage           String?
@@ -271,6 +280,10 @@ model Article {
   published       Boolean  @default(false)
   metaTitle       String?
   metaDescription String?
+  // Traduzioni inglese (bozza automatica, da rivedere) — usate quando la lingua selezionata è EN
+  titleEn   String?
+  excerptEn String?
+  bodyEn    String?  @db.Text
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

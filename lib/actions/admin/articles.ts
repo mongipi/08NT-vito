@@ -20,6 +20,9 @@ export async function createArticle(formData: FormData) {
       published: formData.get('published') === 'on',
       metaTitle: formData.get('metaTitle') as string || null,
       metaDescription: formData.get('metaDescription') as string || null,
+      titleEn: formData.get('titleEn') as string || null,
+      excerptEn: formData.get('excerptEn') as string || null,
+      bodyEn: formData.get('bodyEn') as string || null,
     },
   })
   revalidatePath('/admin/articoli')
@@ -40,6 +43,9 @@ export async function updateArticle(formData: FormData) {
       published: formData.get('published') === 'on',
       metaTitle: formData.get('metaTitle') as string || null,
       metaDescription: formData.get('metaDescription') as string || null,
+      titleEn: formData.get('titleEn') as string || null,
+      excerptEn: formData.get('excerptEn') as string || null,
+      bodyEn: formData.get('bodyEn') as string || null,
     },
   })
   revalidatePath('/admin/articoli')

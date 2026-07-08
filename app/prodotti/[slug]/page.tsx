@@ -6,6 +6,10 @@ import { ProductGallery } from '@/components/ui/ProductGallery'
 import { ProductPurchasePanel } from '@/components/ui/ProductPurchasePanel'
 import type { Metadata } from 'next'
 import type { ProductImages } from '@/types'
+import { IngredientsDisclosure } from '@/components/ui/IngredientsDisclosure'
+import { ProductRegulatoryNotice } from '@/components/ui/ProductRegulatoryNotice'
+import { Localized } from '@/components/ui/Localized'
+import { ProductTitle } from '@/components/ui/ProductTitle'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -14,29 +18,6 @@ interface Props {
 type GallerySlide = { src: string; label: string; alt: string }
 
 export const dynamic = 'force-dynamic'
-
-const V61_PRODUCT_GALLERIES: Record<string, GallerySlide[]> = {
-  'menopausa-complex': [
-    { src: '/v61/img/menopausa-complex-front.png', label: 'Fronte', alt: 'Menopausa Complex' },
-    { src: '/v61/img/menopausa-complex-composition.png', label: 'Composizione', alt: 'Menopausa Complex - composizione' },
-    { src: '/v61/img/menopausa-complex-retro.png', label: 'Retro etichetta', alt: 'Menopausa Complex - retro etichetta' },
-  ],
-  'capelli-pelle-unghie': [
-    { src: '/v61/img/capelli-pelle-unghie-front.png', label: 'Fronte', alt: 'Capelli, Pelle e Unghie' },
-    { src: '/v61/img/capelli-pelle-unghie-composition.png', label: 'Composizione', alt: 'Capelli, Pelle e Unghie - composizione' },
-    { src: '/v61/img/capelli-pelle-unghie-retro.png', label: 'Retro etichetta', alt: 'Capelli, Pelle e Unghie - retro etichetta' },
-  ],
-  'microcircolo-superior': [
-    { src: '/v61/img/microcircolo-superior-front.png', label: 'Fronte', alt: 'Microcircolo Superior' },
-    { src: '/v61/img/microcircolo-superior-composition.png', label: 'Composizione', alt: 'Microcircolo Superior - composizione' },
-    { src: '/v61/img/microcircolo-superior-retro.png', label: 'Retro etichetta', alt: 'Microcircolo Superior - retro etichetta' },
-  ],
-  'multivitaminico-minerali': [
-    { src: '/v61/img/multivitaminico-minerali-front.png', label: 'Fronte', alt: 'Multivitaminico e Minerali' },
-    { src: '/v61/img/multivitaminico-minerali-composition.png', label: 'Composizione', alt: 'Multivitaminico e Minerali - composizione' },
-    { src: '/v61/img/multivitaminico-minerali-retro.png', label: 'Retro etichetta', alt: 'Multivitaminico e Minerali - retro etichetta' },
-  ],
-}
 
 const PRODUCT_KICKERS: Record<string, string> = {
   'menopausa-complex': 'Linea Menopausa - Formula giorno e notte',
@@ -60,13 +41,12 @@ export default async function ProductPage({ params }: Props) {
   const {
     line, name, shortDescription, longDescription,
     usage, target, capsules, days,
-    dosage, notificationMs, format,
+    dosage, notificationMs, format, ingredientsText,
+    nameEn, shortDescriptionEn, longDescriptionEn, usageEn, targetEn, formatEn, ingredientsTextEn,
   } = product
 
   const images = product.images as ProductImages
-  const gallerySlides = V61_PRODUCT_GALLERIES[slug] ?? buildFallbackGallery(images, name)
-  const productImage = gallerySlides[0]?.src ?? images?.fronte
-  const [mainName, emphasizedName] = splitProductName(name)
+  const gallerySlides = buildFallbackGallery(images, name)
   const metaPills = [
     capsules ? `${capsules} capsule vegetali` : format,
     days ? `${days} giorni` : null,
@@ -87,14 +67,38 @@ export default async function ProductPage({ params }: Props) {
       </div>
 
       <section className="page-hero product-single-hero">
-        <div className="v61-inner">
-          <div className="v61-eyebrow light">{line.name}</div>
-          <h1 className="v61-title v61-product-detail-title">
-            {mainName} {emphasizedName && <em>{emphasizedName}.</em>}
-          </h1>
-          <p>{shortDescription}</p>
+        <div className="v61-inner v61-product-hero-grid">
+          <div>
+            <div className="v61-eyebrow light">{line.name}</div>
+            <h1 className="v61-title v61-product-detail-title">
+              <ProductTitle name={name} nameEn={nameEn} />
+            </h1>
+            <p><Localized it={shortDescription} en={shortDescriptionEn} /></p>
+          </div>
+
+          {gallerySlides.length > 0 ? (
+            <ProductGallery slides={gallerySlides} color={line.color} contained />
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <BottleStub color={line.color} colorLight={line.colorLight} label={name} />
+            </div>
+          )}
         </div>
       </section>
+
+      <style>{`
+        .v61-product-hero-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 2.5rem;
+          align-items: center;
+        }
+        @media (min-width: 900px) {
+          .v61-product-hero-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+      `}</style>
 
       <section className="section v61-product-detail-section">
         <div className="v61-inner">
@@ -118,33 +122,13 @@ export default async function ProductPage({ params }: Props) {
               color={line.color}
             />
           </div>
-        </div>
 
-            <div className="v61-product-detail-copy">
-              <div className="v61-detail-kicker">{PRODUCT_KICKERS[slug] ?? `${line.name} - Formula mirata`}</div>
-              <h2>{name}</h2>
-              <p className="v61-product-detail-description">{longDescription || shortDescription}</p>
-
-              <div className="v61-product-purchase">
-                <div className="v61-price-row">
-                  <span>€ {product.price.toFixed(2).replace('.', ',')}</span>
-                  {product.comparePrice && <del>€ {product.comparePrice.toFixed(2).replace('.', ',')}</del>}
-                </div>
-
-                <AddToCartButton
-                  item={{
-                    productId: product.id,
-                    slug: product.slug,
-                    name: product.name,
-                    price: product.price,
-                    comparePrice: product.comparePrice ?? undefined,
-                    image: productImage,
-                  }}
-                  color={line.color}
-                  stock={product.stock}
-                />
-              </div>
-            </div>
+          <div className="v61-product-detail-copy">
+            <div className="v61-detail-kicker">{PRODUCT_KICKERS[slug] ?? `${line.name} - Formula mirata`}</div>
+            <h2><ProductTitle name={name} nameEn={nameEn} join /></h2>
+            <p className="v61-product-detail-description">
+              <Localized it={longDescription || shortDescription} en={longDescriptionEn || shortDescriptionEn} />
+            </p>
           </div>
         </div>
       </section>
@@ -157,20 +141,22 @@ export default async function ProductPage({ params }: Props) {
 
       <section className="section v61-detail-info-section">
         <div className="v61-inner v61-detail-grid">
-          <DetailCard title="Modo d'uso" color={line.color}>{usage ?? 'Seguire le indicazioni riportate in etichetta.'}</DetailCard>
-          <DetailCard title="A chi è rivolto" color={line.color}>{target ?? 'Pensato per chi cerca un supporto nutrizionale mirato.'}</DetailCard>
-          <DetailCard title="Formato e composizione" color={line.color}>{format ?? `${capsules ?? ''} capsule vegetali`.trim()}</DetailCard>
+          <DetailCard title="Modo d'uso" color={line.color}>
+            <Localized it={usage ?? "Seguire le indicazioni riportate in etichetta."} en={usageEn} />
+          </DetailCard>
+          <DetailCard title="A chi è rivolto" color={line.color}>
+            <Localized it={target ?? 'Pensato per chi cerca un supporto nutrizionale mirato.'} en={targetEn} />
+          </DetailCard>
+          <DetailCard title="Formato e composizione" color={line.color}>
+            <Localized it={format ?? `${capsules ?? ''} capsule vegetali`.trim()} en={formatEn} />
+          </DetailCard>
+          <DetailCard title="Ingredienti" color={line.color}>
+            <Localized it={ingredientsText ?? 'Ingredienti non ancora specificati.'} en={ingredientsTextEn} />
+          </DetailCard>
         </div>
       </section>
 
-      <div className="v61-regulatory-notice">
-        <div>
-          Integratore alimentare notificato al Ministero della Salute della Repubblica Italiana
-          {notificationMs ? ` (${notificationMs})` : ''}. Non superare la dose giornaliera consigliata.
-          Gli integratori alimentari non sostituiscono una dieta varia ed equilibrata e uno stile di vita sano.
-          Tenere fuori dalla portata dei bambini.
-        </div>
-      </div>
+      <ProductRegulatoryNotice notificationMs={notificationMs} />
     </main>
   )
 }
@@ -182,12 +168,6 @@ function buildFallbackGallery(images: ProductImages, name: string): GallerySlide
     images?.lato2 && { src: images.lato2, label: 'Retro etichetta', alt: `${name} - retro etichetta` },
     images?.etichetta && { src: images.etichetta, label: 'Etichetta', alt: `${name} - etichetta` },
   ].filter(Boolean) as GallerySlide[]
-}
-
-function splitProductName(name: string): [string, string] {
-  const words = name.split(' ')
-  if (words.length < 2) return [name, '']
-  return [words.slice(0, -1).join(' '), words[words.length - 1]]
 }
 
 function SectionLabel({ children, color }: { children: ReactNode; color: string }) {

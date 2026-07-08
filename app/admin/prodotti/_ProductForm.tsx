@@ -13,16 +13,16 @@ interface Props {
   deleteAction?: (fd: FormData) => Promise<void>
 }
 
-function Field({ label: lbl, name, type = 'text', required, defaultValue, placeholder, rows }: {
+function Field({ label: lbl, name, type = 'text', required, defaultValue, placeholder, rows, step }: {
   label: string; name: string; type?: string; required?: boolean
-  defaultValue?: string | number | null; placeholder?: string; rows?: number
+  defaultValue?: string | number | null; placeholder?: string; rows?: number; step?: string
 }) {
   return (
     <div>
       <label style={s.label}>{lbl}{required && <span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>}</label>
       {rows
         ? <textarea name={name} required={required} defaultValue={defaultValue ?? ''} placeholder={placeholder} rows={rows} style={{ ...s.input, resize: 'vertical' }} />
-        : <input name={name} type={type} required={required} defaultValue={defaultValue ?? ''} placeholder={placeholder} style={s.input} />
+        : <input name={name} type={type} step={step} required={required} defaultValue={defaultValue ?? ''} placeholder={placeholder} style={s.input} />
       }
     </div>
   )
@@ -107,10 +107,33 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
               </p>
             </div>
 
-            {/* Ingredienti */}
+            {/* Valori nutrizionali (tabella strutturata nome/dosaggio) */}
             <div style={s.cardPad}>
-              <p style={s.cardTitle}>Ingredienti · Contenuti medi per dose</p>
+              <p style={s.cardTitle}>Valori nutrizionali · Contenuti medi per dose</p>
               <IngredientsEditor defaultValue={product?.ingredients ?? []} />
+            </div>
+
+            {/* Ingredienti (testo libero, box separato in pagina prodotto) */}
+            <div style={s.cardPad}>
+              <p style={s.cardTitle}>Ingredienti</p>
+              <Field label="Elenco ingredienti" name="ingredientsText" defaultValue={product?.ingredientsText} rows={4} placeholder="es. Agnocasto, Vitamina B6, Magnesio, ..." />
+            </div>
+
+            {/* Traduzione inglese */}
+            <div style={s.cardPad}>
+              <p style={s.cardTitle}>Traduzione inglese (EN)</p>
+              <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: '-0.375rem 0 0.875rem' }}>
+                Mostrata sul sito quando il cliente seleziona EN. Se lasci un campo vuoto, resta visibile l&apos;italiano.
+              </p>
+              <div style={s.stack(14)}>
+                <Field label="Nome prodotto (EN)" name="nameEn" defaultValue={product?.nameEn} />
+                <Field label="Descrizione breve (EN)" name="shortDescriptionEn" defaultValue={product?.shortDescriptionEn} rows={2} />
+                <Field label="Descrizione lunga (EN)" name="longDescriptionEn" defaultValue={product?.longDescriptionEn} rows={5} />
+                <Field label="Uso consigliato (EN)" name="usageEn" defaultValue={product?.usageEn} rows={2} />
+                <Field label="Target (EN)" name="targetEn" defaultValue={product?.targetEn} rows={2} />
+                <Field label="Descrizione formato (EN)" name="formatEn" defaultValue={product?.formatEn} />
+                <Field label="Elenco ingredienti (EN)" name="ingredientsTextEn" defaultValue={product?.ingredientsTextEn} rows={4} />
+              </div>
             </div>
 
             <div style={s.cardPad}>
@@ -130,8 +153,8 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
                 Usati solo se il prodotto non ha varianti (vedi sotto).
               </p>
               <div style={s.stack(12)}>
-                <Field label="Prezzo (€)" name="price" type="number" required defaultValue={product?.price} placeholder="0.00" />
-                <Field label="Prezzo barrato (€)" name="comparePrice" type="number" defaultValue={product?.comparePrice} placeholder="0.00" />
+                <Field label="Prezzo (€)" name="price" type="number" step="0.01" required defaultValue={product?.price} placeholder="0.00" />
+                <Field label="Prezzo barrato (€)" name="comparePrice" type="number" step="0.01" defaultValue={product?.comparePrice} placeholder="0.00" />
                 <Field label="Scorte" name="stock" type="number" required defaultValue={product?.stock ?? 0} />
               </div>
             </div>

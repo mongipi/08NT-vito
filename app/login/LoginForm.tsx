@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -13,20 +15,23 @@ const inputStyle: React.CSSProperties = {
   fontFamily: 'var(--font-montserrat)',
 }
 
-const VERIFY_BANNER: Record<string, { text: string; color: string; bg: string; border: string }> = {
-  success: { text: 'Email confermata! Ora puoi accedere.', color: '#166534', bg: '#f0fdf4', border: '#bbf7d0' },
-  expired: { text: 'Il link di conferma è scaduto. Richiedine uno nuovo qui sotto dopo aver effettuato l\'accesso.', color: '#a16207', bg: '#fffbeb', border: '#fde68a' },
-  invalid: { text: 'Link di conferma non valido.', color: '#dc2626', bg: '#fff5f5', border: '#fecaca' },
-}
-
-const RESET_BANNER: Record<string, { text: string; color: string; bg: string; border: string }> = {
-  success: { text: 'Password aggiornata! Accedi con la nuova password.', color: '#166534', bg: '#f0fdf4', border: '#bbf7d0' },
-}
-
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const callbackUrl = searchParams.get('callbackUrl') ?? '/account'
+
+  const VERIFY_BANNER: Record<string, { text: string; color: string; bg: string; border: string }> = {
+    success: { text: t('login_verify_success'), color: '#166534', bg: '#f0fdf4', border: '#bbf7d0' },
+    expired: { text: t('login_verify_expired'), color: '#a16207', bg: '#fffbeb', border: '#fde68a' },
+    invalid: { text: t('login_verify_invalid'), color: '#dc2626', bg: '#fff5f5', border: '#fecaca' },
+  }
+
+  const RESET_BANNER: Record<string, { text: string; color: string; bg: string; border: string }> = {
+    success: { text: t('login_reset_success'), color: '#166534', bg: '#f0fdf4', border: '#bbf7d0' },
+  }
+
   const verifyBanner = VERIFY_BANNER[searchParams.get('verify') ?? '']
   const resetBanner = RESET_BANNER[searchParams.get('reset') ?? '']
   const banner = verifyBanner ?? resetBanner
@@ -47,10 +52,10 @@ export function LoginForm() {
     const res = await signIn('credentials', { email, password, redirect: false })
     if (res?.error) {
       if (res.error === 'email_not_verified') {
-        setError('Devi prima confermare la tua email. Controlla la tua casella di posta.')
+        setError(t('login_error_unverified'))
         setUnverifiedEmail(email)
       } else {
-        setError('Email o password non corretti.')
+        setError(t('login_error_credentials'))
       }
       setLoading(false)
     } else {
@@ -85,7 +90,7 @@ export function LoginForm() {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div>
           <label style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-3)', marginBottom: '0.375rem' }}>
-            Email
+            {t('login_email')}
           </label>
           <input
             type="email" required autoComplete="email"
@@ -97,10 +102,10 @@ export function LoginForm() {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.375rem' }}>
             <label style={{ fontSize: '0.6875rem', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
-              Password
+              {t('login_password')}
             </label>
             <Link href="/password-dimenticata" style={{ fontSize: '0.75rem', color: 'var(--forest)', textDecoration: 'none', borderBottom: '1px solid var(--green-l)' }}>
-              Password dimenticata?
+              {t('login_forgot_password')}
             </Link>
           </div>
           <input
@@ -127,7 +132,7 @@ export function LoginForm() {
               cursor: resendState === 'idle' ? 'pointer' : 'default',
             }}
           >
-            {resendState === 'sent' ? 'Email inviata di nuovo' : resendState === 'sending' ? 'Invio in corso…' : 'Invia di nuovo l\'email di conferma'}
+            {resendState === 'sent' ? t('login_resend_sent') : resendState === 'sending' ? t('login_resend_sending') : t('login_resend_verification')}
           </button>
         )}
 
@@ -141,14 +146,14 @@ export function LoginForm() {
             transition: 'background 0.2s',
           }}
         >
-          {loading ? 'Accesso in corso…' : 'Accedi'}
+          {loading ? t('login_submitting') : t('login_submit')}
         </button>
       </form>
 
       {/* Divider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{ flex: 1, height: '0.5px', background: 'var(--border)' }} />
-        <span style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', letterSpacing: '0.1em' }}>oppure</span>
+        <span style={{ fontSize: '0.6875rem', color: 'var(--ink-4)', letterSpacing: '0.1em' }}>{t('login_or')}</span>
         <div style={{ flex: 1, height: '0.5px', background: 'var(--border)' }} />
       </div>
 
@@ -163,7 +168,7 @@ export function LoginForm() {
         }}
       >
         <GoogleIcon />
-        Continua con Google
+        {t('login_google')}
       </button>
     </div>
   )

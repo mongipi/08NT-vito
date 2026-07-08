@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
+import { richText } from '@/lib/i18n/richText'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -17,6 +20,8 @@ const labelStyle: React.CSSProperties = {
 }
 
 export function RegisterForm() {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,7 +35,7 @@ export function RegisterForm() {
     setError(null)
 
     if (password !== confirmPassword) {
-      setError('Le password non coincidono')
+      setError(t('register_password_mismatch'))
       return
     }
 
@@ -43,14 +48,14 @@ export function RegisterForm() {
       })
       if (!res.ok) {
         const data = await res.json()
-        setError(data.error ?? 'Errore durante la registrazione')
+        setError(data.error ?? t('register_generic_error'))
         setLoading(false)
         return
       }
       setSubmitted(true)
       setLoading(false)
     } catch {
-      setError('Errore di rete. Riprova.')
+      setError(t('register_network_error'))
       setLoading(false)
     }
   }
@@ -62,11 +67,10 @@ export function RegisterForm() {
         border: '1px solid var(--border-2)', textAlign: 'center',
       }}>
         <p style={{ fontSize: '0.9375rem', color: 'var(--ink)', fontWeight: 500, marginBottom: '0.5rem' }}>
-          Controlla la tua email
+          {t('register_check_email_title')}
         </p>
         <p style={{ fontSize: '0.8125rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
-          Ti abbiamo inviato un link a <strong>{email}</strong> per confermare il tuo indirizzo.
-          Clicca sul link entro 24 ore per attivare l&apos;account.
+          {richText(t('register_check_email_body', { email }))}
         </p>
       </div>
     )
@@ -75,41 +79,41 @@ export function RegisterForm() {
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div>
-        <label style={labelStyle}>Nome</label>
+        <label style={labelStyle}>{t('register_name')}</label>
         <input
           type="text" required autoComplete="name"
           value={name} onChange={e => setName(e.target.value)}
-          placeholder="Mario Rossi"
+          placeholder={t('register_name_placeholder')}
           style={inputStyle}
         />
       </div>
 
       <div>
-        <label style={labelStyle}>Email</label>
+        <label style={labelStyle}>{t('login_email')}</label>
         <input
           type="email" required autoComplete="email"
           value={email} onChange={e => setEmail(e.target.value)}
-          placeholder="mario@esempio.it"
+          placeholder={t('register_email_placeholder')}
           style={inputStyle}
         />
       </div>
 
       <div>
-        <label style={labelStyle}>Password</label>
+        <label style={labelStyle}>{t('register_password')}</label>
         <input
           type="password" required minLength={8} autoComplete="new-password"
           value={password} onChange={e => setPassword(e.target.value)}
-          placeholder="Minimo 8 caratteri"
+          placeholder={t('register_password_placeholder')}
           style={inputStyle}
         />
       </div>
 
       <div>
-        <label style={labelStyle}>Conferma password</label>
+        <label style={labelStyle}>{t('register_confirm_password')}</label>
         <input
           type="password" required minLength={8} autoComplete="new-password"
           value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-          placeholder="Ripeti la password"
+          placeholder={t('register_confirm_password_placeholder')}
           style={inputStyle}
         />
       </div>
@@ -130,14 +134,14 @@ export function RegisterForm() {
           transition: 'background 0.2s',
         }}
       >
-        {loading ? 'Creazione account…' : 'Crea account'}
+        {loading ? t('register_submitting') : t('register_submit')}
       </button>
 
       <p style={{ fontSize: '0.75rem', color: 'var(--ink-4)', textAlign: 'center', lineHeight: 1.6 }}>
-        Registrandoti accetti i nostri{' '}
-        <a href="/termini-condizioni-vendita" style={{ color: 'var(--forest)', textDecoration: 'none', borderBottom: '1px solid var(--green-l)' }}>Termini e condizioni di vendita</a>
-        {' '}e la{' '}
-        <a href="/privacy" style={{ color: 'var(--forest)', textDecoration: 'none', borderBottom: '1px solid var(--green-l)' }}>Privacy Policy</a>.
+        {t('register_terms_prefix')}{' '}
+        <a href="/termini-condizioni-vendita" style={{ color: 'var(--forest)', textDecoration: 'none', borderBottom: '1px solid var(--green-l)' }}>{t('register_terms_link')}</a>
+        {' '}{t('register_and_the')}{' '}
+        <a href="/privacy" style={{ color: 'var(--forest)', textDecoration: 'none', borderBottom: '1px solid var(--green-l)' }}>{t('register_privacy_link')}</a>.
       </p>
     </form>
   )
