@@ -13,16 +13,16 @@ interface Props {
   deleteAction?: (fd: FormData) => Promise<void>
 }
 
-function Field({ label: lbl, name, type = 'text', required, defaultValue, placeholder, rows }: {
+function Field({ label: lbl, name, type = 'text', required, defaultValue, placeholder, rows, step }: {
   label: string; name: string; type?: string; required?: boolean
-  defaultValue?: string | number | null; placeholder?: string; rows?: number
+  defaultValue?: string | number | null; placeholder?: string; rows?: number; step?: string
 }) {
   return (
     <div>
       <label style={s.label}>{lbl}{required && <span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>}</label>
       {rows
         ? <textarea name={name} required={required} defaultValue={defaultValue ?? ''} placeholder={placeholder} rows={rows} style={{ ...s.input, resize: 'vertical' }} />
-        : <input name={name} type={type} required={required} defaultValue={defaultValue ?? ''} placeholder={placeholder} style={s.input} />
+        : <input name={name} type={type} step={step} required={required} defaultValue={defaultValue ?? ''} placeholder={placeholder} style={s.input} />
       }
     </div>
   )
@@ -153,8 +153,8 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
                 Usati solo se il prodotto non ha varianti (vedi sotto).
               </p>
               <div style={s.stack(12)}>
-                <Field label="Prezzo (€)" name="price" type="number" required defaultValue={product?.price} placeholder="0.00" />
-                <Field label="Prezzo barrato (€)" name="comparePrice" type="number" defaultValue={product?.comparePrice} placeholder="0.00" />
+                <Field label="Prezzo (€)" name="price" type="number" step="0.01" required defaultValue={product?.price} placeholder="0.00" />
+                <Field label="Prezzo barrato (€)" name="comparePrice" type="number" step="0.01" defaultValue={product?.comparePrice} placeholder="0.00" />
                 <Field label="Scorte" name="stock" type="number" required defaultValue={product?.stock ?? 0} />
               </div>
             </div>
