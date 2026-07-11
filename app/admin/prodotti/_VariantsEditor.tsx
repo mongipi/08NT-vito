@@ -13,6 +13,13 @@ interface Variant {
 
 const EMPTY: Variant = { label: '', quantity: '', price: '', comparePrice: '', b2bPrice: '', stock: '' }
 
+function parseDecimal(value: number | string | null | undefined) {
+  const normalized = String(value ?? '').trim().replace(',', '.')
+  if (!normalized) return 0
+  const parsed = Number.parseFloat(normalized)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
 export function VariantsEditor({ defaultValue }: { defaultValue: Variant[] }) {
   const [items, setItems] = useState<Variant[]>(defaultValue)
 
@@ -33,9 +40,9 @@ export function VariantsEditor({ defaultValue }: { defaultValue: Variant[] }) {
     .map(v => ({
       label: v.label,
       quantity: parseInt(String(v.quantity)) || 0,
-      price: parseFloat(String(v.price)) || 0,
-      comparePrice: v.comparePrice ? parseFloat(String(v.comparePrice)) : null,
-      b2bPrice: v.b2bPrice ? parseFloat(String(v.b2bPrice)) : null,
+      price: parseDecimal(v.price),
+      comparePrice: v.comparePrice ? parseDecimal(v.comparePrice) : null,
+      b2bPrice: v.b2bPrice ? parseDecimal(v.b2bPrice) : null,
       stock: parseInt(String(v.stock)) || 0,
     }))
 
@@ -59,9 +66,9 @@ export function VariantsEditor({ defaultValue }: { defaultValue: Variant[] }) {
         <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.7fr 0.9fr 0.9fr 0.9fr 0.8fr 2rem', gap: '0.5rem', alignItems: 'center' }}>
           <input type="text" value={item.label} onChange={e => update(i, 'label', e.target.value)} placeholder="es. 30 pastiglie" style={s.input} />
           <input type="number" value={item.quantity} onChange={e => update(i, 'quantity', e.target.value)} placeholder="30" style={s.input} />
-          <input type="number" step="0.01" value={item.price} onChange={e => update(i, 'price', e.target.value)} placeholder="0.00" style={s.input} />
-          <input type="number" step="0.01" value={item.comparePrice ?? ''} onChange={e => update(i, 'comparePrice', e.target.value)} placeholder="0.00" style={s.input} />
-          <input type="number" step="0.01" value={item.b2bPrice ?? ''} onChange={e => update(i, 'b2bPrice', e.target.value)} placeholder="0.00" style={s.input} />
+          <input type="text" inputMode="decimal" value={item.price} onChange={e => update(i, 'price', e.target.value)} placeholder="0,00" style={s.input} />
+          <input type="text" inputMode="decimal" value={item.comparePrice ?? ''} onChange={e => update(i, 'comparePrice', e.target.value)} placeholder="0,00" style={s.input} />
+          <input type="text" inputMode="decimal" value={item.b2bPrice ?? ''} onChange={e => update(i, 'b2bPrice', e.target.value)} placeholder="0,00" style={s.input} />
           <input type="number" value={item.stock} onChange={e => update(i, 'stock', e.target.value)} placeholder="0" style={s.input} />
           <button
             type="button"

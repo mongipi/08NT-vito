@@ -1078,13 +1078,14 @@ export const dictionary = {
     method_vision_cta1: 'Discover our products',
     method_vision_cta2: 'Contact us',
   },
-} as const satisfies Record<Locale, Record<string, string>>
+} as const satisfies Record<string, Record<string, string>>
 
 export type DictionaryKey = keyof typeof dictionary.it
 
 export function useTranslation(locale: Locale) {
   return (key: DictionaryKey, vars?: Record<string, string>) => {
-    const text = dictionary[locale][key] ?? dictionary.it[key]
+    const selected = dictionary[locale as keyof typeof dictionary] ?? dictionary.it
+    const text = selected[key] ?? dictionary.it[key]
     if (!vars) return text
     return Object.entries(vars).reduce(
       (acc, [k, v]) => acc.replace(`{${k}}`, v),

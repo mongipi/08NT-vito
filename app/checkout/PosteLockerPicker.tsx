@@ -119,6 +119,15 @@ export function PosteLockerPicker({ pickupPointCode, pickupPointAddress, onSelec
 
       {error && <p style={{ fontSize: '0.75rem', color: '#dc2626', margin: 0 }}>{error}</p>}
 
+      <a
+        href="https://www.poste.it/prenotazione/vieni-in-poste?vieni-in-poste"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ fontSize: '0.75rem', color: 'var(--forest)', fontWeight: 500, width: 'max-content' }}
+      >
+        Visualizza i punti Poste Italiane vicino a te →
+      </a>
+
       {lockers.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: 280, overflowY: 'auto' }}>
           {lockers.map(l => {

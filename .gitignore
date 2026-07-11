@@ -37,3 +37,5 @@ npm-debug.log*
 # ── Mockup HTML (file di design, non del progetto Next.js) ──
 08NT_mockup_sito.html
 08NT_mockup_sito_V2.html
+.vercel
+.env*

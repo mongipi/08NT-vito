@@ -6,6 +6,7 @@ import { useLocale, pickLocalized } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
 import { formatDate } from '@/lib/utils'
+import { NewsletterSignup } from '@/components/ui/NewsletterSignup'
 
 export interface HomeArticle {
   id: string
@@ -81,6 +82,12 @@ export function HomeContent({ articles }: { articles: HomeArticle[] }) {
           <h2 className="v61-title">{richText(t('home_formulas_title'))}</h2>
           <p>{t('home_formulas_body')}</p>
           <Link className="v61-button green" href="/prodotti">{t('home_formulas_cta')}</Link>
+        </div>
+      </section>
+
+      <section className="section v61-home-newsletter-section">
+        <div className="v61-inner">
+          <NewsletterSignup />
         </div>
       </section>
 

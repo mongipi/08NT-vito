@@ -31,7 +31,7 @@ export default async function ImpostazioniPage({
   const iban         = settings[SETTING_KEYS.IBAN]         ?? ''
   const intestatario = settings[SETTING_KEYS.INTESTATARIO] ?? ''
   const codSurcharge       = settings[SETTING_KEYS.COD_SURCHARGE]       ?? '5'
-  const speGratuita        = settings[SETTING_KEYS.SPEDIZIONE_GRATUITA] ?? '50'
+  const speGratuita        = settings[SETTING_KEYS.SPEDIZIONE_GRATUITA] ?? '39.90'
   const prezzoSpe          = settings[SETTING_KEYS.PREZZO_SPEDIZIONE]   ?? '5.90'
   const supplementoEstero  = settings[SETTING_KEYS.SUPPLEMENTO_ESTERO]  ?? '10'
 

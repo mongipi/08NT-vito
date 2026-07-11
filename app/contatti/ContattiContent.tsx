@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
+import { SOCIAL_LINKS } from '@/lib/social-links'
 
 export function ContattiContent() {
   const { locale } = useLocale()
@@ -16,7 +17,7 @@ export function ContattiContent() {
     { label: t('contact_row_phone_label'), value: '080 303 1103', href: 'tel:+390803031103' },
     { label: t('contact_row_whatsapp_label'), value: '351 507 8701', href: 'https://wa.me/393515078701', icon: '/v61/icons/whatsapp.svg' },
     { label: t('contact_row_email_label'), value: '08naturaltechnology@gmail.com', href: 'mailto:08naturaltechnology@gmail.com' },
-    { label: t('contact_row_social_label'), value: t('contact_row_social_value') },
+    { label: t('contact_row_social_label'), value: t('contact_row_social_value'), social: true },
   ]
 
   return (
@@ -37,6 +38,14 @@ export function ContattiContent() {
                       {row.icon && <Image src={row.icon} alt="" width={15} height={15} />}
                       <span>{row.value}</span>
                     </a>
+                  ) : row.social ? (
+                    <div className="v61-contact-socials">
+                      {SOCIAL_LINKS.map(({ href, label }) => (
+                        <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
+                          <Image src={`/v61/icons/${label.toLowerCase()}.svg`} alt="" width={16} height={16} />
+                        </a>
+                      ))}
+                    </div>
                   ) : row.value}
                 </div>
               ))}

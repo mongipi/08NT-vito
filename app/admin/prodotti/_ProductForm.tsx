@@ -153,8 +153,8 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
                 Usati solo se il prodotto non ha varianti (vedi sotto).
               </p>
               <div style={s.stack(12)}>
-                <Field label="Prezzo (€)" name="price" type="number" step="0.01" required defaultValue={product?.price} placeholder="0.00" />
-                <Field label="Prezzo barrato (€)" name="comparePrice" type="number" step="0.01" defaultValue={product?.comparePrice} placeholder="0.00" />
+                <Field label="Prezzo (€)" name="price" required defaultValue={product?.price} placeholder="0,00" />
+                <Field label="Prezzo barrato (€)" name="comparePrice" defaultValue={product?.comparePrice} placeholder="0,00" />
                 <Field label="Scorte" name="stock" type="number" required defaultValue={product?.stock ?? 0} />
               </div>
             </div>

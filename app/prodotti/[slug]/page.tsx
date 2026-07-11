@@ -67,7 +67,7 @@ export default async function ProductPage({ params }: Props) {
       </div>
 
       <section className="page-hero product-single-hero">
-        <div className="v61-inner v61-product-hero-grid">
+        <div className="v61-inner">
           <div>
             <div className="v61-eyebrow light">{line.name}</div>
             <h1 className="v61-title v61-product-detail-title">
@@ -75,60 +75,50 @@ export default async function ProductPage({ params }: Props) {
             </h1>
             <p><Localized it={shortDescription} en={shortDescriptionEn} /></p>
           </div>
-
-          {gallerySlides.length > 0 ? (
-            <ProductGallery slides={gallerySlides} color={line.color} contained />
-          ) : (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <BottleStub color={line.color} colorLight={line.colorLight} label={name} />
-            </div>
-          )}
         </div>
       </section>
 
-      <style>{`
-        .v61-product-hero-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 2.5rem;
-          align-items: center;
-        }
-        @media (min-width: 900px) {
-          .v61-product-hero-grid {
-            grid-template-columns: 1fr 1fr;
-          }
-        }
-      `}</style>
-
       <section className="section v61-product-detail-section">
         <div className="v61-inner">
-          <div className="v61-product-detail-meta">
-            <div className="v61-meta-row">
-              {metaPills.map((pill) => <span className="v61-pill" key={pill}>{pill}</span>)}
+          <div className="v61-product-purchase-grid">
+            <div
+              className={`v61-product-purchase-media v61-product-media-${slug}`}
+              style={slug === 'menopausa-complex' ? { '--product-gallery-max-width': '232px' } as CSSProperties : undefined}
+            >
+              {gallerySlides.length > 0 ? (
+                <ProductGallery slides={gallerySlides} color={line.color} contained />
+              ) : (
+                <BottleStub color={line.color} colorLight={line.colorLight} label={name} />
+              )}
             </div>
-          </div>
 
-          {/* Prezzo + varianti + Aggiungi al carrello */}
-          <div style={{ marginTop: '1.75rem' }}>
-            <ProductPurchasePanel
-              productId={product.id}
-              slug={product.slug}
-              name={product.name}
-              image={images.fronte}
-              price={product.price}
-              comparePrice={product.comparePrice}
-              stock={product.stock}
-              variants={product.variants}
-              color={line.color}
-            />
-          </div>
+            <div className="v61-product-purchase-content">
+              <div className="v61-product-detail-meta">
+                <div className="v61-meta-row">
+                  {metaPills.map((pill) => <span className="v61-pill" key={pill}>{pill}</span>)}
+                </div>
+              </div>
 
-          <div className="v61-product-detail-copy">
-            <div className="v61-detail-kicker">{PRODUCT_KICKERS[slug] ?? `${line.name} - Formula mirata`}</div>
-            <h2><ProductTitle name={name} nameEn={nameEn} join /></h2>
-            <p className="v61-product-detail-description">
-              <Localized it={longDescription || shortDescription} en={longDescriptionEn || shortDescriptionEn} />
-            </p>
+              <ProductPurchasePanel
+                productId={product.id}
+                slug={product.slug}
+                name={product.name}
+                image={images.fronte}
+                price={product.price}
+                comparePrice={product.comparePrice}
+                stock={product.stock}
+                variants={product.variants}
+                color={line.color}
+              />
+
+              <div className="v61-product-detail-copy">
+                <div className="v61-detail-kicker">{PRODUCT_KICKERS[slug] ?? `${line.name} - Formula mirata`}</div>
+                <h2><ProductTitle name={name} nameEn={nameEn} join /></h2>
+                <p className="v61-product-detail-description">
+                  <Localized it={longDescription || shortDescription} en={longDescriptionEn || shortDescriptionEn} />
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

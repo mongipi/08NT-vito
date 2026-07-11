@@ -12,6 +12,7 @@ import { issueVerificationEmail } from '@/lib/verification'
 import { chunkMetadataValue } from '@/lib/stripe-metadata'
 import bcrypt from 'bcryptjs'
 
+const STRIPE_EXCLUDED_PAYMENT_METHOD_TYPES: Stripe.PaymentIntentCreateParams.ExcludedPaymentMethodType[] = ['amazon_pay', 'eps']
 
 export interface ShippingAddress {
   firstName: string
@@ -88,6 +89,8 @@ export async function createPaymentIntent(
   const paymentIntent = await stripe.paymentIntents.create({
     amount: amountInCents,
     currency: 'eur',
+    automatic_payment_methods: { enabled: true },
+    excluded_payment_method_types: STRIPE_EXCLUDED_PAYMENT_METHOD_TYPES,
     metadata: {
       userId: session?.user?.id ?? '',
       guestEmail: shippingAddress.guestEmail ?? '',

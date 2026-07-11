@@ -14,6 +14,7 @@ export interface Ingredient {
   id: string
   name: string
   dosage?: string | null
+  vnr?: string | null
   order: number
 }
 

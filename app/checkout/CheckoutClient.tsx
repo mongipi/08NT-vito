@@ -53,7 +53,7 @@ interface Prefill {
 export function CheckoutClient({
   prefill,
   codSurcharge     = 5,
-  shippingThreshold = 50,
+  shippingThreshold = 39.90,
   shippingPrice     = 5.90,
   foreignSurcharge  = 10,
 }: {
@@ -526,7 +526,7 @@ export function CheckoutClient({
                       {/* Link locator corriere */}
                       <div style={{ fontSize: '0.75rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
                         {t('checkout_find_nearest_point')}&nbsp;
-                        <a href="https://www.brt.it/it/servizi/fermopoint.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--forest)', fontWeight: 500 }}>
+                        <a href="https://www.mybrt.it/it/mybrt/parcel-shops" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--forest)', fontWeight: 500 }}>
                           {t('checkout_carrier_brt')} →
                         </a>
                       </div>

@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Logo } from './Logo'
 import { SOCIAL_LINKS } from '@/lib/social-links'
 import { CookiePreferencesButton } from '@/components/ui/CookieConsent'
+import { NewsletterSignup } from '@/components/ui/NewsletterSignup'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
 
@@ -45,7 +46,13 @@ const CONTACTS = [
   { label: 'Email', href: 'mailto:08naturaltechnology@gmail.com', text: '08naturaltechnology@gmail.com', icon: 'email.svg' },
 ]
 
-const COURIERS = ['GLS', 'BRT', 'POSTE ITALIANE'] as const
+const COURIERS = [
+  { label: 'GLS', src: '/v61/img/gls%20logo.png', width: 57, height: 20 },
+  { label: 'BRT', src: '/v61/img/brt%20logo.png', width: 50, height: 24 },
+  { label: 'SDA', src: '/v61/img/sda%20logo.png', width: 100, height: 20 },
+] as const
+
+const PAYMENTS = ['Visa', 'Mastercard', 'PayPal', 'Google Pay', 'Apple Pay', 'Contrassegno', 'Bonifico'] as const
 
 export function Footer() {
   const { locale } = useLocale()
@@ -70,8 +77,16 @@ export function Footer() {
           </div>
           <div className="v61-footer-couriers" aria-label={t('footer_couriers')}>
             {COURIERS.map((courier) => (
-              <span key={courier}>{courier}</span>
+              <span key={courier.label}>
+                <Image src={courier.src} alt={courier.label} width={courier.width} height={courier.height} />
+              </span>
             ))}
+          </div>
+          <div className="v61-footer-payments" aria-label="Pagamenti disponibili">
+            {PAYMENTS.map((payment) => <span key={payment}>{payment}</span>)}
+          </div>
+          <div className="v61-footer-ministry-logo" aria-label="Ministero della Salute">
+            <Image src="/v61/img/ministero.png" alt="Ministero della Salute" width={150} height={33} />
           </div>
         </div>
 
@@ -87,6 +102,10 @@ export function Footer() {
             </ul>
           </div>
         ))}
+
+        <div className="v61-footer-newsletter">
+          <NewsletterSignup variant="footer" />
+        </div>
       </div>
 
       <div className="v61-footer-bottom">

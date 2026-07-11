@@ -69,8 +69,7 @@ export function BlogArchiveClient({ articles }: { articles: BlogArchiveArticle[]
     <>
       <PageHeader
         eyebrow={t('blog_eyebrow')}
-        script={t('blog_script')}
-        title={<><span>{t('blog_title_1')}</span><br /><em>{t('blog_title_2')}</em></>}
+        title={<em>{t('blog_title_2')}</em>}
       />
 
       <section className="section v61-blog-search-section">

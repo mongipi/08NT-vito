@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 54" role="img" aria-label="Poste Italiane">
+  <rect width="210" height="54" rx="6" fill="#fff"/>
+  <rect x="8" y="9" width="56" height="36" rx="2" fill="#ffcc00"/>
+  <path d="M18 34h25c5 0 9-4 9-9s-4-9-9-9H18l5 6h19c2 0 4 1 4 3s-2 3-4 3H28l4 6H18Z" fill="#003f7d"/>
+  <path d="M75 17h18c8 0 13 5 13 12s-5 12-13 12h-8v-7h8c4 0 6-2 6-5s-2-5-6-5H82v17h-7V17Z" fill="#003f7d"/>
+  <path d="M111 24h7v17h-7V24Zm0-7h7v5h-7v-5Zm14 7h7v3c2-2 4-3 7-3 6 0 10 4 10 11v6h-7v-6c0-3-2-5-5-5s-5 2-5 5v6h-7V24Zm31 0h7v17h-7V24Zm0-7h7v5h-7v-5Zm15 0h7v24h-7V17Zm14 7h7v17h-7V24Zm0-7h7v5h-7v-5Z" fill="#003f7d"/>
+</svg>

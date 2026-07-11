@@ -64,10 +64,11 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
               }}
             >
               <div
+                className="v61-product-gallery-frame"
                 style={{
                   position: 'relative',
                   width: '100%',
-                  maxWidth: contained ? 260 : 760,
+                  maxWidth: contained ? 'var(--product-gallery-max-width, 260px)' : 760,
                   height: '100%',
                 }}
               >

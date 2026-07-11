@@ -29,7 +29,7 @@ async function saveImages(productId: string, formData: FormData) {
 }
 
 async function syncIngredients(productId: string, formData: FormData) {
-  interface RawIngredient { name: string; dosage?: string }
+  interface RawIngredient { name: string; dosage?: string; vnr?: string }
   const raw: RawIngredient[] = JSON.parse((formData.get('ingredients') as string) || '[]')
   await prisma.ingredient.deleteMany({ where: { productId } })
   if (raw.length > 0) {
@@ -38,10 +38,18 @@ async function syncIngredients(productId: string, formData: FormData) {
         productId,
         name: ing.name,
         dosage: ing.dosage ?? null,
+        vnr: ing.vnr ?? null,
         order: i,
       })),
     })
   }
+}
+
+function parseDecimal(value: FormDataEntryValue | string | number | null | undefined, fallback = 0) {
+  const normalized = String(value ?? '').trim().replace(',', '.')
+  if (!normalized) return fallback
+  const parsed = Number.parseFloat(normalized)
+  return Number.isFinite(parsed) ? parsed : fallback
 }
 
 async function syncVariants(productId: string, formData: FormData) {
@@ -61,9 +69,9 @@ async function syncVariants(productId: string, formData: FormData) {
         productId,
         label: v.label,
         quantity: v.quantity,
-        price: v.price,
-        comparePrice: v.comparePrice ?? null,
-        b2bPrice: v.b2bPrice ?? null,
+        price: parseDecimal(v.price),
+        comparePrice: v.comparePrice == null ? null : parseDecimal(v.comparePrice),
+        b2bPrice: v.b2bPrice == null ? null : parseDecimal(v.b2bPrice),
         stock: v.stock ?? 0,
         order: i,
       })),
@@ -83,8 +91,8 @@ function slugify(name: string) {
 function parseProductData(formData: FormData) {
   return {
     name: formData.get('name') as string,
-    price: parseFloat(formData.get('price') as string),
-    comparePrice: formData.get('comparePrice') ? parseFloat(formData.get('comparePrice') as string) : null,
+    price: parseDecimal(formData.get('price')),
+    comparePrice: formData.get('comparePrice') ? parseDecimal(formData.get('comparePrice')) : null,
     stock: parseInt(formData.get('stock') as string) || 0,
     published: formData.get('published') === 'on',
     order: parseInt(formData.get('order') as string) || 99,

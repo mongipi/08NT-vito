@@ -2,8 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-export type Locale = 'it' | 'en'
-export const AVAILABLE_LOCALES: Locale[] = ['it', 'en']
+export type Locale = 'it' | 'en' | 'es' | 'fr' | 'de' | 'pt'
+export const AVAILABLE_LOCALES: Locale[] = ['it', 'en', 'es', 'fr', 'de', 'pt']
 
 const STORAGE_KEY = '08nt-locale'
 
@@ -20,7 +20,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored === 'it' || stored === 'en') setLocaleState(stored)
+      if (AVAILABLE_LOCALES.includes(stored as Locale)) setLocaleState(stored as Locale)
     } catch {}
   }, [])
 

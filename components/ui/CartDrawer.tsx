@@ -36,7 +36,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     setCouponLoading(false)
   }
 
-  const freeThreshold  = shipping?.threshold ?? 50
+  const freeThreshold  = shipping?.threshold ?? 39.90
   const shippingPrice  = shipping?.price     ?? 5.90
   const missingForFree = Math.max(0, freeThreshold - cart.total)
   const hasFreeShipping = cart.total >= freeThreshold
@@ -252,6 +252,9 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
 
             <p style={{ textAlign: 'center', fontSize: '0.6875rem', color: 'var(--ink-4)', margin: 0 }}>
               {t('cart_checkout_note')}
+            </p>
+            <p style={{ textAlign: 'center', fontSize: '0.6875rem', color: 'var(--ink-4)', margin: 0, lineHeight: 1.55 }}>
+              Spedizione gratuita da {formatPrice(freeThreshold)}.
             </p>
           </div>
         )}

@@ -13,7 +13,7 @@ export default async function CheckoutPage() {
   const session = await auth()
   const settings = await getSettingsMap()
   const codSurcharge       = parseFloat(settings['COD_SURCHARGE']       ?? '5')    || 5
-  const shippingThreshold  = parseFloat(settings['SPEDIZIONE_GRATUITA'] ?? '50')   || 50
+  const shippingThreshold  = parseFloat(settings['SPEDIZIONE_GRATUITA'] ?? '39.90')   || 39.90
   const shippingPrice      = parseFloat(settings['PREZZO_SPEDIZIONE']   ?? '5.90') || 5.90
   const foreignSurcharge   = parseFloat(settings['SUPPLEMENTO_ESTERO']  ?? '10')   || 10
 
