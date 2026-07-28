@@ -2,8 +2,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getProductBySlug } from '@/services/products'
-import { ProductGallery } from '@/components/ui/ProductGallery'
-import { ProductPurchasePanel } from '@/components/ui/ProductPurchasePanel'
+import { ProductPurchaseExperience } from '@/components/ui/ProductPurchaseExperience'
 import type { Metadata } from 'next'
 import type { ProductImages } from '@/types'
 import { IngredientsDisclosure } from '@/components/ui/IngredientsDisclosure'
@@ -80,46 +79,31 @@ export default async function ProductPage({ params }: Props) {
 
       <section className="section v61-product-detail-section">
         <div className="v61-inner">
-          <div className="v61-product-purchase-grid">
-            <div
-              className={`v61-product-purchase-media v61-product-media-${slug}`}
-              style={slug === 'menopausa-complex' ? { '--product-gallery-max-width': '232px' } as CSSProperties : undefined}
-            >
-              {gallerySlides.length > 0 ? (
-                <ProductGallery slides={gallerySlides} color={line.color} contained />
-              ) : (
+          {gallerySlides.length > 0 ? (
+            <ProductPurchaseExperience
+              productId={product.id}
+              slug={product.slug}
+              name={product.name}
+              nameEn={nameEn}
+              image={images.fronte}
+              price={product.price}
+              comparePrice={product.comparePrice}
+              stock={product.stock}
+              variants={product.variants}
+              color={line.color}
+              slides={gallerySlides}
+              metaPills={metaPills}
+              kicker={PRODUCT_KICKERS[slug] ?? `${line.name} - Formula mirata`}
+              description={longDescription || shortDescription}
+              descriptionEn={longDescriptionEn || shortDescriptionEn}
+            />
+          ) : (
+            <div className="v61-product-purchase-grid">
+              <div className="v61-product-purchase-media">
                 <BottleStub color={line.color} colorLight={line.colorLight} label={name} />
-              )}
-            </div>
-
-            <div className="v61-product-purchase-content">
-              <div className="v61-product-detail-meta">
-                <div className="v61-meta-row">
-                  {metaPills.map((pill) => <span className="v61-pill" key={pill}>{pill}</span>)}
-                </div>
-              </div>
-
-              <ProductPurchasePanel
-                productId={product.id}
-                slug={product.slug}
-                name={product.name}
-                image={images.fronte}
-                price={product.price}
-                comparePrice={product.comparePrice}
-                stock={product.stock}
-                variants={product.variants}
-                color={line.color}
-              />
-
-              <div className="v61-product-detail-copy">
-                <div className="v61-detail-kicker">{PRODUCT_KICKERS[slug] ?? `${line.name} - Formula mirata`}</div>
-                <h2><ProductTitle name={name} nameEn={nameEn} join /></h2>
-                <p className="v61-product-detail-description">
-                  <Localized it={longDescription || shortDescription} en={longDescriptionEn || shortDescriptionEn} />
-                </p>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -154,6 +138,7 @@ export default async function ProductPage({ params }: Props) {
 function buildFallbackGallery(images: ProductImages, name: string): GallerySlide[] {
   return [
     images?.fronte && { src: images.fronte, label: 'Fronte', alt: name },
+    images?.infografica && { src: images.infografica, label: 'Infografica', alt: `${name} - infografica` },
     images?.lato1 && { src: images.lato1, label: 'Composizione', alt: `${name} - composizione` },
     images?.lato2 && { src: images.lato2, label: 'Retro etichetta', alt: `${name} - retro etichetta` },
     images?.etichetta && { src: images.etichetta, label: 'Etichetta', alt: `${name} - etichetta` },

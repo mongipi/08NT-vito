@@ -111,7 +111,86 @@ export async function createPaymentIntent(
     ...(session?.user?.stripeCustomerId ? { customer: session.user.stripeCustomerId } : {}),
   })
 
-  return { clientSecret: paymentIntent.client_secret }
+  let order
+  try {
+    order = await prisma.order.create({
+      data: {
+        userId: session?.user?.id ?? undefined,
+        guestEmail: session?.user ? undefined : (shippingAddress.guestEmail ?? undefined),
+        subtotal,
+        discountAmount,
+        total,
+        couponCode: coupon?.code ?? null,
+        status: 'pending',
+        paymentMethod: 'stripe',
+        stripePaymentIntentId: paymentIntent.id,
+        shippingCost: shipping.shippingCost,
+        foreignSurcharge: shipping.foreignSurcharge,
+        freeShipping: shipping.freeShipping,
+        shippingNotes: shippingAddress.shippingNotes ?? null,
+        deliveryType: shippingAddress.deliveryType ?? 'home',
+        pickupCarrier: shippingAddress.pickupCarrier ?? null,
+        pickupPointCode: shippingAddress.pickupPointCode ?? null,
+        pickupPointAddress: shippingAddress.pickupPointAddress ?? null,
+        ...(shippingAddress.billingDifferent && shippingAddress.billingAddress ? {
+          billingAddress: {
+            create: {
+              firstName: shippingAddress.billingFirstName ?? shippingAddress.firstName,
+              lastName: shippingAddress.billingLastName ?? shippingAddress.lastName,
+              company: shippingAddress.billingCompany ?? null,
+              vatNumber: shippingAddress.billingVatNumber ?? null,
+              fiscalCode: shippingAddress.billingFiscalCode ?? null,
+              address: shippingAddress.billingAddress,
+              city: shippingAddress.billingCity ?? '',
+              postalCode: shippingAddress.billingPostalCode ?? '',
+              province: shippingAddress.billingProvince ?? null,
+              country: shippingAddress.billingCountry ?? 'IT',
+            },
+          },
+        } : {}),
+        items: {
+          create: items.map((item) => ({
+            slug: item.slug ?? null,
+            name: item.name,
+            variantLabel: item.variantLabel ?? null,
+            unitPrice: item.price,
+            qty: item.qty,
+          })),
+        },
+        shippingAddress: {
+          create: {
+            firstName: shippingAddress.firstName,
+            lastName: shippingAddress.lastName,
+            company: shippingAddress.company ?? null,
+            vatNumber: shippingAddress.vatNumber ?? null,
+            fiscalCode: shippingAddress.fiscalCode ?? null,
+            sdiCode: shippingAddress.sdiCode ?? null,
+            pec: shippingAddress.pec ?? null,
+            docType: shippingAddress.docType ?? null,
+            address: shippingAddress.address,
+            city: shippingAddress.city,
+            postalCode: shippingAddress.postalCode,
+            province: shippingAddress.province ?? null,
+            country: shippingAddress.country,
+            phone: shippingAddress.phone ?? null,
+          },
+        },
+      },
+    })
+  } catch (error) {
+    await stripe.paymentIntents.cancel(paymentIntent.id).catch(() => undefined)
+    throw error
+  }
+
+  await stripe.paymentIntents.update(paymentIntent.id, {
+    metadata: { orderId: order.id },
+  }).catch((error) => {
+    // The order can still be matched through stripePaymentIntentId. Do not
+    // block payment if this optional metadata enrichment is unavailable.
+    console.error('Aggiornamento metadata ordine Stripe fallito:', error)
+  })
+
+  return { clientSecret: paymentIntent.client_secret, orderId: order.id }
 }
 
 export async function createDirectOrder(
@@ -253,6 +332,10 @@ export async function createDirectOrder(
       postalCode: shippingAddress.postalCode, province: shippingAddress.province ?? null,
       country: shippingAddress.country, phone: shippingAddress.phone ?? null,
     },
+    deliveryType: shippingAddress.deliveryType ?? 'home',
+    pickupCarrier: shippingAddress.pickupCarrier ?? null,
+    pickupPointCode: shippingAddress.pickupPointCode ?? null,
+    pickupPointAddress: shippingAddress.pickupPointAddress ?? null,
   }
 
   if (emailData.customerEmail) {

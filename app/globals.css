@@ -631,8 +631,8 @@ img{max-width:100%;height:auto}
   height:34px;
   min-width:48px;
   padding:0 .5rem;
-  background:var(--amber);
-  border:.5px solid var(--amber);
+  background:#f4f4f2;
+  border:1px solid #d5d8d4;
   color:var(--forest);
   cursor:pointer;
 }
@@ -651,8 +651,8 @@ img{max-width:100%;height:auto}
   grid-template-columns:repeat(3,1fr);
   gap:.32rem;
   padding:.45rem;
-  background:var(--amber);
-  border:1px solid rgba(11,42,23,.16);
+  background:#f4f4f2;
+  border:1px solid #d5d8d4;
   box-shadow:0 16px 30px rgba(0,0,0,.14);
 }
 
@@ -1556,21 +1556,51 @@ body{
 }
 
 .v61-footer-ministry-logo{
-  margin-top:.65rem!important;
-  display:inline-flex;
+  margin-top:.85rem!important;
+  margin-left:auto;
+  display:flex;
   align-items:center;
   justify-content:center;
-  padding:.26rem .46rem;
+  width:max-content;
+  padding:.32rem .55rem;
   background:rgba(255,255,255,.94);
   border:1px solid rgba(184,144,60,.25);
-  max-width:190px;
+  max-width:220px;
 }
 
 .v61-footer-ministry-logo img{
   display:block;
-  width:150px;
+  width:190px;
   height:auto;
   object-fit:contain;
+}
+
+.v61-contact-value{
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  color:#fff;
+}
+
+.v61-contact-value img,
+.v61-contact-item>a>img{
+  width:16px!important;
+  height:16px!important;
+  flex:0 0 16px;
+}
+
+.v61-contact-form-message{
+  margin:0;
+  font-size:.72rem;
+  line-height:1.55;
+}
+
+.v61-contact-form-message.success{color:#15803d}
+.v61-contact-form-message.error{color:#b91c1c}
+.v61-contact-form .v61-button:disabled{cursor:wait;opacity:.65}
+
+.v61-hero h1>span:last-child{
+  white-space:nowrap;
 }
 
 .v61-newsletter-popup-layer{
@@ -1632,6 +1662,89 @@ body{
   letter-spacing:.14em;
   padding:.65rem .95rem;
   text-transform:uppercase;
+}
+
+.v61-whatsapp-launcher{
+  background:#1f8f4d;
+  border-color:#1f8f4d;
+  color:#fff;
+}
+
+.v61-whatsapp-launcher:hover{
+  background:#18763f;
+  border-color:#18763f;
+}
+
+.v61-whatsapp-launcher img{
+  display:block;
+  width:20px;
+  height:20px;
+}
+
+.v61-whatsapp-panel{
+  position:absolute;
+  right:0;
+  bottom:calc(100% + .75rem);
+  width:min(340px,calc(100vw - 1.5rem));
+  border:1px solid rgba(31,143,77,.22);
+  background:#fff;
+  box-shadow:0 24px 50px rgba(11,42,23,.18);
+  padding:1rem;
+}
+
+.v61-whatsapp-close{
+  position:absolute;
+  top:.65rem;
+  right:.65rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  border:0;
+  background:transparent;
+  color:#6b7280;
+  cursor:pointer;
+}
+
+.v61-whatsapp-head{
+  display:flex;
+  align-items:center;
+  gap:.7rem;
+  margin-bottom:.75rem;
+}
+
+.v61-whatsapp-head span{
+  display:block;
+  color:#1f8f4d;
+  font-size:.52rem;
+  font-weight:800;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+
+.v61-whatsapp-head strong{
+  display:block;
+  margin-top:.15rem;
+  color:var(--forest);
+  font-size:.92rem;
+  font-weight:700;
+}
+
+.v61-whatsapp-panel p{
+  margin:0 0 .9rem;
+  color:var(--ink-3);
+  font-size:.74rem;
+  line-height:1.65;
+}
+
+.v61-whatsapp-panel .v61-chat-launcher{
+  width:100%;
+  justify-content:center;
+}
+
+.v61-whatsapp-minimized{
+  min-width:0;
 }
 
 .v61-chat-panel{
@@ -1827,6 +1940,10 @@ body{
     grid-column:1/-1;
   }
 
+  .v61-footer-ministry-logo{
+    margin-left:auto;
+  }
+
   .v61-footer-payments,
   .v61-footer-ministry-logo{
     grid-column:1/-1;
@@ -1843,6 +1960,11 @@ body{
 
   .v61-chat-panel{
     width:calc(100vw - 1.7rem);
+  }
+
+  .v61-whatsapp-panel{
+    width:calc(100vw - 1.7rem);
+    bottom:calc(100% + .6rem);
   }
 }
 
@@ -1971,4 +2093,289 @@ body{
   .v61-footer-newsletter{
     grid-column:1/-1;
   }
+}
+
+/* Tablet layout: reference viewports 768x1024 and 1024x768 */
+@media(min-width:761px) and (max-width:1080px){
+  :root{
+    --header-h:82px;
+    --pad-x:clamp(2rem,4.6vw,3rem);
+  }
+
+  .section{
+    padding-top:3.75rem;
+    padding-bottom:3.75rem;
+  }
+
+  .v61-hero,
+  .v61-quality-hero{
+    display:flex;
+    flex-direction:column;
+    background:var(--forest);
+  }
+
+  .v61-hero:after,
+  .v61-quality-hero:after{
+    display:none;
+  }
+
+  .v61-hero-bg,
+  .v61-quality-hero .v61-brand-hero-bg{
+    position:relative;
+    inset:auto;
+    order:1;
+    width:100%;
+    height:clamp(280px,35vw,360px);
+    overflow:hidden;
+    background:var(--forest);
+  }
+
+  .v61-hero-bg:after,
+  .v61-quality-hero .v61-brand-hero-bg:after{
+    content:"";
+    position:absolute;
+    z-index:2;
+    right:0;
+    bottom:-1px;
+    left:0;
+    height:34%;
+    pointer-events:none;
+    background:linear-gradient(180deg,rgba(11,42,23,0),var(--forest));
+  }
+
+  .v61-hero-bg img{
+    left:50%!important;
+    right:auto!important;
+    width:150%!important;
+    min-width:150%!important;
+    max-width:none!important;
+    height:100%!important;
+    object-fit:cover!important;
+    object-position:center!important;
+    transform:translateX(-46%)!important;
+  }
+
+  .v61-quality-hero .v61-brand-hero-bg img{
+    left:50%!important;
+    right:auto!important;
+    width:118%!important;
+    min-width:118%!important;
+    max-width:none!important;
+    height:100%!important;
+    object-fit:cover!important;
+    object-position:center!important;
+    transform:translateX(-52%)!important;
+  }
+
+  .v61-hero-inner,
+  .v61-quality-hero .v61-brand-hero-inner{
+    order:2;
+    width:100%;
+    min-height:0;
+    margin-top:-1px;
+    padding:2.6rem var(--pad-x) 3.2rem;
+    background:var(--forest);
+  }
+
+  .v61-hero-copy{
+    max-width:720px;
+  }
+
+  .v61-hero h1,
+  .v61-quality-hero h1{
+    font-size:clamp(3.25rem,7.5vw,4.6rem);
+  }
+
+  .v61-feature-strip{
+    padding-top:.75rem;
+    padding-bottom:.75rem;
+  }
+
+  .v61-feature-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0;
+  }
+
+  .v61-feature{
+    min-height:88px;
+    padding:.85rem 1rem;
+    border-bottom:.5px solid rgba(184,144,60,.16);
+  }
+
+  .v61-quality-section,
+  .v61-quality-values-section,
+  .v61-quality-method-section,
+  .v61-quality-vision-section{
+    padding-top:3.75rem;
+    padding-bottom:3.75rem;
+  }
+
+  .v61-quality-section-head{
+    gap:1.25rem;
+    margin-bottom:1.75rem;
+  }
+
+  .v61-quality-panel{
+    min-height:0;
+    padding:1.75rem;
+  }
+
+  .v61-quality-products-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .v61-quality-product-card{
+    min-height:180px;
+  }
+
+  .v61-product-purchase-media{
+    min-height:420px;
+  }
+
+  .v61-product-gallery-frame.bottle{
+    max-width:285px!important;
+  }
+
+  .v61-product-gallery-frame.document{
+    max-width:min(94%,760px)!important;
+  }
+
+  .v61-contact-grid,
+  .v61-blog-section-head{
+    gap:1.5rem;
+  }
+
+  .v61-footer{
+    padding-top:2.2rem;
+  }
+
+  .v61-footer-grid{
+    grid-template-columns:minmax(205px,.92fr) repeat(3,minmax(120px,.64fr)) minmax(240px,.96fr);
+    gap:1.1rem 1.4rem;
+    padding-bottom:1.5rem;
+    align-items:start;
+  }
+
+  .v61-footer-brand{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    min-width:0;
+  }
+
+  .v61-footer-brand>a>img{
+    height:66px!important;
+    width:auto!important;
+  }
+
+  .v61-footer-brand p{
+    margin:.3rem 0 .55rem;
+    max-width:220px;
+  }
+
+  .v61-footer-contacts{
+    gap:.34rem;
+  }
+
+  .v61-footer-couriers{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.35rem;
+    margin-top:.55rem;
+  }
+
+  .v61-footer-payments{
+    margin-top:.55rem;
+  }
+
+  .v61-footer-newsletter{
+    grid-column:5;
+    grid-row:1;
+    width:100%;
+    justify-self:stretch;
+    align-self:start;
+    display:flex;
+    flex-direction:column;
+    gap:.65rem;
+  }
+
+  .v61-footer-newsletter .v61-newsletter{
+    padding:.95rem;
+    height:auto;
+  }
+
+  .v61-footer-newsletter .v61-newsletter h2{
+    font-size:1.08rem;
+    margin-bottom:.3rem;
+  }
+
+  .v61-footer-newsletter .v61-newsletter p{
+    font-size:.58rem;
+    line-height:1.45;
+  }
+
+  .v61-footer-newsletter .v61-newsletter-fields{
+    margin-top:.55rem;
+  }
+
+  .v61-footer-ministry-logo{
+    margin-top:0!important;
+    margin-left:0;
+    justify-self:start;
+    align-self:start;
+    max-width:186px;
+  }
+
+  .v61-footer-ministry-logo img{
+    width:160px;
+  }
+}
+
+@media(min-width:761px) and (max-width:900px){
+  .v61-product-purchase-grid,
+  .v61-quality-duo,
+  .v61-contact-grid{
+    grid-template-columns:1fr;
+  }
+
+  .v61-footer-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .v61-footer-brand{
+    grid-column:1/-1;
+    display:grid;
+    grid-template-columns:minmax(220px,.88fr) minmax(0,1fr);
+    gap:1rem 1.35rem;
+    align-items:start;
+  }
+
+  .v61-footer-brand>a,
+  .v61-footer-brand>p,
+  .v61-footer-brand>.v61-footer-contacts{
+    grid-column:1;
+  }
+
+  .v61-footer-brand>.v61-footer-couriers,
+  .v61-footer-brand>.v61-footer-payments{
+    grid-column:2;
+  }
+
+  .v61-footer-newsletter{
+    grid-column:1/-1;
+    grid-row:auto;
+    width:100%;
+    align-self:start;
+    grid-template-columns:minmax(260px,360px) auto;
+    justify-content:space-between;
+  }
+}
+
+.v61-hero h1>span:last-child{
+  display:inline-block;
+  white-space:nowrap;
+}
+
+html[data-locale="pt"] .v61-hero h1>span:last-child{
+  font-size:.96em;
 }

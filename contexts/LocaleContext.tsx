@@ -2,8 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-export type Locale = 'it' | 'en' | 'es' | 'fr' | 'de' | 'pt'
-export const AVAILABLE_LOCALES: Locale[] = ['it', 'en', 'es', 'fr', 'de', 'pt']
+export type Locale = 'it' | 'en' | 'fr'
+export const AVAILABLE_LOCALES: Locale[] = ['it', 'en', 'fr']
 
 const STORAGE_KEY = '08nt-locale'
 
@@ -23,6 +23,11 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
       if (AVAILABLE_LOCALES.includes(stored as Locale)) setLocaleState(stored as Locale)
     } catch {}
   }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+    document.documentElement.dataset.locale = locale
+  }, [locale])
 
   function setLocale(next: Locale) {
     setLocaleState(next)

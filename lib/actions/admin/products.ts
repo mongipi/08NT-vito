@@ -43,6 +43,45 @@ async function syncIngredients(productId: string, formData: FormData) {
       })),
     })
   }
+
+  interface RawVariant { label: string; quantity: number }
+  const variants: RawVariant[] = JSON.parse((formData.get('variants') as string) || '[]')
+  const activeVariantKeys: string[] = []
+
+  for (const [index, variant] of variants.entries()) {
+    const token = variantImageToken(variant.quantity, variant.label)
+    if (!token) continue
+    const key = `variant-${token}`
+    activeVariantKeys.push(key)
+    const file = formData.get(`img_variant_${index}`) as File | null
+    if (!file || file.size === 0) continue
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const mimeType = file.type || 'image/png'
+    await prisma.productImage.upsert({
+      where: { productId_key: { productId, key } },
+      create: { productId, key, data: buffer, mimeType },
+      update: { data: buffer, mimeType },
+    })
+  }
+
+  await prisma.productImage.deleteMany({
+    where: {
+      productId,
+      key: { startsWith: 'variant-', notIn: activeVariantKeys },
+    },
+  })
+}
+
+function variantImageToken(quantity: number, label: string) {
+  if (Number(quantity) > 0) return String(quantity)
+  const quantityInLabel = String(label ?? '').match(/\d+/)?.[0]
+  if (quantityInLabel) return quantityInLabel
+  return String(label ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
 }
 
 function parseDecimal(value: FormDataEntryValue | string | number | null | undefined, fallback = 0) {

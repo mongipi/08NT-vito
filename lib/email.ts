@@ -106,8 +106,7 @@ function layout(content: string) {
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
                 <td>
-                  <p style="margin:0;font-size:0.625rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.45)">08 Natural Technology</p>
-                  <p style="margin:0.25rem 0 0;font-size:1.375rem;font-weight:300;color:white;letter-spacing:0.02em;font-family:Georgia,serif">VIPHARMA</p>
+                  <h1 style="margin:0;font-size:1.375rem;font-weight:300;color:white;letter-spacing:0.02em;font-family:Georgia,serif">08 NATURAL TECHNOLOGY</h1>
                 </td>
                 <td align="right">
                   <p style="margin:0;font-size:0.5625rem;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.35)">Nutraceutica di qualit&agrave;</p>
@@ -122,7 +121,7 @@ function layout(content: string) {
         <tr>
           <td style="padding:1.25rem 2rem;background:#f9f9f7;border-top:1px solid #e8e8e4">
             <p style="margin:0;font-size:0.6875rem;color:#9ca3af;line-height:1.6;text-align:center">
-              08 Natural Technology &middot; VIPHARMA di Tatulli Vito &amp; Co. S.A.S.<br>
+              08 NATURAL TECHNOLOGY<br>
               Bitonto (BA) &middot; Italy<br>
               <a href="${SITE_URL}" style="color:#9ca3af;text-decoration:underline">${escapeHtml(SITE_URL.replace(/^https?:\/\//, ''))}</a>
             </p>
@@ -236,6 +235,10 @@ export interface OrderData {
     country: string
     phone?: string | null
   }
+  deliveryType?: 'home' | 'pickup' | string | null
+  pickupCarrier?: 'BRT' | 'POSTE' | string | null
+  pickupPointCode?: string | null
+  pickupPointAddress?: string | null
   trackingNumber?: string
 }
 
@@ -243,6 +246,24 @@ const METHOD_LABEL: Record<string, string> = {
   stripe: 'Carta / PayPal / Google Pay / Apple Pay',
   bonifico: 'Bonifico bancario',
   contrassegno: 'Contrassegno (pagamento alla consegna)',
+}
+
+function pickupCarrierLabel(carrier: OrderData['pickupCarrier']) {
+  if (carrier === 'BRT') return 'BRT Fermopoint'
+  if (carrier === 'POSTE') return 'Poste Italiane'
+  return carrier ? String(carrier) : 'Punto di ritiro'
+}
+
+function pickupBlock(data: Pick<OrderData, 'deliveryType' | 'pickupCarrier' | 'pickupPointCode' | 'pickupPointAddress'>) {
+  if (data.deliveryType !== 'pickup' || !data.pickupPointAddress?.trim()) return ''
+
+  return `
+    <div style="background:#fffaf0;border:1px solid #f5deb3;padding:0.875rem 1rem;font-size:0.8125rem;color:#374151;line-height:1.7;margin-top:0.75rem">
+      <p style="margin:0 0 0.375rem;font-size:0.625rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#9ca3af">Punto di ritiro selezionato</p>
+      <strong>${escapeHtml(pickupCarrierLabel(data.pickupCarrier))}</strong><br>
+      ${escapeHtml(data.pickupPointAddress)}
+      ${data.pickupPointCode?.trim() ? `<br><span style="color:#9ca3af">Codice punto: ${escapeHtml(data.pickupPointCode)}</span>` : ''}
+    </div>`
 }
 
 export async function sendOrderConfirmation(data: OrderData) {
@@ -285,6 +306,7 @@ export async function sendOrderConfirmation(data: OrderData) {
         <td style="padding-left:0.5rem;vertical-align:top;width:50%">
           <p style="margin:0 0 0.375rem;font-size:0.625rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#9ca3af">Indirizzo di spedizione</p>
           ${addressBlock(data.address)}
+          ${pickupBlock(data)}
         </td>
       </tr>
     </table>
@@ -315,6 +337,7 @@ export async function sendOrderShipped(data: OrderData) {
     ${tracking}
     <p style="margin:1rem 0 0.375rem;font-size:0.625rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#9ca3af">Indirizzo di consegna</p>
     ${addressBlock(data.address)}
+    ${pickupBlock(data)}
     <p style="margin:1.5rem 0 0.75rem;font-size:0.8125rem;color:#6b7280;font-weight:300;line-height:1.7">Hai domande sulla spedizione? Contattaci rispondendo a questa email.</p>
     ${cta(`${SITE_URL}/account/ordini/${data.orderId}`, 'Dettagli ordine &rarr;')}
   `)
@@ -390,6 +413,7 @@ export async function sendAdminOrderNotification(data: OrderData) {
     </table>
     <p style="margin:0 0 0.375rem;font-size:0.625rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#9ca3af">Indirizzo di spedizione</p>
     ${addressBlock(data.address)}
+    ${pickupBlock(data)}
     <p style="margin:1.5rem 0 0.75rem"></p>
     ${cta(`${SITE_URL}/admin/ordini/${data.orderId}`, 'Gestisci ordine &rarr;')}
   `)
@@ -439,6 +463,74 @@ export async function sendNewsletterConfirmation(email: string, discountCode: st
     to: email,
     subject: 'Conferma iscrizione newsletter - codice extra 5%',
     html,
+  })
+}
+
+export interface ContactMessageData {
+  name: string
+  email: string
+  subject: string
+  message: string
+}
+
+export async function sendContactNotification(data: ContactMessageData) {
+  const recipient = process.env.CONTACT_EMAIL_TO?.trim()
+    || process.env.ADMIN_EMAIL?.trim()
+    || DEFAULT_EMAIL
+  const safeSubject = data.subject.trim() || 'Richiesta dal sito'
+
+  const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${escapeHtml(safeSubject)}</title>
+</head>
+<body style="margin:0;padding:24px;background:#f5f5f0;font-family:Arial,sans-serif;color:#1f2937">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb">
+    <tr>
+      <td style="padding:18px 22px;border-bottom:1px solid #e5e7eb;background:#fafaf8">
+        <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#6b7280">Nuovo messaggio dal sito</p>
+        <h1 style="margin:0;font-size:26px;font-weight:400;color:#1a4a2e">08 NATURAL TECHNOLOGY</h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:22px">
+        <p style="margin:0 0 18px;font-size:14px;color:#111827"><strong>Oggetto:</strong> ${escapeHtml(safeSubject)}</p>
+        <p style="margin:0 0 6px;font-size:13px;color:#6b7280">Mittente</p>
+        <p style="margin:0 0 18px;font-size:15px;line-height:1.65;color:#111827">
+          <strong>${escapeHtml(data.name)}</strong><br>
+          <a href="mailto:${escapeHtml(data.email)}" style="color:${BRAND_GREEN};text-decoration:none">${escapeHtml(data.email)}</a>
+        </p>
+        <p style="margin:0 0 6px;font-size:13px;color:#6b7280">Messaggio</p>
+        <div style="padding:14px 16px;border:1px solid #e5e7eb;background:#fafaf8;font-size:15px;line-height:1.7;white-space:pre-wrap">${escapeHtml(data.message)}</div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+  const text = [
+    'Nuovo messaggio dal sito 08 Natural Technology',
+    '',
+    `Oggetto: ${safeSubject}`,
+    `Nome: ${data.name}`,
+    `Email: ${data.email}`,
+    '',
+    'Messaggio:',
+    data.message,
+  ].join('\n')
+
+  await sendMail({
+    from: buildFrom('Contatti 08 Natural Technology'),
+    to: recipient,
+    replyTo: data.email,
+    subject: `[Contatti 08] ${safeSubject}`,
+    html,
+    text,
+    headers: {
+      'X-Auto-Response-Suppress': 'All',
+      'X-Entity-Ref-ID': `contact-${Date.now()}`,
+    },
   })
 }
 

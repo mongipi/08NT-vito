@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { AddToCartButton } from './AddToCartButton'
 import type { ProductVariant } from '@/types'
 
@@ -14,11 +13,24 @@ interface Props {
   stock: number
   variants: ProductVariant[]
   color: string
+  selectedId?: string
+  onSelectVariant: (id: string) => void
 }
 
-export function ProductPurchasePanel({ productId, slug, name, image, price, comparePrice, stock, variants, color }: Props) {
+export function ProductPurchasePanel({
+  productId,
+  slug,
+  name,
+  image,
+  price,
+  comparePrice,
+  stock,
+  variants,
+  color,
+  selectedId,
+  onSelectVariant,
+}: Props) {
   const hasVariants = variants.length > 0
-  const [selectedId, setSelectedId] = useState(variants[0]?.id)
   const selected = hasVariants ? (variants.find((variant) => variant.id === selectedId) ?? variants[0]) : null
 
   const activePrice = selected ? selected.price : price
@@ -33,11 +45,16 @@ export function ProductPurchasePanel({ productId, slug, name, image, price, comp
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {variants.map((variant) => {
             const active = variant.id === selected?.id
+            const labelIncludesQuantity = variant.quantity > 0
+              && new RegExp(`^\\s*${variant.quantity}\\b`).test(variant.label)
+            const displayLabel = variant.quantity > 0 && !labelIncludesQuantity
+              ? `${variant.quantity} ${variant.label}`
+              : variant.label
             return (
               <button
                 key={variant.id}
                 type="button"
-                onClick={() => setSelectedId(variant.id)}
+                onClick={() => onSelectVariant(variant.id)}
                 disabled={variant.stock === 0}
                 style={{
                   padding: '0.5rem 0.875rem',
@@ -50,7 +67,7 @@ export function ProductPurchasePanel({ productId, slug, name, image, price, comp
                   textDecoration: variant.stock === 0 ? 'line-through' : 'none',
                 }}
               >
-                {variant.quantity > 0 ? `${variant.quantity} ${variant.label}` : variant.label}
+                {displayLabel}
               </button>
             )
           })}

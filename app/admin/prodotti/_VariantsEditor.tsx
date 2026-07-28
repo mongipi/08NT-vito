@@ -9,6 +9,7 @@ interface Variant {
   comparePrice?: number | string | null
   b2bPrice?: number | string | null
   stock: number | string
+  image?: string
 }
 
 const EMPTY: Variant = { label: '', quantity: '', price: '', comparePrice: '', b2bPrice: '', stock: '' }
@@ -55,21 +56,50 @@ export function VariantsEditor({ defaultValue }: { defaultValue: Variant[] }) {
           Nessuna variante: il prodotto usa il prezzo e le scorte definiti in &quot;Prezzo &amp; Stock&quot;.
         </p>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.7fr 0.9fr 0.9fr 0.9fr 0.8fr 2rem', gap: '0.5rem' }}>
-          {['Label (es. 30 pastiglie)', 'Pezzi', 'Prezzo €', 'Barrato €', 'B2B €', 'Scorte', ''].map(h => (
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.7fr 0.9fr 0.9fr 0.9fr 0.8fr 4.5rem 2rem', gap: '0.5rem' }}>
+          {['Label (es. 30 pastiglie)', 'Pezzi', 'Vendita €', 'Originale €', 'B2B €', 'Scorte', 'Immagine', ''].map(h => (
             <span key={h} style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{h}</span>
           ))}
         </div>
       )}
 
       {items.map((item, i) => (
-        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.7fr 0.9fr 0.9fr 0.9fr 0.8fr 2rem', gap: '0.5rem', alignItems: 'center' }}>
+        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.7fr 0.9fr 0.9fr 0.9fr 0.8fr 4.5rem 2rem', gap: '0.5rem', alignItems: 'center' }}>
           <input type="text" value={item.label} onChange={e => update(i, 'label', e.target.value)} placeholder="es. 30 pastiglie" style={s.input} />
           <input type="number" value={item.quantity} onChange={e => update(i, 'quantity', e.target.value)} placeholder="30" style={s.input} />
           <input type="text" inputMode="decimal" value={item.price} onChange={e => update(i, 'price', e.target.value)} placeholder="0,00" style={s.input} />
           <input type="text" inputMode="decimal" value={item.comparePrice ?? ''} onChange={e => update(i, 'comparePrice', e.target.value)} placeholder="0,00" style={s.input} />
           <input type="text" inputMode="decimal" value={item.b2bPrice ?? ''} onChange={e => update(i, 'b2bPrice', e.target.value)} placeholder="0,00" style={s.input} />
           <input type="number" value={item.stock} onChange={e => update(i, 'stock', e.target.value)} placeholder="0" style={s.input} />
+          <label style={{
+            height: '2.5rem',
+            border: '1px dashed #d1d5db',
+            background: '#f9fafb',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            overflow: 'hidden',
+            fontSize: '0.625rem',
+            color: '#6b7280',
+          }}>
+            {item.image
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={item.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              : 'Carica'}
+            <input
+              type="file"
+              name={`img_variant_${i}`}
+              accept="image/png,image/jpeg,image/webp"
+              style={{ display: 'none' }}
+              onChange={(event) => {
+                const file = event.target.files?.[0]
+                if (!file) return
+                const preview = URL.createObjectURL(file)
+                setItems(prev => prev.map((variant, index) => index === i ? { ...variant, image: preview } : variant))
+              }}
+            />
+          </label>
           <button
             type="button"
             onClick={() => remove(i)}

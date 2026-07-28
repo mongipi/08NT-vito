@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { useCart } from '@/contexts/CartContext'
@@ -10,6 +10,7 @@ import { useSession } from 'next-auth/react'
 import { formatPrice } from '@/lib/cart'
 import Link from 'next/link'
 import { COUNTRIES, DOMESTIC_COUNTRIES, ISLAND_PROVINCES } from '@/lib/countries'
+import { BrtFermopointPicker } from './BrtFermopointPicker'
 import { PosteLockerPicker } from './PosteLockerPicker'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
@@ -170,6 +171,7 @@ export function CheckoutClient({
 
   const isIsland = address.country === 'IT' && (ISLAND_PROVINCES as readonly string[]).includes(address.province.trim().toUpperCase())
   const effectiveCarrier: 'BRT' | 'POSTE' = isIsland ? 'POSTE' : pickupCarrier
+  const isBrtPickup = deliveryType === 'pickup' && effectiveCarrier === 'BRT'
 
   const baseOk = !!(address.firstName && address.lastName && address.address && address.city && address.postalCode)
   const docOk = docType === 'nessuno' || docType === 'scontrino' || (docType === 'fattura' && !!(address.company && address.vatNumber && (address.sdiCode || address.pec)))
@@ -183,6 +185,12 @@ export function CheckoutClient({
   const foreignSurchargeVal = isEstero ? foreignSurcharge : 0
   const baseShipping   = shippingCostVal + foreignSurchargeVal
   const displayTotal   = cart.total + (isCod ? codSurcharge : 0) + baseShipping
+
+  useEffect(() => {
+    if (isBrtPickup && payMethod === 'contrassegno') {
+      setPayMethod('stripe')
+    }
+  }, [isBrtPickup, payMethod])
 
   if (cart.itemCount === 0) {
     return (
@@ -522,39 +530,15 @@ export function CheckoutClient({
                       labelStyle={labelStyle}
                     />
                   ) : (
-                    <>
-                      {/* Link locator corriere */}
-                      <div style={{ fontSize: '0.75rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
-                        {t('checkout_find_nearest_point')}&nbsp;
-                        <a href="https://www.mybrt.it/it/mybrt/parcel-shops" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--forest)', fontWeight: 500 }}>
-                          {t('checkout_carrier_brt')} →
-                        </a>
-                      </div>
-
-                      {/* Inserimento punto */}
-                      <div>
-                        <label style={labelStyle}>
-                          {t('checkout_pickup_address')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={pickupPointAddress}
-                          onChange={e => setPickupPointAddress(e.target.value)}
-                          placeholder={t('checkout_pickup_address_placeholder')}
-                          style={inputStyle}
-                        />
-                      </div>
-                      <div>
-                        <label style={labelStyle}>{t('checkout_pickup_code')}</label>
-                        <input
-                          type="text"
-                          value={pickupPointCode}
-                          onChange={e => setPickupPointCode(e.target.value)}
-                          placeholder={t('checkout_pickup_code_placeholder')}
-                          style={{ ...inputStyle, fontFamily: 'monospace' }}
-                        />
-                      </div>
-                    </>
+                    <BrtFermopointPicker
+                      pickupPointCode={pickupPointCode}
+                      pickupPointAddress={pickupPointAddress}
+                      onSelect={(code, addr) => { setPickupPointCode(code); setPickupPointAddress(addr) }}
+                      inputStyle={inputStyle}
+                      labelStyle={labelStyle}
+                      postalCode={address.postalCode}
+                      t={t as (key: string, vars?: Record<string, string | number>) => string}
+                    />
                   )}
                 </div>
               )}
@@ -591,26 +575,36 @@ export function CheckoutClient({
             <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
               <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>{t('checkout_payment_method')}</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {PAY_METHODS.map(opt => (
-                  <label key={opt.value} style={{
-                    display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer',
-                    padding: '0.875rem 1rem',
-                    border: payMethod === opt.value ? '1.5px solid var(--forest)' : '1px solid var(--border)',
-                    background: payMethod === opt.value ? '#f8faf9' : 'white',
-                  }}>
-                    <input
-                      type="radio" name="payMethod" value={opt.value}
-                      checked={payMethod === opt.value}
-                      onChange={() => setPayMethod(opt.value)}
-                      style={{ accentColor: 'var(--forest)', width: '1rem', height: '1rem', marginTop: '0.125rem', flexShrink: 0 }}
-                    />
-                    <span>
-                      <span style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--ink)', marginBottom: '0.1875rem' }}>{opt.label}</span>
-                      <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--ink-4)', fontWeight: 300 }}>{opt.desc}</span>
-                    </span>
-                  </label>
-                ))}
+                {PAY_METHODS.map(opt => {
+                  const disabled = isBrtPickup && opt.value === 'contrassegno'
+                  return (
+                    <label key={opt.value} style={{
+                      display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: disabled ? 'not-allowed' : 'pointer',
+                      padding: '0.875rem 1rem',
+                      border: payMethod === opt.value ? '1.5px solid var(--forest)' : '1px solid var(--border)',
+                      background: payMethod === opt.value ? '#f8faf9' : 'white',
+                      opacity: disabled ? 0.5 : 1,
+                    }}>
+                      <input
+                        type="radio" name="payMethod" value={opt.value}
+                        checked={payMethod === opt.value}
+                        onChange={() => !disabled && setPayMethod(opt.value)}
+                        disabled={disabled}
+                        style={{ accentColor: 'var(--forest)', width: '1rem', height: '1rem', marginTop: '0.125rem', flexShrink: 0 }}
+                      />
+                      <span>
+                        <span style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--ink)', marginBottom: '0.1875rem' }}>{opt.label}</span>
+                        <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--ink-4)', fontWeight: 300 }}>{opt.desc}</span>
+                      </span>
+                    </label>
+                  )
+                })}
               </div>
+              {isBrtPickup && (
+                <p style={{ fontSize: '0.75rem', color: 'var(--ink-4)', marginTop: '0.625rem', marginBottom: 0 }}>
+                  {t('checkout_brt_cod_disabled')}
+                </p>
+              )}
             </div>
 
             <button
@@ -795,3 +789,4 @@ function PaymentForm() {
     </form>
   )
 }
+

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { isPrismaInitError, logPrismaInitError } from '@/lib/prisma-errors'
 import type { Product, ProductImages } from '@/types'
 
 const KEY_TO_URL_PATH: Record<string, string> = {
@@ -19,18 +20,56 @@ function buildImageMap(productId: string, productImages: { key: string }[]): Pro
     const path = KEY_TO_URL_PATH[img.key]
     if (path) {
       (result as Record<string, string>)[img.key] = `/api/product-images/${productId}/${path}`
+    } else if (img.key.startsWith('variant-')) {
+      const token = img.key.slice('variant-'.length)
+      result.variants ??= {}
+      result.variants[token] = `/api/product-images/${productId}/${encodeURIComponent(img.key)}`
     }
   }
   return result
 }
 
+function normalizedPrice(price: number, comparePrice?: number | null) {
+  if (!comparePrice || comparePrice === price) return { price, comparePrice: comparePrice ?? null }
+  return {
+    price: Math.min(price, comparePrice),
+    comparePrice: Math.max(price, comparePrice),
+  }
+}
+
+function variantImageToken(quantity: number, label: string) {
+  if (quantity > 0) return String(quantity)
+  const quantityInLabel = label.match(/\d+/)?.[0]
+  if (quantityInLabel) return quantityInLabel
+  return label
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapProduct(p: any): Product {
   const lineOverride = PRODUCT_LINE_OVERRIDES[p.slug]
+  const images = buildImageMap(p.id, p.productImages ?? [])
+  const productPricing = normalizedPrice(Number(p.price), p.comparePrice == null ? null : Number(p.comparePrice))
+  const variants = (p.variants ?? []).map((variant: any) => {
+    const pricing = normalizedPrice(Number(variant.price), variant.comparePrice == null ? null : Number(variant.comparePrice))
+    const token = variantImageToken(Number(variant.quantity ?? 0), String(variant.label ?? ''))
+    return {
+      ...variant,
+      ...pricing,
+      image: images.variants?.[token] ?? images.fronte,
+    }
+  })
+
   return {
     ...p,
+    ...productPricing,
     line: lineOverride ? { ...p.line, ...lineOverride } : p.line,
-    images: buildImageMap(p.id, p.productImages ?? []),
+    images,
+    variants,
   }
 }
 
@@ -42,32 +81,56 @@ const productInclude = {
 } as const
 
 export async function getProducts(): Promise<Product[]> {
-  const products = await prisma.product.findMany({
-    where: { published: true },
-    include: productInclude,
-    orderBy: { order: 'asc' },
-  })
-  return products.map(mapProduct)
+  try {
+    const products = await prisma.product.findMany({
+      where: { published: true },
+      include: productInclude,
+      orderBy: { order: 'asc' },
+    })
+    return products.map(mapProduct)
+  } catch (error) {
+    logPrismaInitError('products:list', error)
+    if (isPrismaInitError(error)) return []
+    throw error
+  }
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const p = await prisma.product.findFirst({
-    where: { slug, published: true },
-    include: { ...productInclude, b2bPricing: true },
-  })
-  if (!p) return null
-  return mapProduct(p)
+  try {
+    const p = await prisma.product.findFirst({
+      where: { slug, published: true },
+      include: { ...productInclude, b2bPricing: true },
+    })
+    if (!p) return null
+    return mapProduct(p)
+  } catch (error) {
+    logPrismaInitError('products:by-slug', error)
+    if (isPrismaInitError(error)) return null
+    throw error
+  }
 }
 
 export async function getProductSlugs(): Promise<string[]> {
-  const products = await prisma.product.findMany({
-    where: { published: true },
-    select: { slug: true },
-  })
-  return products.map((p) => p.slug)
+  try {
+    const products = await prisma.product.findMany({
+      where: { published: true },
+      select: { slug: true },
+    })
+    return products.map((p) => p.slug)
+  } catch (error) {
+    logPrismaInitError('products:slugs', error)
+    if (isPrismaInitError(error)) return []
+    throw error
+  }
 }
 
 export async function getB2BPrice(productId: string): Promise<number | null> {
-  const b2b = await prisma.b2BPricing.findUnique({ where: { productId } })
-  return b2b?.price ?? null
+  try {
+    const b2b = await prisma.b2BPricing.findUnique({ where: { productId } })
+    return b2b?.price ?? null
+  } catch (error) {
+    logPrismaInitError('products:b2b-price', error)
+    if (isPrismaInitError(error)) return null
+    throw error
+  }
 }

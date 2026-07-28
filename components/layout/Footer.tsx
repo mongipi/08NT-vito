@@ -59,7 +59,7 @@ export function Footer() {
   const t = useTranslation(locale)
 
   return (
-    <footer className="v61-footer">
+    <footer id="footer" className="v61-footer">
       <div className="v61-footer-grid">
         <div className="v61-footer-brand">
           <Logo variant="light" height={90} />
@@ -85,9 +85,6 @@ export function Footer() {
           <div className="v61-footer-payments" aria-label="Pagamenti disponibili">
             {PAYMENTS.map((payment) => <span key={payment}>{payment}</span>)}
           </div>
-          <div className="v61-footer-ministry-logo" aria-label="Ministero della Salute">
-            <Image src="/v61/img/ministero.png" alt="Ministero della Salute" width={150} height={33} />
-          </div>
         </div>
 
         {FOOTER_SECTIONS.map((section) => (
@@ -105,6 +102,9 @@ export function Footer() {
 
         <div className="v61-footer-newsletter">
           <NewsletterSignup variant="footer" />
+          <div className="v61-footer-ministry-logo" aria-label="Ministero della Salute">
+            <Image src="/v61/img/ministero.png" alt="Ministero della Salute" width={190} height={42} />
+          </div>
         </div>
       </div>
 
