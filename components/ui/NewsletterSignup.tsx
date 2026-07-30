@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react'
 import { useLocale } from '@/contexts/LocaleContext'
+import { useSiteSettings } from '@/contexts/SiteSettingsContext'
 
 interface NewsletterSignupProps {
   variant?: 'section' | 'footer' | 'popup'
@@ -12,6 +13,7 @@ const POPUP_KEY = '08nt_newsletter_popup_seen_v1'
 
 export function NewsletterSignup({ variant = 'section', onDone }: NewsletterSignupProps) {
   const { locale } = useLocale()
+  const siteSettings = useSiteSettings()
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
@@ -43,9 +45,9 @@ export function NewsletterSignup({ variant = 'section', onDone }: NewsletterSign
   return (
     <form className={`v61-newsletter v61-newsletter-${variant}`} onSubmit={submit}>
       <div>
-        <span className="v61-newsletter-kicker">Newsletter 08</span>
-        <h2>Extra sconto 5%</h2>
-        <p>Iscriviti per ricevere novita, contenuti e formule 08 Natural Technology.</p>
+        <span className="v61-newsletter-kicker">{siteSettings.newsletterKicker}</span>
+        <h2>{siteSettings.newsletterTitle}</h2>
+        <p>{siteSettings.newsletterBody}</p>
       </div>
       <div className="v61-newsletter-fields">
         <label>
@@ -54,12 +56,12 @@ export function NewsletterSignup({ variant = 'section', onDone }: NewsletterSign
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="nome@email.it"
+            placeholder={siteSettings.newsletterEmailPlaceholder}
             required
           />
         </label>
         <button type="submit" disabled={status === 'loading'}>
-          {status === 'loading' ? 'Invio...' : 'Iscriviti'}
+          {status === 'loading' ? 'Invio...' : siteSettings.newsletterButtonLabel}
         </button>
       </div>
       {message && <p className={`v61-newsletter-message ${status}`}>{message}</p>}
@@ -80,7 +82,9 @@ export function NewsletterPopup() {
   }, [])
 
   function close() {
-    try { localStorage.setItem(POPUP_KEY, '1') } catch {}
+    try {
+      localStorage.setItem(POPUP_KEY, '1')
+    } catch {}
     setOpen(false)
   }
 
@@ -88,8 +92,18 @@ export function NewsletterPopup() {
 
   return (
     <div className="v61-newsletter-popup-layer" role="presentation">
-      <section className="v61-newsletter-popup" role="dialog" aria-modal="true" aria-label="Iscrizione newsletter">
-        <button type="button" className="v61-newsletter-close" onClick={close} aria-label="Chiudi">
+      <section
+        className="v61-newsletter-popup"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Iscrizione newsletter"
+      >
+        <button
+          type="button"
+          className="v61-newsletter-close"
+          onClick={close}
+          aria-label="Chiudi"
+        >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />

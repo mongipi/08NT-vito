@@ -1,12 +1,15 @@
 'use client'
 
-import Link from 'next/link'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useLocale, pickLocalized } from '@/contexts/LocaleContext'
+import { useSiteSettings } from '@/contexts/SiteSettingsContext'
+import { NewsletterSignup } from '@/components/ui/NewsletterSignup'
+import { HomeHeroCarousel } from '@/components/ui/HomeHeroCarousel'
 import { useTranslation } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
 import { formatDate } from '@/lib/utils'
-import { NewsletterSignup } from '@/components/ui/NewsletterSignup'
+import type { HomeHeroSlide } from '@/lib/home-hero'
 
 export interface HomeArticle {
   id: string
@@ -20,29 +23,31 @@ export interface HomeArticle {
   excerptEn?: string | null
 }
 
-export function HomeContent({ articles }: { articles: HomeArticle[] }) {
+export function HomeContent({
+  articles,
+  heroSlides,
+}: {
+  articles: HomeArticle[]
+  heroSlides: HomeHeroSlide[]
+}) {
   const { locale } = useLocale()
+  const siteSettings = useSiteSettings()
   const t = useTranslation(locale)
-
-  const FEATURES = [
-    { icon: 'IT', titleKey: 'home_feature_1_title', bodyKey: 'home_feature_1_body' },
-    { icon: '🌿', titleKey: 'home_feature_2_title', bodyKey: 'home_feature_2_body' },
-    { icon: '🔬', titleKey: 'home_feature_3_title', bodyKey: 'home_feature_3_body' },
-    { icon: '✨', titleKey: 'home_feature_4_title', bodyKey: 'home_feature_4_body' },
-  ] as const
 
   return (
     <main>
       <section className="v61-hero">
         <div className="v61-hero-bg">
-          <Image src="/v61/img/hero_home_bg.jpg" alt="08 Natural Technology" fill priority unoptimized sizes="100vw" />
+          <HomeHeroCarousel slides={heroSlides} />
         </div>
         <div className="v61-hero-inner">
           <div className="v61-hero-copy">
             <h1>{richText(t('home_hero_title'))}</h1>
             <p>{t('home_hero_body')}</p>
             <div className="v61-hero-actions">
-              <Link className="v61-button" href="/prodotti">{t('home_hero_cta')}</Link>
+              <Link className="v61-button" href="/prodotti">
+                {t('home_hero_cta')}
+              </Link>
             </div>
           </div>
         </div>
@@ -50,10 +55,13 @@ export function HomeContent({ articles }: { articles: HomeArticle[] }) {
 
       <div className="v61-feature-strip">
         <div className="v61-feature-grid">
-          {FEATURES.map((item) => (
-            <div className="v61-feature" key={item.titleKey}>
+          {siteSettings.homeFeatures.map((item) => (
+            <div className="v61-feature" key={item.id}>
               <div className="ico">{item.icon}</div>
-              <div><h3>{t(item.titleKey)}</h3><p>{t(item.bodyKey)}</p></div>
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -62,26 +70,37 @@ export function HomeContent({ articles }: { articles: HomeArticle[] }) {
       <section className="section">
         <div className="v61-inner v61-about-grid">
           <div className="v61-showcase">
-            <Image src="/v61/img/founder-lab-08.png" alt="Laboratorio 08 Natural Technology" width={520} height={340} />
+            <Image
+              src="/v61/img/founder-lab-08.png"
+              alt="Laboratorio 08 Natural Technology"
+              width={520}
+              height={340}
+            />
           </div>
           <div>
             <div className="v61-eyebrow">{t('home_about_eyebrow')}</div>
             <span className="v61-script">{t('home_about_script')}</span>
             <h2 className="v61-title">{richText(t('home_about_title'))}</h2>
             <blockquote className="v61-quote">&ldquo;{t('home_about_quote')}&rdquo;</blockquote>
-            <p className="v61-copy" style={{ marginBottom: 14 }}>{richText(t('home_about_p1'))}</p>
+            <p className="v61-copy" style={{ marginBottom: 14 }}>
+              {richText(t('home_about_p1'))}
+            </p>
             <p className="v61-copy">{t('home_about_p2')}</p>
-            <div className="v61-script" style={{ marginTop: 18 }}>{t('home_about_signature')}</div>
+            <div className="v61-script" style={{ marginTop: 18 }}>
+              {t('home_about_signature')}
+            </div>
           </div>
         </div>
       </section>
 
       <section className="section v61-formulas-intro">
         <div className="v61-inner v61-formulas-intro-inner">
-          <div className="v61-eyebrow">{t('home_formulas_eyebrow')}</div>
-          <h2 className="v61-title">{richText(t('home_formulas_title'))}</h2>
-          <p>{t('home_formulas_body')}</p>
-          <Link className="v61-button green" href="/prodotti">{t('home_formulas_cta')}</Link>
+          <div className="v61-eyebrow">{siteSettings.homeFormulasEyebrow}</div>
+          <h2 className="v61-title">{richText(siteSettings.homeFormulasTitle)}</h2>
+          <p>{siteSettings.homeFormulasBody}</p>
+          <Link className="v61-button green" href={siteSettings.homeFormulasCtaHref}>
+            {siteSettings.homeFormulasCtaLabel}
+          </Link>
         </div>
       </section>
 
@@ -95,10 +114,10 @@ export function HomeContent({ articles }: { articles: HomeArticle[] }) {
         <div className="v61-inner">
           <div className="v61-section-head">
             <div>
-              <div className="v61-eyebrow">{t('home_blog_eyebrow')}</div>
-              <h2 className="v61-title">{t('home_blog_title')}</h2>
+              <div className="v61-eyebrow">{siteSettings.homeBlogEyebrow}</div>
+              <h2 className="v61-title">{siteSettings.homeBlogTitle}</h2>
             </div>
-            <p>{t('home_blog_body')}</p>
+            <p>{siteSettings.homeBlogBody}</p>
           </div>
           <div className="v61-blog-carousel">
             {articles.map((article) => (
@@ -106,7 +125,10 @@ export function HomeContent({ articles }: { articles: HomeArticle[] }) {
                 <span className="cat">{article.tag}</span>
                 <h2>{pickLocalized(locale, article.title, article.titleEn)}</h2>
                 <p>{pickLocalized(locale, article.excerpt, article.excerptEn)}</p>
-                <span className="date">{formatDate(article.publishedAt)} · {article.readingTime ?? 5} {t('home_reading_time')}</span>
+                <span className="date">
+                  {formatDate(article.publishedAt)} · {article.readingTime ?? 5}{' '}
+                  {t('home_reading_time')}
+                </span>
               </Link>
             ))}
           </div>

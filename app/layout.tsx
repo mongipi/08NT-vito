@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Montserrat, Great_Vibes } from 'next/font/google'
 import { Providers } from './providers'
 import { SiteShell } from './_components/SiteShell'
 import { organizationJsonLd } from '@/lib/jsonld'
+import { getPublicSiteSettings } from '@/lib/site-settings'
 // @ts-ignore
 import './globals.css'
 
@@ -44,7 +45,9 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const siteSettings = await getPublicSiteSettings()
+
   return (
     <html
       lang="it"
@@ -57,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
         />
-        <Providers>
+        <Providers siteSettings={siteSettings}>
           <SiteShell>{children}</SiteShell>
         </Providers>
       </body>

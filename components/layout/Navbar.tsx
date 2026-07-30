@@ -8,20 +8,12 @@ import { signOut, useSession } from 'next-auth/react'
 import { Logo } from './Logo'
 import { useScrolled } from '@/hooks/useScrolled'
 import { cn } from '@/lib/utils'
-import { SOCIAL_LINKS } from '@/lib/social-links'
 import { useCart } from '@/contexts/CartContext'
 import { CartDrawer } from '@/components/ui/CartDrawer'
 import { useLocale, type Locale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
-
-const NAV_LINKS = [
-  { href: '/', key: 'nav_home' },
-  { href: '/prodotti', key: 'nav_products' },
-  { href: '/metodo', key: 'nav_quality' },
-  { href: '/blog', key: 'nav_blog' },
-  { href: '/lavora-con-noi', key: 'nav_careers' },
-  { href: '/contatti', key: 'nav_contact' },
-] as const
+import { useSiteSettings } from '@/contexts/SiteSettingsContext'
+import { getSocialLinks } from '@/lib/site-settings'
 
 const LANG_FLAGS = [
   { code: 'it', label: 'Italiano', src: '/v61/flags/it.png', enabled: true },
@@ -186,6 +178,8 @@ export function Navbar() {
 
   const { locale } = useLocale()
   const t = useTranslation(locale)
+  const siteSettings = useSiteSettings()
+  const socialLinks = getSocialLinks(siteSettings)
   const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href)
 
   return (
@@ -195,17 +189,17 @@ export function Navbar() {
           <Logo variant="dark" height={70} className="v61-header-logo" />
 
           <ul className="v61-menu" role="list">
-            {NAV_LINKS.map(({ href, key }) => (
+            {siteSettings.headerNavLinks.filter((item) => item.enabled).map(({ href, label }) => (
               <li key={href}>
                 <Link href={href} className={cn(isActive(href) && 'active')} aria-current={isActive(href) ? 'page' : undefined}>
-                  {t(key)}
+                  {label}
                 </Link>
               </li>
             ))}
           </ul>
 
           <div className="v61-nav-actions">
-            {SOCIAL_LINKS.map(({ href, label }) => (
+            {socialLinks.map(({ href, label }) => (
               <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="v61-social-link">
                 <Image src={`/v61/icons/${label.toLowerCase()}.svg`} alt="" width={17} height={17} />
               </a>
@@ -251,9 +245,9 @@ export function Navbar() {
         </div>
         <div className="v61-mobile-drawer-body">
           <div className="v61-mobile-drawer-nav">
-            {NAV_LINKS.map(({ href, key }) => (
+            {siteSettings.headerNavLinks.filter((item) => item.enabled).map(({ href, label }) => (
               <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={cn(isActive(href) && 'active')}>
-                {t(key)}
+                {label}
               </Link>
             ))}
           </div>

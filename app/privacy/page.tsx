@@ -198,6 +198,7 @@ const sections: LegalSection[] = [
 export default function PrivacyPage() {
   return (
     <LegalDocument
+      documentKey="privacy"
       eyebrow="Privacy"
       title="Privacy Policy"
       subtitle="Informativa sul trattamento dei dati personali ai sensi del Regolamento UE 2016/679."

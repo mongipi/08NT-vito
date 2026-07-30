@@ -2,14 +2,13 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
-
-const WHATSAPP_NUMBER = '393515078701'
-const WHATSAPP_MESSAGE =
-  'Ciao, arrivo dal sito 08 Natural Technology e vorrei ricevere assistenza.'
+import { useSiteSettings } from '@/contexts/SiteSettingsContext'
+import { formatWhatsappHref } from '@/lib/site-settings'
 
 export function ChatWidget() {
   const [open, setOpen] = useState(true)
-  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
+  const siteSettings = useSiteSettings()
+  const href = formatWhatsappHref(siteSettings.companyWhatsapp, siteSettings.whatsappMessage)
 
   return (
     <div className="v61-chat-widget">

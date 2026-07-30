@@ -166,6 +166,7 @@ const sections: LegalSection[] = [
 export default function CookiePage() {
   return (
     <LegalDocument
+      documentKey="cookie"
       eyebrow="Cookie"
       title="Cookie Policy"
       subtitle="Informativa sull’utilizzo dei cookie e di altri strumenti di tracciamento."
