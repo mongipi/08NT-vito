@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { saveSettings } from '@/lib/actions/settings'
 import { getSettingsMap, SETTING_KEYS } from '@/lib/settings'
-import { DEFAULT_PUBLIC_SITE_SETTINGS } from '@/lib/site-settings'
 import { LegalOverrideEditor } from './_LegalOverrideEditor'
 
 export const metadata: Metadata = { title: 'Impostazioni' }
@@ -73,19 +72,19 @@ export default async function ImpostazioniPage({
   const speGratuita = get(SETTING_KEYS.SPEDIZIONE_GRATUITA, '39.90')
   const prezzoSpe = get(SETTING_KEYS.PREZZO_SPEDIZIONE, '5.90')
   const supplementoEstero = get(SETTING_KEYS.SUPPLEMENTO_ESTERO, '10')
-  const companyLegalName = get(SETTING_KEYS.COMPANY_LEGAL_NAME, DEFAULT_PUBLIC_SITE_SETTINGS.companyLegalName)
-  const companyAddress = get(SETTING_KEYS.COMPANY_ADDRESS, DEFAULT_PUBLIC_SITE_SETTINGS.companyAddress)
-  const companyPhone = get(SETTING_KEYS.COMPANY_PHONE, DEFAULT_PUBLIC_SITE_SETTINGS.companyPhone)
-  const companyWhatsapp = get(SETTING_KEYS.COMPANY_WHATSAPP, DEFAULT_PUBLIC_SITE_SETTINGS.companyWhatsapp)
-  const companyEmail = get(SETTING_KEYS.COMPANY_EMAIL, DEFAULT_PUBLIC_SITE_SETTINGS.companyEmail)
-  const whatsappMessage = get(SETTING_KEYS.WHATSAPP_MESSAGE, DEFAULT_PUBLIC_SITE_SETTINGS.whatsappMessage)
-  const socialFacebook = get(SETTING_KEYS.SOCIAL_FACEBOOK, DEFAULT_PUBLIC_SITE_SETTINGS.facebookUrl)
-  const socialInstagram = get(SETTING_KEYS.SOCIAL_INSTAGRAM, DEFAULT_PUBLIC_SITE_SETTINGS.instagramUrl)
-  const socialTiktok = get(SETTING_KEYS.SOCIAL_TIKTOK, DEFAULT_PUBLIC_SITE_SETTINGS.tiktokUrl)
-  const newsletterKicker = get(SETTING_KEYS.NEWSLETTER_KICKER, DEFAULT_PUBLIC_SITE_SETTINGS.newsletterKicker)
-  const newsletterTitle = get(SETTING_KEYS.NEWSLETTER_TITLE, DEFAULT_PUBLIC_SITE_SETTINGS.newsletterTitle)
-  const newsletterBody = get(SETTING_KEYS.NEWSLETTER_BODY, DEFAULT_PUBLIC_SITE_SETTINGS.newsletterBody)
-  const newsletterButtonLabel = get(SETTING_KEYS.NEWSLETTER_BUTTON_LABEL, DEFAULT_PUBLIC_SITE_SETTINGS.newsletterButtonLabel)
+  const companyLegalName = get(SETTING_KEYS.COMPANY_LEGAL_NAME)
+  const companyAddress = get(SETTING_KEYS.COMPANY_ADDRESS)
+  const companyPhone = get(SETTING_KEYS.COMPANY_PHONE)
+  const companyWhatsapp = get(SETTING_KEYS.COMPANY_WHATSAPP)
+  const companyEmail = get(SETTING_KEYS.COMPANY_EMAIL)
+  const whatsappMessage = get(SETTING_KEYS.WHATSAPP_MESSAGE)
+  const socialFacebook = get(SETTING_KEYS.SOCIAL_FACEBOOK)
+  const socialInstagram = get(SETTING_KEYS.SOCIAL_INSTAGRAM)
+  const socialTiktok = get(SETTING_KEYS.SOCIAL_TIKTOK)
+  const newsletterKicker = get(SETTING_KEYS.NEWSLETTER_KICKER)
+  const newsletterTitle = get(SETTING_KEYS.NEWSLETTER_TITLE)
+  const newsletterBody = get(SETTING_KEYS.NEWSLETTER_BODY)
+  const newsletterButtonLabel = get(SETTING_KEYS.NEWSLETTER_BUTTON_LABEL)
   const legalPrivacyOverride = get(SETTING_KEYS.LEGAL_PRIVACY_OVERRIDE)
   const legalCookieOverride = get(SETTING_KEYS.LEGAL_COOKIE_OVERRIDE)
   const legalNotesOverride = get(SETTING_KEYS.LEGAL_NOTES_OVERRIDE)
