@@ -4,6 +4,7 @@ import { Providers } from './providers'
 import { SiteShell } from './_components/SiteShell'
 import { organizationJsonLd } from '@/lib/jsonld'
 import { getPublicSiteSettings } from '@/lib/site-settings'
+import { getProductNavLinks } from '@/services/products'
 // @ts-ignore
 import './globals.css'
 
@@ -46,7 +47,10 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const siteSettings = await getPublicSiteSettings()
+  const [siteSettings, footerProducts] = await Promise.all([
+    getPublicSiteSettings(),
+    getProductNavLinks(),
+  ])
 
   return (
     <html
@@ -61,7 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
         />
         <Providers siteSettings={siteSettings}>
-          <SiteShell>{children}</SiteShell>
+          <SiteShell footerProducts={footerProducts}>{children}</SiteShell>
         </Providers>
       </body>
     </html>

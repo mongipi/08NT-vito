@@ -7,7 +7,13 @@ import { TranslationBridge } from '@/components/ui/TranslationBridge'
 import { NewsletterPopup } from '@/components/ui/NewsletterSignup'
 import { ChatWidget } from '@/components/ui/ChatWidget'
 
-export function SiteShell({ children }: { children: React.ReactNode }) {
+export function SiteShell({
+  children,
+  footerProducts,
+}: {
+  children: React.ReactNode
+  footerProducts: { name: string; slug: string }[]
+}) {
   const pathname = usePathname()
   const isAdmin = pathname.startsWith('/admin')
 
@@ -17,7 +23,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-full flex-col">
       <Navbar />
       {children}
-      <Footer />
+      <Footer products={footerProducts} />
       <CookieConsent />
       <NewsletterPopup />
       <TranslationBridge />

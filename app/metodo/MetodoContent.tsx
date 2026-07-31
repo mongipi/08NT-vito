@@ -3,15 +3,14 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useLocale } from '@/contexts/LocaleContext'
-import { useSiteSettings } from '@/contexts/SiteSettingsContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
+import { DEFAULT_METHOD_PAGE_CONTENT } from '@/lib/method-page'
 
 export function MetodoContent() {
   const { locale } = useLocale()
-  const siteSettings = useSiteSettings()
   const t = useTranslation(locale)
-  const managed = siteSettings.methodPageContent
+  const managed = DEFAULT_METHOD_PAGE_CONTENT
   const useManaged = locale === 'it'
 
   const wellbeingValues = useManaged

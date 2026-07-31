@@ -9,7 +9,6 @@ import { IngredientsDisclosure } from '@/components/ui/IngredientsDisclosure'
 import { ProductRegulatoryNotice } from '@/components/ui/ProductRegulatoryNotice'
 import { Localized } from '@/components/ui/Localized'
 import { ProductTitle } from '@/components/ui/ProductTitle'
-import { getPublicSiteSettings, type ProductPageTexts } from '@/lib/site-settings'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -17,6 +16,27 @@ interface Props {
 
 export const dynamic = 'force-dynamic'
 type GallerySlide = { src: string; label: string; alt: string }
+
+const PRODUCT_PAGE_TEXTS = {
+  breadcrumbBrandLabel: '08 Natural Technology',
+  allProductsLabel: 'Tutti i prodotti',
+  madeInItalyLabel: 'Made in Italy',
+  defaultKickerTemplate: '{line} - Formula mirata',
+  galleryFrontLabel: 'Fronte',
+  galleryInfographicLabel: 'Infografica',
+  galleryCompositionLabel: 'Composizione',
+  galleryBackLabel: 'Retro etichetta',
+  galleryLabelLabel: 'Etichetta',
+  sectionUsageTitle: "Modo d'uso",
+  sectionTargetTitle: 'A chi è rivolto',
+  sectionFormatTitle: 'Formato e composizione',
+  sectionIngredientsTitle: 'Ingredienti',
+  fallbackUsageBody: 'Seguire le indicazioni riportate in etichetta.',
+  fallbackTargetBody: 'Pensato per chi cerca un supporto nutrizionale mirato.',
+  fallbackIngredientsBody: 'Ingredienti non ancora specificati.',
+  capsuleSuffix: 'capsule vegetali',
+  daysSuffix: 'giorni',
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -27,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params
-  const [product, siteSettings] = await Promise.all([getProductBySlug(slug), getPublicSiteSettings()])
+  const product = await getProductBySlug(slug)
   if (!product) notFound()
 
   const {
@@ -38,11 +58,9 @@ export default async function ProductPage({ params }: Props) {
   } = product
 
   const images = product.images as ProductImages
-  const texts = siteSettings.productPageTexts
+  const texts = PRODUCT_PAGE_TEXTS
   const gallerySlides = buildFallbackGallery(images, name, texts)
-  const kicker =
-    siteSettings.productPageKickers.find((item) => item.enabled && item.slug === slug)?.label ??
-    texts.defaultKickerTemplate.replace('{line}', line.name)
+  const kicker = texts.defaultKickerTemplate.replace('{line}', line.name)
   const metaPills = [
     capsules ? `${capsules} ${texts.capsuleSuffix}` : format,
     days ? `${days} ${texts.daysSuffix}` : null,
@@ -135,7 +153,7 @@ export default async function ProductPage({ params }: Props) {
 function buildFallbackGallery(
   images: ProductImages,
   name: string,
-  texts: ProductPageTexts
+  texts: typeof PRODUCT_PAGE_TEXTS
 ): GallerySlide[] {
   return [
     images?.fronte && { src: images.fronte, label: texts.galleryFrontLabel, alt: name },

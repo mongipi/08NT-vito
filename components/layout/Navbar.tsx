@@ -15,6 +15,15 @@ import { useTranslation } from '@/lib/i18n/dictionary'
 import { useSiteSettings } from '@/contexts/SiteSettingsContext'
 import { getSocialLinks } from '@/lib/site-settings'
 
+const NAV_LINKS = [
+  { href: '/', label: 'Home' },
+  { href: '/prodotti', label: 'Prodotti & Shop' },
+  { href: '/metodo', label: 'Qualità 08' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/lavora-con-noi', label: 'Lavora con noi' },
+  { href: '/contatti', label: 'Contatti' },
+]
+
 const LANG_FLAGS = [
   { code: 'it', label: 'Italiano', src: '/v61/flags/it.png', enabled: true },
   { code: 'en', label: 'English', src: '/v61/flags/gb.png', enabled: true },
@@ -189,7 +198,7 @@ export function Navbar() {
           <Logo variant="dark" height={70} className="v61-header-logo" />
 
           <ul className="v61-menu" role="list">
-            {siteSettings.headerNavLinks.filter((item) => item.enabled).map(({ href, label }) => (
+            {NAV_LINKS.map(({ href, label }) => (
               <li key={href}>
                 <Link href={href} className={cn(isActive(href) && 'active')} aria-current={isActive(href) ? 'page' : undefined}>
                   {label}
@@ -245,7 +254,7 @@ export function Navbar() {
         </div>
         <div className="v61-mobile-drawer-body">
           <div className="v61-mobile-drawer-nav">
-            {siteSettings.headerNavLinks.filter((item) => item.enabled).map(({ href, label }) => (
+            {NAV_LINKS.map(({ href, label }) => (
               <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={cn(isActive(href) && 'active')}>
                 {label}
               </Link>

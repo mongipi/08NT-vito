@@ -1,23 +1,20 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useMemo, useState } from 'react'
-import type { HomeHeroSlide } from '@/lib/home-hero'
+import { useEffect, useState } from 'react'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
-interface Props {
-  slides: HomeHeroSlide[]
-}
+const SLIDES = [
+  { id: 'home-hero-default-08', src: '/v61/img/hero_home_bg.jpg', durationMs: 30000 },
+]
 
-export function HomeHeroCarousel({ slides }: Props) {
-  const activeSlides = useMemo(
-    () => slides.filter((slide) => slide.enabled !== false && slide.src.trim()),
-    [slides]
-  )
+export function HomeHeroCarousel() {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
+  const alt = t('home_hero_alt')
+  const activeSlides = SLIDES
   const [active, setActive] = useState(0)
-
-  useEffect(() => {
-    setActive(0)
-  }, [activeSlides.length])
 
   useEffect(() => {
     if (activeSlides.length <= 1) return
@@ -45,7 +42,7 @@ export function HomeHeroCarousel({ slides }: Props) {
           >
             <Image
               src={slide.src}
-              alt={slide.alt}
+              alt={alt}
               fill
               priority={index === 0}
               unoptimized

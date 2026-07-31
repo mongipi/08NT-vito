@@ -95,6 +95,20 @@ export async function getProducts(): Promise<Product[]> {
   }
 }
 
+export async function getProductNavLinks(): Promise<{ name: string; slug: string }[]> {
+  try {
+    return await prisma.product.findMany({
+      where: { published: true },
+      select: { name: true, slug: true },
+      orderBy: { order: 'asc' },
+    })
+  } catch (error) {
+    logPrismaInitError('products:nav-links', error)
+    if (isPrismaInitError(error)) return []
+    throw error
+  }
+}
+
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   try {
     const p = await prisma.product.findFirst({

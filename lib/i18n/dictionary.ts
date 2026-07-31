@@ -61,6 +61,7 @@ export const dictionary = {
     home_hero_title: "L'**Eccellenza**\ncome Standard.",
     home_hero_body: "08 Natural Technology nasce da un sogno: creare qualcosa di cui poter essere veramente orgogliosi. Non volevamo semplicemente realizzare degli integratori, ma dare vita a prodotti sviluppati con passione, attenzione e rispetto per le persone che ogni giorno ripongono la loro fiducia in noi.",
     home_hero_cta: 'Scopri le formule',
+    home_hero_alt: '08 Natural Technology',
 
     home_feature_1_title: 'Eccellenza italiana',
     home_feature_1_body: 'Identità italiana, cura del dettaglio e standard elevati in ogni scelta.',
@@ -618,6 +619,7 @@ export const dictionary = {
     home_hero_title: '**Excellence**\nas Standard.',
     home_hero_body: "08 Natural Technology was born from a dream: to create something we could be truly proud of. We didn't just want to make supplements, but bring to life products developed with passion, care and respect for the people who put their trust in us every day.",
     home_hero_cta: 'Discover our formulas',
+    home_hero_alt: '08 Natural Technology',
 
     home_feature_1_title: 'Italian excellence',
     home_feature_1_body: 'Italian identity, attention to detail and high standards in every choice.',

@@ -2,15 +2,7 @@ import type { Metadata } from 'next'
 import { saveSettings } from '@/lib/actions/settings'
 import { getSettingsMap, SETTING_KEYS } from '@/lib/settings'
 import { DEFAULT_PUBLIC_SITE_SETTINGS } from '@/lib/site-settings'
-import { FooterSectionsEditor } from './_FooterSectionsEditor'
-import { FooterAssetsEditor } from './_FooterAssetsEditor'
-import { HeroCarouselEditor } from './_HeroCarouselEditor'
-import { HomeFeaturesEditor } from './_HomeFeaturesEditor'
 import { LegalOverrideEditor } from './_LegalOverrideEditor'
-import { MethodPageEditor } from './_MethodPageEditor'
-import { NavLinksEditor } from './_NavLinksEditor'
-import { ProductPageKickersEditor } from './_ProductPageKickersEditor'
-import { ProductPageTextsEditor } from './_ProductPageTextsEditor'
 
 export const metadata: Metadata = { title: 'Impostazioni' }
 
@@ -19,6 +11,15 @@ const card: React.CSSProperties = {
   borderRadius: '0.625rem',
   border: '1px solid #e8eaed',
   padding: '1.5rem',
+}
+
+const sectionTitle: React.CSSProperties = {
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+  color: '#111827',
+  margin: '0 0 1.25rem',
+  paddingBottom: '0.875rem',
+  borderBottom: '1px solid #f0f1f3',
 }
 
 const label: React.CSSProperties = {
@@ -49,91 +50,46 @@ const hint: React.CSSProperties = {
   marginTop: '0.25rem',
 }
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={card}>
+      <h2 style={sectionTitle}>{title}</h2>
+      {children}
+    </div>
+  )
+}
+
 export default async function ImpostazioniPage({
   searchParams,
 }: {
   searchParams: Promise<{ saved?: string }>
 }) {
   const [settings, { saved }] = await Promise.all([getSettingsMap(), searchParams])
+  const get = (key: string, fallback = '') => settings[key] ?? fallback
 
-  const iban = settings[SETTING_KEYS.IBAN] ?? ''
-  const intestatario = settings[SETTING_KEYS.INTESTATARIO] ?? ''
-  const codSurcharge = settings[SETTING_KEYS.COD_SURCHARGE] ?? '5'
-  const speGratuita = settings[SETTING_KEYS.SPEDIZIONE_GRATUITA] ?? '39.90'
-  const prezzoSpe = settings[SETTING_KEYS.PREZZO_SPEDIZIONE] ?? '5.90'
-  const supplementoEstero = settings[SETTING_KEYS.SUPPLEMENTO_ESTERO] ?? '10'
-  const homeHeroCarousel = settings[SETTING_KEYS.HOME_HERO_CAROUSEL] ?? ''
-  const companyDisplayName =
-    settings[SETTING_KEYS.COMPANY_DISPLAY_NAME] ?? DEFAULT_PUBLIC_SITE_SETTINGS.companyDisplayName
-  const companyLegalName =
-    settings[SETTING_KEYS.COMPANY_LEGAL_NAME] ?? DEFAULT_PUBLIC_SITE_SETTINGS.companyLegalName
-  const companyAddress =
-    settings[SETTING_KEYS.COMPANY_ADDRESS] ?? DEFAULT_PUBLIC_SITE_SETTINGS.companyAddress
-  const companyPhone =
-    settings[SETTING_KEYS.COMPANY_PHONE] ?? DEFAULT_PUBLIC_SITE_SETTINGS.companyPhone
-  const companyWhatsapp =
-    settings[SETTING_KEYS.COMPANY_WHATSAPP] ?? DEFAULT_PUBLIC_SITE_SETTINGS.companyWhatsapp
-  const companyEmail =
-    settings[SETTING_KEYS.COMPANY_EMAIL] ?? DEFAULT_PUBLIC_SITE_SETTINGS.companyEmail
-  const whatsappMessage =
-    settings[SETTING_KEYS.WHATSAPP_MESSAGE] ?? DEFAULT_PUBLIC_SITE_SETTINGS.whatsappMessage
-  const socialFacebook =
-    settings[SETTING_KEYS.SOCIAL_FACEBOOK] ?? DEFAULT_PUBLIC_SITE_SETTINGS.facebookUrl
-  const socialInstagram =
-    settings[SETTING_KEYS.SOCIAL_INSTAGRAM] ?? DEFAULT_PUBLIC_SITE_SETTINGS.instagramUrl
-  const socialTiktok =
-    settings[SETTING_KEYS.SOCIAL_TIKTOK] ?? DEFAULT_PUBLIC_SITE_SETTINGS.tiktokUrl
-  const headerNavLinks = settings[SETTING_KEYS.HEADER_NAV_LINKS] ?? ''
-  const footerSections = settings[SETTING_KEYS.FOOTER_SECTIONS] ?? ''
-  const footerPayments =
-    settings[SETTING_KEYS.FOOTER_PAYMENTS] ??
-    DEFAULT_PUBLIC_SITE_SETTINGS.footerPayments.join('\n')
-  const footerCouriers = settings[SETTING_KEYS.FOOTER_COURIERS] ?? ''
-  const footerMinistryLogo = settings[SETTING_KEYS.FOOTER_MINISTRY_LOGO] ?? ''
-  const footerCopyrightText =
-    settings[SETTING_KEYS.FOOTER_COPYRIGHT_TEXT] ??
-    DEFAULT_PUBLIC_SITE_SETTINGS.footerCopyrightText
-  const footerMadeLabel =
-    settings[SETTING_KEYS.FOOTER_MADE_LABEL] ?? DEFAULT_PUBLIC_SITE_SETTINGS.footerMadeLabel
-  const productPageKickers = settings[SETTING_KEYS.PRODUCT_PAGE_KICKERS] ?? ''
-  const productPageTexts = settings[SETTING_KEYS.PRODUCT_PAGE_TEXTS] ?? ''
-  const homeFeatures = settings[SETTING_KEYS.HOME_FEATURES] ?? ''
-  const homeFormulasEyebrow =
-    settings[SETTING_KEYS.HOME_FORMULAS_EYEBROW] ??
-    DEFAULT_PUBLIC_SITE_SETTINGS.homeFormulasEyebrow
-  const homeFormulasTitle =
-    settings[SETTING_KEYS.HOME_FORMULAS_TITLE] ?? DEFAULT_PUBLIC_SITE_SETTINGS.homeFormulasTitle
-  const homeFormulasBody =
-    settings[SETTING_KEYS.HOME_FORMULAS_BODY] ?? DEFAULT_PUBLIC_SITE_SETTINGS.homeFormulasBody
-  const homeFormulasCtaLabel =
-    settings[SETTING_KEYS.HOME_FORMULAS_CTA_LABEL] ??
-    DEFAULT_PUBLIC_SITE_SETTINGS.homeFormulasCtaLabel
-  const homeFormulasCtaHref =
-    settings[SETTING_KEYS.HOME_FORMULAS_CTA_HREF] ??
-    DEFAULT_PUBLIC_SITE_SETTINGS.homeFormulasCtaHref
-  const homeBlogEyebrow =
-    settings[SETTING_KEYS.HOME_BLOG_EYEBROW] ?? DEFAULT_PUBLIC_SITE_SETTINGS.homeBlogEyebrow
-  const homeBlogTitle =
-    settings[SETTING_KEYS.HOME_BLOG_TITLE] ?? DEFAULT_PUBLIC_SITE_SETTINGS.homeBlogTitle
-  const homeBlogBody =
-    settings[SETTING_KEYS.HOME_BLOG_BODY] ?? DEFAULT_PUBLIC_SITE_SETTINGS.homeBlogBody
-  const newsletterKicker =
-    settings[SETTING_KEYS.NEWSLETTER_KICKER] ?? DEFAULT_PUBLIC_SITE_SETTINGS.newsletterKicker
-  const newsletterTitle =
-    settings[SETTING_KEYS.NEWSLETTER_TITLE] ?? DEFAULT_PUBLIC_SITE_SETTINGS.newsletterTitle
-  const newsletterBody =
-    settings[SETTING_KEYS.NEWSLETTER_BODY] ?? DEFAULT_PUBLIC_SITE_SETTINGS.newsletterBody
-  const newsletterButtonLabel =
-    settings[SETTING_KEYS.NEWSLETTER_BUTTON_LABEL] ??
-    DEFAULT_PUBLIC_SITE_SETTINGS.newsletterButtonLabel
-  const newsletterEmailPlaceholder =
-    settings[SETTING_KEYS.NEWSLETTER_EMAIL_PLACEHOLDER] ??
-    DEFAULT_PUBLIC_SITE_SETTINGS.newsletterEmailPlaceholder
-  const methodPageContent = settings[SETTING_KEYS.METHOD_PAGE_CONTENT] ?? ''
-  const legalPrivacyOverride = settings[SETTING_KEYS.LEGAL_PRIVACY_OVERRIDE] ?? ''
-  const legalCookieOverride = settings[SETTING_KEYS.LEGAL_COOKIE_OVERRIDE] ?? ''
-  const legalNotesOverride = settings[SETTING_KEYS.LEGAL_NOTES_OVERRIDE] ?? ''
-  const legalTermsOverride = settings[SETTING_KEYS.LEGAL_TERMS_OVERRIDE] ?? ''
+  const iban = get(SETTING_KEYS.IBAN)
+  const intestatario = get(SETTING_KEYS.INTESTATARIO)
+  const codSurcharge = get(SETTING_KEYS.COD_SURCHARGE, '5')
+  const speGratuita = get(SETTING_KEYS.SPEDIZIONE_GRATUITA, '39.90')
+  const prezzoSpe = get(SETTING_KEYS.PREZZO_SPEDIZIONE, '5.90')
+  const supplementoEstero = get(SETTING_KEYS.SUPPLEMENTO_ESTERO, '10')
+  const companyLegalName = get(SETTING_KEYS.COMPANY_LEGAL_NAME, DEFAULT_PUBLIC_SITE_SETTINGS.companyLegalName)
+  const companyAddress = get(SETTING_KEYS.COMPANY_ADDRESS, DEFAULT_PUBLIC_SITE_SETTINGS.companyAddress)
+  const companyPhone = get(SETTING_KEYS.COMPANY_PHONE, DEFAULT_PUBLIC_SITE_SETTINGS.companyPhone)
+  const companyWhatsapp = get(SETTING_KEYS.COMPANY_WHATSAPP, DEFAULT_PUBLIC_SITE_SETTINGS.companyWhatsapp)
+  const companyEmail = get(SETTING_KEYS.COMPANY_EMAIL, DEFAULT_PUBLIC_SITE_SETTINGS.companyEmail)
+  const whatsappMessage = get(SETTING_KEYS.WHATSAPP_MESSAGE, DEFAULT_PUBLIC_SITE_SETTINGS.whatsappMessage)
+  const socialFacebook = get(SETTING_KEYS.SOCIAL_FACEBOOK, DEFAULT_PUBLIC_SITE_SETTINGS.facebookUrl)
+  const socialInstagram = get(SETTING_KEYS.SOCIAL_INSTAGRAM, DEFAULT_PUBLIC_SITE_SETTINGS.instagramUrl)
+  const socialTiktok = get(SETTING_KEYS.SOCIAL_TIKTOK, DEFAULT_PUBLIC_SITE_SETTINGS.tiktokUrl)
+  const newsletterKicker = get(SETTING_KEYS.NEWSLETTER_KICKER, DEFAULT_PUBLIC_SITE_SETTINGS.newsletterKicker)
+  const newsletterTitle = get(SETTING_KEYS.NEWSLETTER_TITLE, DEFAULT_PUBLIC_SITE_SETTINGS.newsletterTitle)
+  const newsletterBody = get(SETTING_KEYS.NEWSLETTER_BODY, DEFAULT_PUBLIC_SITE_SETTINGS.newsletterBody)
+  const newsletterButtonLabel = get(SETTING_KEYS.NEWSLETTER_BUTTON_LABEL, DEFAULT_PUBLIC_SITE_SETTINGS.newsletterButtonLabel)
+  const legalPrivacyOverride = get(SETTING_KEYS.LEGAL_PRIVACY_OVERRIDE)
+  const legalCookieOverride = get(SETTING_KEYS.LEGAL_COOKIE_OVERRIDE)
+  const legalNotesOverride = get(SETTING_KEYS.LEGAL_NOTES_OVERRIDE)
+  const legalTermsOverride = get(SETTING_KEYS.LEGAL_TERMS_OVERRIDE)
 
   return (
     <div>
@@ -170,19 +126,7 @@ export default async function ImpostazioniPage({
       )}
 
       <form action={saveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Bonifico bancario
-          </h2>
+        <Section title="Bonifico bancario">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label style={label} htmlFor="iban">
@@ -211,21 +155,9 @@ export default async function ImpostazioniPage({
               <p style={hint}>Ragione sociale o nome da indicare come beneficiario del bonifico.</p>
             </div>
           </div>
-        </div>
+        </Section>
 
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Contrassegno
-          </h2>
+        <Section title="Contrassegno">
           <div>
             <label style={label} htmlFor="cod">
               Supplemento contrassegno (€)
@@ -243,21 +175,9 @@ export default async function ImpostazioniPage({
               Importo aggiunto al totale quando il cliente sceglie il pagamento alla consegna.
             </p>
           </div>
-        </div>
+        </Section>
 
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Spedizione
-          </h2>
+        <Section title="Spedizione">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label style={label} htmlFor="speGratuita">
@@ -302,76 +222,10 @@ export default async function ImpostazioniPage({
               />
             </div>
           </div>
-        </div>
+        </Section>
 
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Home hero carousel
-          </h2>
-          <HeroCarouselEditor initialValue={homeHeroCarousel} />
-        </div>
-
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Pagine prodotto
-          </h2>
-          <div style={{ display: 'grid', gap: '1.25rem' }}>
-            <ProductPageKickersEditor
-              name={SETTING_KEYS.PRODUCT_PAGE_KICKERS}
-              initialValue={productPageKickers}
-              defaults={DEFAULT_PUBLIC_SITE_SETTINGS.productPageKickers}
-            />
-            <ProductPageTextsEditor
-              name={SETTING_KEYS.PRODUCT_PAGE_TEXTS}
-              initialValue={productPageTexts}
-              defaults={DEFAULT_PUBLIC_SITE_SETTINGS.productPageTexts}
-            />
-          </div>
-        </div>
-
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Azienda e contatti
-          </h2>
+        <Section title="Azienda e contatti">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div>
-              <label style={label} htmlFor="companyDisplayName">
-                Nome brand visibile
-              </label>
-              <input
-                id="companyDisplayName"
-                name={SETTING_KEYS.COMPANY_DISPLAY_NAME}
-                defaultValue={companyDisplayName}
-                style={input}
-              />
-            </div>
             <div>
               <label style={label} htmlFor="companyLegalName">
                 Ragione sociale
@@ -442,21 +296,9 @@ export default async function ImpostazioniPage({
               />
             </div>
           </div>
-        </div>
+        </Section>
 
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Social
-          </h2>
+        <Section title="Social">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label style={label} htmlFor="socialFacebook">
@@ -492,227 +334,9 @@ export default async function ImpostazioniPage({
               />
             </div>
           </div>
-        </div>
+        </Section>
 
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Header navigation
-          </h2>
-          <NavLinksEditor
-            name={SETTING_KEYS.HEADER_NAV_LINKS}
-            initialValue={headerNavLinks}
-            defaults={DEFAULT_PUBLIC_SITE_SETTINGS.headerNavLinks}
-            helperText="Gestisci il menu principale del sito. I link disattivati spariscono sia da desktop che da mobile."
-          />
-        </div>
-
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Footer links e pagamenti
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <FooterSectionsEditor
-              name={SETTING_KEYS.FOOTER_SECTIONS}
-              initialValue={footerSections}
-              defaults={DEFAULT_PUBLIC_SITE_SETTINGS.footerSections}
-            />
-            <FooterAssetsEditor
-              couriersName={SETTING_KEYS.FOOTER_COURIERS}
-              couriersInitialValue={footerCouriers}
-              courierDefaults={DEFAULT_PUBLIC_SITE_SETTINGS.footerCouriers}
-              ministryName={SETTING_KEYS.FOOTER_MINISTRY_LOGO}
-              ministryInitialValue={footerMinistryLogo}
-              ministryDefault={DEFAULT_PUBLIC_SITE_SETTINGS.footerMinistryLogo}
-            />
-            <div>
-              <label style={label} htmlFor="footerPayments">
-                Pagamenti mostrati nel footer
-              </label>
-              <textarea
-                id="footerPayments"
-                name={SETTING_KEYS.FOOTER_PAYMENTS}
-                defaultValue={footerPayments}
-                rows={6}
-                style={{ ...input, resize: 'vertical' }}
-              />
-              <p style={hint}>Inserisci un metodo di pagamento per riga.</p>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '1rem' }}>
-              <div>
-                <label style={label} htmlFor="footerCopyrightText">
-                  Footer - Testo diritti
-                </label>
-                <input
-                  id="footerCopyrightText"
-                  name={SETTING_KEYS.FOOTER_COPYRIGHT_TEXT}
-                  defaultValue={footerCopyrightText}
-                  style={input}
-                />
-              </div>
-              <div>
-                <label style={label} htmlFor="footerMadeLabel">
-                  Footer - Etichetta Made in Italy
-                </label>
-                <input
-                  id="footerMadeLabel"
-                  name={SETTING_KEYS.FOOTER_MADE_LABEL}
-                  defaultValue={footerMadeLabel}
-                  style={input}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Home contenuti
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <HomeFeaturesEditor
-              name={SETTING_KEYS.HOME_FEATURES}
-              initialValue={homeFeatures}
-              defaults={DEFAULT_PUBLIC_SITE_SETTINGS.homeFeatures}
-            />
-            <div style={{ display: 'grid', gap: '1rem' }}>
-              <div>
-                <label style={label} htmlFor="homeFormulasEyebrow">
-                  Home formule - Eyebrow
-                </label>
-                <input
-                  id="homeFormulasEyebrow"
-                  name={SETTING_KEYS.HOME_FORMULAS_EYEBROW}
-                  defaultValue={homeFormulasEyebrow}
-                  style={input}
-                />
-              </div>
-              <div>
-                <label style={label} htmlFor="homeFormulasTitle">
-                  Home formule - Titolo
-                </label>
-                <textarea
-                  id="homeFormulasTitle"
-                  name={SETTING_KEYS.HOME_FORMULAS_TITLE}
-                  defaultValue={homeFormulasTitle}
-                  rows={3}
-                  style={{ ...input, resize: 'vertical' }}
-                />
-                <p style={hint}>Puoi andare a capo e usare il grassetto con **testo**.</p>
-              </div>
-              <div>
-                <label style={label} htmlFor="homeFormulasBody">
-                  Home formule - Testo
-                </label>
-                <textarea
-                  id="homeFormulasBody"
-                  name={SETTING_KEYS.HOME_FORMULAS_BODY}
-                  defaultValue={homeFormulasBody}
-                  rows={4}
-                  style={{ ...input, resize: 'vertical' }}
-                />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '1rem' }}>
-                <div>
-                  <label style={label} htmlFor="homeFormulasCtaLabel">
-                    Home formule - Testo bottone
-                  </label>
-                  <input
-                    id="homeFormulasCtaLabel"
-                    name={SETTING_KEYS.HOME_FORMULAS_CTA_LABEL}
-                    defaultValue={homeFormulasCtaLabel}
-                    style={input}
-                  />
-                </div>
-                <div>
-                  <label style={label} htmlFor="homeFormulasCtaHref">
-                    Home formule - Link bottone
-                  </label>
-                  <input
-                    id="homeFormulasCtaHref"
-                    name={SETTING_KEYS.HOME_FORMULAS_CTA_HREF}
-                    defaultValue={homeFormulasCtaHref}
-                    style={input}
-                  />
-                </div>
-              </div>
-              <div>
-                <label style={label} htmlFor="homeBlogEyebrow">
-                  Home blog - Eyebrow
-                </label>
-                <input
-                  id="homeBlogEyebrow"
-                  name={SETTING_KEYS.HOME_BLOG_EYEBROW}
-                  defaultValue={homeBlogEyebrow}
-                  style={input}
-                />
-              </div>
-              <div>
-                <label style={label} htmlFor="homeBlogTitle">
-                  Home blog - Titolo
-                </label>
-                <input
-                  id="homeBlogTitle"
-                  name={SETTING_KEYS.HOME_BLOG_TITLE}
-                  defaultValue={homeBlogTitle}
-                  style={input}
-                />
-              </div>
-              <div>
-                <label style={label} htmlFor="homeBlogBody">
-                  Home blog - Testo
-                </label>
-                <textarea
-                  id="homeBlogBody"
-                  name={SETTING_KEYS.HOME_BLOG_BODY}
-                  defaultValue={homeBlogBody}
-                  rows={4}
-                  style={{ ...input, resize: 'vertical' }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Newsletter contenuti
-          </h2>
+        <Section title="Newsletter contenuti">
           <div style={{ display: 'grid', gap: '1rem' }}>
             <div>
               <label style={label} htmlFor="newsletterKicker">
@@ -748,65 +372,21 @@ export default async function ImpostazioniPage({
                 style={{ ...input, resize: 'vertical' }}
               />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '1rem' }}>
-              <div>
-                <label style={label} htmlFor="newsletterButtonLabel">
-                  Testo bottone
-                </label>
-                <input
-                  id="newsletterButtonLabel"
-                  name={SETTING_KEYS.NEWSLETTER_BUTTON_LABEL}
-                  defaultValue={newsletterButtonLabel}
-                  style={input}
-                />
-              </div>
-              <div>
-                <label style={label} htmlFor="newsletterEmailPlaceholder">
-                  Placeholder email
-                </label>
-                <input
-                  id="newsletterEmailPlaceholder"
-                  name={SETTING_KEYS.NEWSLETTER_EMAIL_PLACEHOLDER}
-                  defaultValue={newsletterEmailPlaceholder}
-                  style={input}
-                />
-              </div>
+            <div>
+              <label style={label} htmlFor="newsletterButtonLabel">
+                Testo bottone
+              </label>
+              <input
+                id="newsletterButtonLabel"
+                name={SETTING_KEYS.NEWSLETTER_BUTTON_LABEL}
+                defaultValue={newsletterButtonLabel}
+                style={{ ...input, maxWidth: '20rem' }}
+              />
             </div>
           </div>
-        </div>
+        </Section>
 
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Qualità 08 contenuti
-          </h2>
-          <MethodPageEditor
-            name={SETTING_KEYS.METHOD_PAGE_CONTENT}
-            initialValue={methodPageContent}
-          />
-        </div>
-
-        <div style={card}>
-          <h2
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: '0 0 1.25rem',
-              paddingBottom: '0.875rem',
-              borderBottom: '1px solid #f0f1f3',
-            }}
-          >
-            Pagine legali italiane
-          </h2>
+        <Section title="Pagine legali italiane">
           <div style={{ display: 'grid', gap: '1rem' }}>
             <LegalOverrideEditor
               name={SETTING_KEYS.LEGAL_PRIVACY_OVERRIDE}
@@ -829,7 +409,7 @@ export default async function ImpostazioniPage({
               initialValue={legalTermsOverride}
             />
           </div>
-        </div>
+        </Section>
 
         <div>
           <button

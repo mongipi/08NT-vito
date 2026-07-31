@@ -56,7 +56,7 @@ export function NewsletterSignup({ variant = 'section', onDone }: NewsletterSign
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder={siteSettings.newsletterEmailPlaceholder}
+            placeholder="nome@email.it"
             required
           />
         </label>

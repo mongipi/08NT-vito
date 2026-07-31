@@ -3,13 +3,52 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useLocale, pickLocalized } from '@/contexts/LocaleContext'
-import { useSiteSettings } from '@/contexts/SiteSettingsContext'
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup'
 import { HomeHeroCarousel } from '@/components/ui/HomeHeroCarousel'
 import { useTranslation } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
 import { formatDate } from '@/lib/utils'
-import type { HomeHeroSlide } from '@/lib/home-hero'
+
+const HOME_FEATURES = [
+  {
+    id: 'home-feature-1',
+    icon: 'IT',
+    title: 'ECCELLENZA ITALIANA',
+    body: 'Identità italiana, cura del dettaglio e standard elevati in ogni scelta.',
+  },
+  {
+    id: 'home-feature-2',
+    icon: '🌿',
+    title: 'INGREDIENTI DI ALTA QUALITÀ',
+    body: 'Materie prime selezionate con attenzione e formule coerenti.',
+  },
+  {
+    id: 'home-feature-3',
+    icon: '🔬',
+    title: 'RICERCA E INNOVAZIONE',
+    body: 'Soluzioni nutrizionali moderne, ad alta biodisponibilità.',
+  },
+  {
+    id: 'home-feature-4',
+    icon: '✨',
+    title: 'BENESSERE E RISULTATI CONCRETI',
+    body: 'Soluzioni concrete, pensate per esigenze mirate.',
+  },
+]
+
+const HOME_FORMULAS = {
+  eyebrow: 'Le nostre formule',
+  title: 'Prodotti pensati\n**per esigenze reali.**',
+  body: 'Dai prodotti per microcircolo e gambe leggere, fino al supporto vitaminico, alla bellezza di capelli, pelle e unghie e all’equilibrio femminile in menopausa: 08 Natural Technology propone soluzioni nutrizionali pensate per esigenze concrete e quotidiane.',
+  ctaLabel: 'Scopri i prodotti',
+  ctaHref: '/prodotti',
+}
+
+const HOME_BLOG = {
+  eyebrow: 'Blog 08',
+  title: 'Approfondimenti e benessere quotidiano',
+  body: 'Scopri consigli, ingredienti e articoli utili per orientarti meglio tra formule, esigenze e scelte quotidiane.',
+}
 
 export interface HomeArticle {
   id: string
@@ -23,22 +62,15 @@ export interface HomeArticle {
   excerptEn?: string | null
 }
 
-export function HomeContent({
-  articles,
-  heroSlides,
-}: {
-  articles: HomeArticle[]
-  heroSlides: HomeHeroSlide[]
-}) {
+export function HomeContent({ articles }: { articles: HomeArticle[] }) {
   const { locale } = useLocale()
-  const siteSettings = useSiteSettings()
   const t = useTranslation(locale)
 
   return (
     <main>
       <section className="v61-hero">
         <div className="v61-hero-bg">
-          <HomeHeroCarousel slides={heroSlides} />
+          <HomeHeroCarousel />
         </div>
         <div className="v61-hero-inner">
           <div className="v61-hero-copy">
@@ -55,7 +87,7 @@ export function HomeContent({
 
       <div className="v61-feature-strip">
         <div className="v61-feature-grid">
-          {siteSettings.homeFeatures.map((item) => (
+          {HOME_FEATURES.map((item) => (
             <div className="v61-feature" key={item.id}>
               <div className="ico">{item.icon}</div>
               <div>
@@ -95,11 +127,11 @@ export function HomeContent({
 
       <section className="section v61-formulas-intro">
         <div className="v61-inner v61-formulas-intro-inner">
-          <div className="v61-eyebrow">{siteSettings.homeFormulasEyebrow}</div>
-          <h2 className="v61-title">{richText(siteSettings.homeFormulasTitle)}</h2>
-          <p>{siteSettings.homeFormulasBody}</p>
-          <Link className="v61-button green" href={siteSettings.homeFormulasCtaHref}>
-            {siteSettings.homeFormulasCtaLabel}
+          <div className="v61-eyebrow">{HOME_FORMULAS.eyebrow}</div>
+          <h2 className="v61-title">{richText(HOME_FORMULAS.title)}</h2>
+          <p>{HOME_FORMULAS.body}</p>
+          <Link className="v61-button green" href={HOME_FORMULAS.ctaHref}>
+            {HOME_FORMULAS.ctaLabel}
           </Link>
         </div>
       </section>
@@ -114,10 +146,10 @@ export function HomeContent({
         <div className="v61-inner">
           <div className="v61-section-head">
             <div>
-              <div className="v61-eyebrow">{siteSettings.homeBlogEyebrow}</div>
-              <h2 className="v61-title">{siteSettings.homeBlogTitle}</h2>
+              <div className="v61-eyebrow">{HOME_BLOG.eyebrow}</div>
+              <h2 className="v61-title">{HOME_BLOG.title}</h2>
             </div>
-            <p>{siteSettings.homeBlogBody}</p>
+            <p>{HOME_BLOG.body}</p>
           </div>
           <div className="v61-blog-carousel">
             {articles.map((article) => (

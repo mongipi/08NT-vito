@@ -4,10 +4,12 @@ import Link from 'next/link'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
+import { useSiteSettings } from '@/contexts/SiteSettingsContext'
 
 export function B2BContent() {
   const { locale } = useLocale()
   const t = useTranslation(locale)
+  const siteSettings = useSiteSettings()
 
   const OFFERINGS = [
     t('b2b_offer_1'), t('b2b_offer_2'), t('b2b_offer_3'), t('b2b_offer_4'),
@@ -41,9 +43,9 @@ export function B2BContent() {
             </div>
             <div className="v61-b2b-zone">
               <small>{t('b2b_zone_label')}</small>
-              VIPHARMA di Tatulli Vito &amp; Co. S.A.S.<br />
-              Via Don Luigi Sturzo 44/46/48 - 70032 Bitonto (BA)<br />
-              Tel. 080 303 1103 · 08naturaltechnology@gmail.com
+              {siteSettings.companyLegalName}<br />
+              {siteSettings.companyAddress}<br />
+              Tel. {siteSettings.companyPhone} · {siteSettings.companyEmail}
             </div>
           </div>
 
