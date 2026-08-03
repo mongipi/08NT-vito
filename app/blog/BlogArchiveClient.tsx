@@ -35,42 +35,80 @@ export function BlogArchiveClient({ articles }: { articles: BlogArchiveArticle[]
   const normalizedQuery = query.trim().toLowerCase()
 
   const sections = useMemo<BlogSection[]>(() => {
-    const dossierMatches = articles.filter((article) => ['Dossier formula', 'Beauty nutrition', 'Benessere donna', 'Microcircolo'].includes(article.tag))
+    const dossierMatches = articles.filter((article) =>
+      ['Dossier formula', 'Beauty nutrition', 'Benessere donna', 'Microcircolo'].includes(
+        article.tag
+      )
+    )
     const featured = dossierMatches.length ? dossierMatches : articles.slice(0, 4)
-    const principles = articles.filter((article) => article.tag === 'Principio attivo' && !featured.includes(article))
-    const quality = articles.filter((article) => article.tag === 'Qualità ingredienti' && !featured.includes(article))
-    const other = articles.filter((article) => !featured.includes(article) && !principles.includes(article) && !quality.includes(article))
+    const principles = articles.filter(
+      (article) => article.tag === 'Principio attivo' && !featured.includes(article)
+    )
+    const quality = articles.filter(
+      (article) => article.tag === 'Qualità ingredienti' && !featured.includes(article)
+    )
+    const other = articles.filter(
+      (article) =>
+        !featured.includes(article) && !principles.includes(article) && !quality.includes(article)
+    )
     return [
-      { title: t('blog_section_dossier_title'), body: t('blog_section_dossier_body'), articles: featured },
-      ...(principles.length > 0 ? [{ title: t('blog_section_principles_title'), body: t('blog_section_principles_body'), articles: principles }] : []),
-      ...(quality.length > 0 ? [{ title: t('blog_section_quality_title'), body: t('blog_section_quality_body'), articles: quality }] : []),
-      ...(other.length > 0 ? [{ title: t('blog_section_other_title'), body: t('blog_section_other_body'), articles: other }] : []),
+      {
+        title: t('blog_section_dossier_title'),
+        body: t('blog_section_dossier_body'),
+        articles: featured,
+      },
+      ...(principles.length > 0
+        ? [
+            {
+              title: t('blog_section_principles_title'),
+              body: t('blog_section_principles_body'),
+              articles: principles,
+            },
+          ]
+        : []),
+      ...(quality.length > 0
+        ? [
+            {
+              title: t('blog_section_quality_title'),
+              body: t('blog_section_quality_body'),
+              articles: quality,
+            },
+          ]
+        : []),
+      ...(other.length > 0
+        ? [
+            {
+              title: t('blog_section_other_title'),
+              body: t('blog_section_other_body'),
+              articles: other,
+            },
+          ]
+        : []),
     ]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [articles, locale])
+  }, [articles, t])
 
   const matches = useMemo(() => {
     if (!normalizedQuery) return []
     return articles.filter((article) => {
-      const haystack = `${article.title} ${article.excerpt} ${article.body} ${article.tag}`.toLowerCase()
+      const haystack =
+        `${article.title} ${article.excerpt} ${article.body} ${article.tag}`.toLowerCase()
       return haystack.includes(normalizedQuery)
     })
   }, [articles, normalizedQuery])
 
   const visibleSections = normalizedQuery
-    ? [{
-        title: t('blog_results_for', { query: query.trim() }),
-        body: matches.length ? t('blog_results_suggested') : t('blog_results_none'),
-        articles: matches,
-      }]
+    ? [
+        {
+          title: t('blog_results_for', { query: query.trim() }),
+          body: matches.length ? t('blog_results_suggested') : t('blog_results_none'),
+          articles: matches,
+        },
+      ]
     : sections
 
   return (
     <>
-      <PageHeader
-        eyebrow={t('blog_eyebrow')}
-        title={<em>{t('blog_title_2')}</em>}
-      />
+      <PageHeader eyebrow={t('blog_eyebrow')} title={<em>{t('blog_title_2')}</em>} />
 
       <section className="section v61-blog-search-section">
         <div className="v61-inner v61-blog-search">
@@ -91,13 +129,28 @@ export function BlogArchiveClient({ articles }: { articles: BlogArchiveArticle[]
       </section>
 
       {visibleSections.map((section) => (
-        <ArticleSection key={section.title} title={section.title} body={section.body} articles={section.articles} sectionEyebrow={t('blog_section_eyebrow')} readArticleLabel={t('blog_read_article')} readingTimeLabel={t('blog_reading_time')} />
+        <ArticleSection
+          key={section.title}
+          title={section.title}
+          body={section.body}
+          articles={section.articles}
+          sectionEyebrow={t('blog_section_eyebrow')}
+          readArticleLabel={t('blog_read_article')}
+          readingTimeLabel={t('blog_reading_time')}
+        />
       ))}
     </>
   )
 }
 
-function ArticleSection({ title, body, articles, sectionEyebrow, readArticleLabel, readingTimeLabel }: BlogSection & { sectionEyebrow: string; readArticleLabel: string; readingTimeLabel: string }) {
+function ArticleSection({
+  title,
+  body,
+  articles,
+  sectionEyebrow,
+  readArticleLabel,
+  readingTimeLabel,
+}: BlogSection & { sectionEyebrow: string; readArticleLabel: string; readingTimeLabel: string }) {
   if (articles.length === 0) {
     return (
       <section className="section v61-blog-archive-section">
@@ -122,7 +175,12 @@ function ArticleSection({ title, body, articles, sectionEyebrow, readArticleLabe
         </div>
         <div className="v61-blog-grid">
           {articles.map((article) => (
-            <BlogCard key={article.id} article={article} readArticleLabel={readArticleLabel} readingTimeLabel={readingTimeLabel} />
+            <BlogCard
+              key={article.id}
+              article={article}
+              readArticleLabel={readArticleLabel}
+              readingTimeLabel={readingTimeLabel}
+            />
           ))}
         </div>
       </div>
@@ -130,20 +188,35 @@ function ArticleSection({ title, body, articles, sectionEyebrow, readArticleLabe
   )
 }
 
-function BlogCard({ article, readArticleLabel, readingTimeLabel }: { article: BlogArchiveArticle; readArticleLabel: string; readingTimeLabel: string }) {
+function BlogCard({
+  article,
+  readArticleLabel,
+  readingTimeLabel,
+}: {
+  article: BlogArchiveArticle
+  readArticleLabel: string
+  readingTimeLabel: string
+}) {
   const [open, setOpen] = useState(false)
   const { locale } = useLocale()
 
   return (
     <article className={cn('v61-blog-card', open && 'open')}>
-      <button type="button" className="v61-blog-card-toggle" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
+      <button
+        type="button"
+        className="v61-blog-card-toggle"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+      >
         <h3>{pickLocalized(locale, article.title, article.titleEn)}</h3>
         <span aria-hidden="true">{open ? '-' : '+'}</span>
       </button>
       <div className="v61-blog-card-detail">
         <span className="cat">{article.tag}</span>
         <p>{pickLocalized(locale, article.excerpt, article.excerptEn)}</p>
-        <span className="date">{formatDate(article.publishedAt)} · {article.readingTime ?? 5} {readingTimeLabel}</span>
+        <span className="date">
+          {formatDate(article.publishedAt)} · {article.readingTime ?? 5} {readingTimeLabel}
+        </span>
         <Link href={`/blog/${article.slug}`}>{readArticleLabel}</Link>
       </div>
     </article>
