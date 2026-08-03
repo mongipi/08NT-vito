@@ -1,47 +1,31 @@
 'use server'
 
-import { invalidateSettingsCache, SETTING_KEYS } from '@/lib/settings'
+import { invalidateSettingsCache } from '@/lib/settings'
 import { saveSettingValues } from '@/services/settings'
 import { requireAdmin } from '@/lib/auth/guards'
+import { settingsSchema } from '@/lib/validation/settings'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+
+const SETTINGS_PATH = '/admin/impostazioni'
 
 export async function saveSettings(formData: FormData) {
   await requireAdmin()
 
-  const keys = [
-    SETTING_KEYS.IBAN,
-    SETTING_KEYS.INTESTATARIO,
-    SETTING_KEYS.COD_SURCHARGE,
-    SETTING_KEYS.SPEDIZIONE_GRATUITA,
-    SETTING_KEYS.PREZZO_SPEDIZIONE,
-    SETTING_KEYS.SUPPLEMENTO_ESTERO,
-    SETTING_KEYS.COMPANY_LEGAL_NAME,
-    SETTING_KEYS.COMPANY_ADDRESS,
-    SETTING_KEYS.COMPANY_PHONE,
-    SETTING_KEYS.COMPANY_WHATSAPP,
-    SETTING_KEYS.COMPANY_EMAIL,
-    SETTING_KEYS.WHATSAPP_MESSAGE,
-    SETTING_KEYS.SOCIAL_FACEBOOK,
-    SETTING_KEYS.SOCIAL_INSTAGRAM,
-    SETTING_KEYS.SOCIAL_TIKTOK,
-    SETTING_KEYS.NEWSLETTER_KICKER,
-    SETTING_KEYS.NEWSLETTER_TITLE,
-    SETTING_KEYS.NEWSLETTER_BODY,
-    SETTING_KEYS.NEWSLETTER_BUTTON_LABEL,
-    SETTING_KEYS.LEGAL_PRIVACY_OVERRIDE,
-    SETTING_KEYS.LEGAL_COOKIE_OVERRIDE,
-    SETTING_KEYS.LEGAL_NOTES_OVERRIDE,
-    SETTING_KEYS.LEGAL_TERMS_OVERRIDE,
-  ]
+  const result = settingsSchema.safeParse(Object.fromEntries(formData.entries()))
 
-  await saveSettingValues(
-    Object.fromEntries(keys.map((key) => [key, (formData.get(key) as string)?.trim() ?? '']))
-  )
+  if (!result.success) {
+    // Niente crash: si torna alla pagina con il motivo, così il valore
+    // precedente resta a database e l'admin capisce cosa correggere.
+    const message = result.error.issues.map((issue) => issue.message).join(' · ')
+    redirect(`${SETTINGS_PATH}?error=${encodeURIComponent(message)}`)
+  }
+
+  await saveSettingValues(result.data)
 
   invalidateSettingsCache()
-  revalidatePath('/admin/impostazioni')
+  revalidatePath(SETTINGS_PATH)
   revalidatePath('/checkout')
   revalidatePath('/')
-  redirect('/admin/impostazioni?saved=1')
+  redirect(`${SETTINGS_PATH}?saved=1`)
 }

@@ -61,9 +61,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default async function ImpostazioniPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string }>
+  searchParams: Promise<{ saved?: string; error?: string }>
 }) {
-  const [settings, { saved }] = await Promise.all([getSettingsMap(), searchParams])
+  const [settings, { saved, error }] = await Promise.all([getSettingsMap(), searchParams])
   const get = (key: string, fallback = '') => settings[key] ?? fallback
 
   const iban = get(SETTING_KEYS.IBAN)
@@ -125,7 +125,26 @@ export default async function ImpostazioniPage({
         </div>
       )}
 
-      <form action={saveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {error && (
+        <div
+          style={{
+            background: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '0.375rem',
+            padding: '0.75rem 1rem',
+            marginBottom: '1.25rem',
+            fontSize: '0.8125rem',
+            color: '#b91c1c',
+          }}
+        >
+          Impostazioni non salvate — {error}
+        </div>
+      )}
+
+      <form
+        action={saveSettings}
+        style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
+      >
         <Section title="Bonifico bancario">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
@@ -168,6 +187,7 @@ export default async function ImpostazioniPage({
               type="number"
               step="0.01"
               min="0"
+              required
               defaultValue={codSurcharge}
               style={{ ...input, maxWidth: '10rem' }}
             />
@@ -189,6 +209,7 @@ export default async function ImpostazioniPage({
                 type="number"
                 step="0.01"
                 min="0"
+                required
                 defaultValue={speGratuita}
                 style={{ ...input, maxWidth: '10rem' }}
               />
@@ -203,6 +224,7 @@ export default async function ImpostazioniPage({
                 type="number"
                 step="0.01"
                 min="0"
+                required
                 defaultValue={prezzoSpe}
                 style={{ ...input, maxWidth: '10rem' }}
               />
@@ -217,6 +239,7 @@ export default async function ImpostazioniPage({
                 type="number"
                 step="0.01"
                 min="0"
+                required
                 defaultValue={supplementoEstero}
                 style={{ ...input, maxWidth: '10rem' }}
               />
@@ -248,7 +271,13 @@ export default async function ImpostazioniPage({
                 style={input}
               />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '1rem' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: '1rem',
+              }}
+            >
               <div>
                 <label style={label} htmlFor="companyPhone">
                   Telefono
