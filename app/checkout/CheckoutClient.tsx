@@ -1,23 +1,24 @@
 'use client'
 
-import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useState } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
-import { useCart } from '@/contexts/CartContext'
-import { validateCoupon } from '@/lib/actions/coupon'
-import { createPaymentIntent, createDirectOrder, hashPasswordForCheckout } from '@/lib/actions/checkout'
-import type { ShippingAddress } from '@/lib/actions/checkout'
-import { useSession } from 'next-auth/react'
 import { formatPrice } from '@/lib/cart'
 import Link from 'next/link'
-import { COUNTRIES, ISLAND_PROVINCES } from '@/lib/countries'
-import { computeOrderTotals, isDomesticCountry, type PricingConfig } from '@/lib/domain/pricing'
-import { toCustomerRole } from '@/lib/domain/roles'
+import { COUNTRIES } from '@/lib/countries'
+import type { PricingConfig } from '@/lib/domain/pricing'
 import { BrtFermopointPicker } from './BrtFermopointPicker'
 import { PosteLockerPicker } from './PosteLockerPicker'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
+import {
+  PHONE_PREFIXES,
+  useCheckoutForm,
+  type CheckoutPrefill,
+  type PayMethod,
+} from './useCheckoutForm'
+import type { DocType } from '@/types/checkout'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
@@ -34,37 +35,33 @@ const labelStyle: React.CSSProperties = {
   color: 'var(--ink-3)', marginBottom: '0.375rem',
 }
 
-const PHONE_PREFIXES = [
-  { country: 'Italia', code: '+39', flag: '🇮🇹' },
-  { country: 'Francia', code: '+33', flag: '🇫🇷' },
-  { country: 'Germania', code: '+49', flag: '🇩🇪' },
-  { country: 'Spagna', code: '+34', flag: '🇪🇸' },
-  { country: 'Portogallo', code: '+351', flag: '🇵🇹' },
-  { country: 'Regno Unito', code: '+44', flag: '🇬🇧' },
-  { country: 'Svizzera', code: '+41', flag: '🇨🇭' },
-  { country: 'Austria', code: '+43', flag: '🇦🇹' },
-] as const
-
-type DocType = 'fattura' | 'scontrino' | 'nessuno'
-type PayMethod = 'stripe' | 'bonifico' | 'contrassegno'
-
-interface Prefill {
-  firstName: string; lastName: string; phone: string
-  fiscalCode: string; company: string; vatNumber: string; pec: string; sdiCode: string
-  address: string; city: string; postalCode: string; province: string; country: string
-}
 
 export function CheckoutClient({
   prefill,
   pricing,
 }: {
-  prefill?: Prefill
+  prefill?: CheckoutPrefill
   /** Configurazione gestita da /admin/impostazioni, letta dal server. */
   pricing: PricingConfig
 }) {
-  const { codSurcharge, shippingThreshold, shippingPrice, foreignSurcharge } = pricing
+  const { codSurcharge, shippingPrice, foreignSurcharge } = pricing
   const { locale } = useLocale()
   const t = useTranslation(locale)
+
+  const form = useCheckoutForm(pricing, prefill)
+  const {
+    session, cart, step, setStep, clientSecret, loading, pending, proceedError,
+    couponInput, setCouponInput, couponError, couponLoading, applyCoupon,
+    phonePrefix, setPhonePrefix, address, setAddress,
+    billing, setBilling, billingDifferent, setBillingDifferent,
+    docType, setDocType, payMethod, setPayMethod,
+    deliveryType, setDeliveryType, pickupCarrier, setPickupCarrier,
+    pickupPointCode, setPickupPointCode, pickupPointAddress, setPickupPointAddress,
+    guestEmail, setGuestEmail, createAccount, setCreateAccount,
+    guestPassword, setGuestPassword, saveForNextTime, setSaveForNextTime,
+    isIsland, effectiveCarrier, isBrtPickup, canProceed,
+    totals, isCod, isEstero, handleProceed,
+  } = form
 
   const ADDRESS_FIELDS = [
     { key: 'address',    label: t('checkout_address'),    required: true,  placeholder: t('checkout_address_placeholder') },
@@ -78,152 +75,9 @@ export function CheckoutClient({
     { value: 'bonifico',     label: t('checkout_pay_bank_label'),   desc: t('checkout_pay_bank_desc') },
     { value: 'contrassegno', label: t('checkout_pay_cod_label'),    desc: t('checkout_pay_cod_desc', { amount: `€${codSurcharge.toFixed(2)}` }) },
   ]
-  const { data: session } = useSession()
-  const cart = useCart()
-  const [clientSecret, setClientSecret] = useState<string | null>(null)
-  const [couponInput, setCouponInput] = useState('')
-  const [couponError, setCouponError] = useState<string | null>(null)
-  const [couponLoading, setCouponLoading] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [proceedError, setProceedError] = useState<string | null>(null)
-  const [pending, startTransition] = useTransition()
-  const savedPhone = prefill?.phone?.trim() ?? ''
-  const savedPhonePrefix = PHONE_PREFIXES.find(({ code }) => savedPhone.startsWith(code))
-  const savedPhoneNumber = savedPhonePrefix ? savedPhone.slice(savedPhonePrefix.code.length).trim() : savedPhone
-  const [phonePrefix, setPhonePrefix] = useState<string>(savedPhonePrefix?.code ?? '+39')
-  const [address, setAddress] = useState({
-    firstName:  prefill?.firstName  ?? '',
-    lastName:   prefill?.lastName   ?? '',
-    company:    prefill?.company    ?? '',
-    vatNumber:  prefill?.vatNumber  ?? '',
-    fiscalCode: prefill?.fiscalCode ?? '',
-    sdiCode:    prefill?.sdiCode    ?? '',
-    pec:        prefill?.pec        ?? '',
-    address:    prefill?.address    ?? '',
-    city:       prefill?.city       ?? '',
-    postalCode: prefill?.postalCode ?? '',
-    province:   prefill?.province   ?? '',
-    country:       prefill?.country ?? 'IT',
-    phone:         savedPhoneNumber,
-    shippingNotes: '',
-  })
-  const [step, setStep] = useState<'address' | 'payment'>('address')
-  const [docType, setDocType] = useState<DocType>('nessuno')
-  const [payMethod, setPayMethod] = useState<PayMethod>('stripe')
-  const [deliveryType, setDeliveryType] = useState<'home' | 'pickup'>('home')
-  const [pickupCarrier, setPickupCarrier] = useState<'BRT' | 'POSTE'>('BRT')
-  const [pickupPointCode, setPickupPointCode] = useState('')
-  const [pickupPointAddress, setPickupPointAddress] = useState('')
-  const [guestEmail, setGuestEmail] = useState('')
-  const [createAccount, setCreateAccount] = useState(false)
-  const [guestPassword, setGuestPassword] = useState('')
-  const [saveForNextTime, setSaveForNextTime] = useState(false)
-  const [billingDifferent, setBillingDifferent] = useState(false)
-  const [billing, setBilling] = useState({
-    firstName: '', lastName: '', company: '', vatNumber: '', fiscalCode: '',
-    address: '', city: '', postalCode: '', province: '', country: 'IT',
-  })
 
-  async function applyCoupon() {
-    if (!couponInput.trim()) return
-    setCouponLoading(true); setCouponError(null)
-    const role = toCustomerRole(session?.user?.role)
-    const result = await validateCoupon(couponInput, cart.items, role)
-    if (!result.valid) setCouponError(result.error ?? 'Codice non valido')
-    else if (result.coupon) { cart.applyCoupon(result.coupon); setCouponInput('') }
-    setCouponLoading(false)
-  }
-
-  async function handleProceed() {
-    if (!session && !guestEmail.includes('@')) {
-      setProceedError(t('checkout_error_email'))
-      return
-    }
-    if (!session && createAccount && guestPassword.length < 8) {
-      setProceedError(t('checkout_error_password'))
-      return
-    }
-    setProceedError(null)
-
-    const guestPasswordHash = (!session && createAccount && guestPassword)
-      ? await hashPasswordForCheckout(guestPassword)
-      : undefined
-    const isPickup = deliveryType === 'pickup'
-    const orderAddress: ShippingAddress = {
-      ...address,
-      phone: address.phone.trim() ? `${phonePrefix} ${address.phone.trim()}` : '',
-      docType,
-      guestEmail: session ? undefined : guestEmail,
-      createAccount: session ? undefined : createAccount,
-      guestPasswordHash,
-      saveForNextTime,
-      deliveryType,
-      pickupCarrier: isPickup ? effectiveCarrier : null,
-      pickupPointCode: isPickup ? pickupPointCode : undefined,
-      pickupPointAddress: isPickup ? pickupPointAddress : undefined,
-      billingDifferent,
-      ...(billingDifferent
-        ? {
-            billingFirstName: billing.firstName,
-            billingLastName: billing.lastName,
-            billingCompany: billing.company,
-            billingVatNumber: billing.vatNumber,
-            billingFiscalCode: billing.fiscalCode,
-            billingAddress: billing.address,
-            billingCity: billing.city,
-            billingPostalCode: billing.postalCode,
-            billingProvince: billing.province,
-            billingCountry: billing.country,
-          }
-        : {}),
-    }
-
-    // Spedizione e sovrapprezzi non vengono inviati: li ricalcola il server.
-    if (payMethod === 'stripe') {
-      setLoading(true)
-      try {
-        const { clientSecret } = await createPaymentIntent(cart.items, cart.coupon, orderAddress)
-        setClientSecret(clientSecret!)
-        setStep('payment')
-      } finally {
-        setLoading(false)
-      }
-    } else {
-      startTransition(async () => {
-        await createDirectOrder(cart.items, cart.coupon, orderAddress, payMethod)
-      })
-    }
-  }
-
-  const isIsland = address.country === 'IT' && (ISLAND_PROVINCES as readonly string[]).includes(address.province.trim().toUpperCase())
-  const effectiveCarrier: 'BRT' | 'POSTE' = isIsland ? 'POSTE' : pickupCarrier
-  const isBrtPickup = deliveryType === 'pickup' && effectiveCarrier === 'BRT'
-
-  const baseOk = !!(address.firstName && address.lastName && address.address && address.city && address.postalCode)
-  const docOk = docType === 'nessuno' || docType === 'scontrino' || (docType === 'fattura' && !!(address.company && address.vatNumber && (address.sdiCode || address.pec)))
-  const pickupOk = deliveryType === 'home' || !!pickupPointAddress.trim()
-  const canProceed = baseOk && docOk && pickupOk
-
-  // Anteprima: il totale definitivo viene comunque ricalcolato dal server alla
-  // creazione dell'ordine, usando questa stessa funzione.
-  const totals = useMemo(
-    () =>
-      computeOrderTotals(
-        { items: cart.items, coupon: cart.coupon, country: address.country, paymentMethod: payMethod },
-        pricing
-      ),
-    [cart.items, cart.coupon, address.country, payMethod, pricing]
-  )
-  const isCod        = payMethod === 'contrassegno'
-  const isEstero     = !isDomesticCountry(address.country)
   const baseShipping = totals.shippingCost + totals.foreignSurcharge
   const displayTotal = totals.total
-
-  useEffect(() => {
-    if (isBrtPickup && payMethod === 'contrassegno') {
-      setPayMethod('stripe')
-    }
-  }, [isBrtPickup, payMethod])
 
   if (cart.itemCount === 0) {
     return (
