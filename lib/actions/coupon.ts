@@ -1,10 +1,11 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { calcSubtotal } from '@/lib/cart'
+import { calcDiscount, calcSubtotal } from '@/lib/cart'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
 
 const NEWSLETTER_DISCOUNT_CODE = 'BENVENUTO5'
+const NEWSLETTER_DISCOUNT_PERCENT = 5
 
 interface ValidateCouponResult {
   valid: boolean
@@ -30,12 +31,14 @@ export async function validateCoupon(
 
   if (!doc && normalizedCode === NEWSLETTER_DISCOUNT_CODE) {
     if (userRole !== 'consumer') return { valid: false, error: 'Codice non applicabile al tuo account' }
-    const subtotal = calcSubtotal(items)
-    const discountAmount = Math.round((subtotal * 5) / 100 * 100) / 100
-    return {
-      valid: true,
-      coupon: { code: NEWSLETTER_DISCOUNT_CODE, type: 'percent', value: 5, discountAmount },
+    const coupon: AppliedCoupon = {
+      code: NEWSLETTER_DISCOUNT_CODE,
+      type: 'percent',
+      value: NEWSLETTER_DISCOUNT_PERCENT,
+      discountAmount: 0,
     }
+    coupon.discountAmount = calcDiscount(calcSubtotal(items), coupon)
+    return { valid: true, coupon }
   }
 
   if (!doc) return { valid: false, error: 'Codice non valido' }
@@ -51,14 +54,13 @@ export async function validateCoupon(
     return { valid: false, error: `Importo minimo ordine: €${doc.minOrderAmount.toFixed(2)}` }
   }
 
-  const type = doc.type as 'percent' | 'fixed'
-  const discountAmount =
-    type === 'percent'
-      ? Math.round((subtotal * doc.value) / 100 * 100) / 100
-      : Math.min(doc.value, subtotal)
-
-  return {
-    valid: true,
-    coupon: { code: code.toUpperCase(), type, value: doc.value, discountAmount },
+  const coupon: AppliedCoupon = {
+    code: normalizedCode,
+    type: doc.type as 'percent' | 'fixed',
+    value: doc.value,
+    discountAmount: 0,
   }
+  coupon.discountAmount = calcDiscount(subtotal, coupon)
+
+  return { valid: true, coupon }
 }

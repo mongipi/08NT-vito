@@ -1,15 +1,17 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { useCart } from '@/contexts/CartContext'
 import { validateCoupon } from '@/lib/actions/coupon'
 import { createPaymentIntent, createDirectOrder, hashPasswordForCheckout } from '@/lib/actions/checkout'
+import type { ShippingAddress } from '@/lib/actions/checkout'
 import { useSession } from 'next-auth/react'
 import { formatPrice } from '@/lib/cart'
 import Link from 'next/link'
-import { COUNTRIES, DOMESTIC_COUNTRIES, ISLAND_PROVINCES } from '@/lib/countries'
+import { COUNTRIES, ISLAND_PROVINCES } from '@/lib/countries'
+import { computeOrderTotals, isDomesticCountry, type PricingConfig } from '@/lib/domain/pricing'
 import { BrtFermopointPicker } from './BrtFermopointPicker'
 import { PosteLockerPicker } from './PosteLockerPicker'
 import { useLocale } from '@/contexts/LocaleContext'
@@ -53,17 +55,13 @@ interface Prefill {
 
 export function CheckoutClient({
   prefill,
-  codSurcharge     = 5,
-  shippingThreshold = 39.90,
-  shippingPrice     = 5.90,
-  foreignSurcharge  = 10,
+  pricing,
 }: {
   prefill?: Prefill
-  codSurcharge?: number
-  shippingThreshold?: number
-  shippingPrice?: number
-  foreignSurcharge?: number
+  /** Configurazione gestita da /admin/impostazioni, letta dal server. */
+  pricing: PricingConfig
 }) {
+  const { codSurcharge, shippingThreshold, shippingPrice, foreignSurcharge } = pricing
   const { locale } = useLocale()
   const t = useTranslation(locale)
 
@@ -149,14 +147,41 @@ export function CheckoutClient({
     const guestPasswordHash = (!session && createAccount && guestPassword)
       ? await hashPasswordForCheckout(guestPassword)
       : undefined
-    const addressForOrder = {
+    const isPickup = deliveryType === 'pickup'
+    const orderAddress: ShippingAddress = {
       ...address,
       phone: address.phone.trim() ? `${phonePrefix} ${address.phone.trim()}` : '',
+      docType,
+      guestEmail: session ? undefined : guestEmail,
+      createAccount: session ? undefined : createAccount,
+      guestPasswordHash,
+      saveForNextTime,
+      deliveryType,
+      pickupCarrier: isPickup ? effectiveCarrier : null,
+      pickupPointCode: isPickup ? pickupPointCode : undefined,
+      pickupPointAddress: isPickup ? pickupPointAddress : undefined,
+      billingDifferent,
+      ...(billingDifferent
+        ? {
+            billingFirstName: billing.firstName,
+            billingLastName: billing.lastName,
+            billingCompany: billing.company,
+            billingVatNumber: billing.vatNumber,
+            billingFiscalCode: billing.fiscalCode,
+            billingAddress: billing.address,
+            billingCity: billing.city,
+            billingPostalCode: billing.postalCode,
+            billingProvince: billing.province,
+            billingCountry: billing.country,
+          }
+        : {}),
     }
+
+    // Spedizione e sovrapprezzi non vengono inviati: li ricalcola il server.
     if (payMethod === 'stripe') {
       setLoading(true)
       try {
-        const { clientSecret } = await createPaymentIntent(cart.items, cart.coupon, { ...addressForOrder, docType, guestEmail: session ? undefined : guestEmail, createAccount: session ? undefined : createAccount, guestPasswordHash, saveForNextTime, deliveryType, pickupCarrier: deliveryType === 'pickup' ? effectiveCarrier : null, pickupPointCode: deliveryType === 'pickup' ? pickupPointCode : undefined, pickupPointAddress: deliveryType === 'pickup' ? pickupPointAddress : undefined, billingDifferent, ...(billingDifferent ? { billingFirstName: billing.firstName, billingLastName: billing.lastName, billingCompany: billing.company, billingVatNumber: billing.vatNumber, billingFiscalCode: billing.fiscalCode, billingAddress: billing.address, billingCity: billing.city, billingPostalCode: billing.postalCode, billingProvince: billing.province, billingCountry: billing.country } : {}) }, { shippingCost: shippingCostVal, foreignSurcharge: foreignSurchargeVal, freeShipping: hasFreeShip })
+        const { clientSecret } = await createPaymentIntent(cart.items, cart.coupon, orderAddress)
         setClientSecret(clientSecret!)
         setStep('payment')
       } finally {
@@ -164,7 +189,7 @@ export function CheckoutClient({
       }
     } else {
       startTransition(async () => {
-        await createDirectOrder(cart.items, cart.coupon, { ...addressForOrder, docType, guestEmail: session ? undefined : guestEmail, createAccount: session ? undefined : createAccount, guestPasswordHash, saveForNextTime, deliveryType, pickupCarrier: deliveryType === 'pickup' ? effectiveCarrier : null, pickupPointCode: deliveryType === 'pickup' ? pickupPointCode : undefined, pickupPointAddress: deliveryType === 'pickup' ? pickupPointAddress : undefined, billingDifferent, ...(billingDifferent ? { billingFirstName: billing.firstName, billingLastName: billing.lastName, billingCompany: billing.company, billingVatNumber: billing.vatNumber, billingFiscalCode: billing.fiscalCode, billingAddress: billing.address, billingCity: billing.city, billingPostalCode: billing.postalCode, billingProvince: billing.province, billingCountry: billing.country } : {}) }, payMethod, { shippingCost: shippingCostVal, foreignSurcharge: foreignSurchargeVal, freeShipping: hasFreeShip })
+        await createDirectOrder(cart.items, cart.coupon, orderAddress, payMethod)
       })
     }
   }
@@ -178,13 +203,20 @@ export function CheckoutClient({
   const pickupOk = deliveryType === 'home' || !!pickupPointAddress.trim()
   const canProceed = baseOk && docOk && pickupOk
 
-  const isCod          = payMethod === 'contrassegno'
-  const isEstero       = !(DOMESTIC_COUNTRIES as readonly string[]).includes(address.country)
-  const hasFreeShip    = cart.total >= shippingThreshold
-  const shippingCostVal    = hasFreeShip ? 0 : shippingPrice
-  const foreignSurchargeVal = isEstero ? foreignSurcharge : 0
-  const baseShipping   = shippingCostVal + foreignSurchargeVal
-  const displayTotal   = cart.total + (isCod ? codSurcharge : 0) + baseShipping
+  // Anteprima: il totale definitivo viene comunque ricalcolato dal server alla
+  // creazione dell'ordine, usando questa stessa funzione.
+  const totals = useMemo(
+    () =>
+      computeOrderTotals(
+        { items: cart.items, coupon: cart.coupon, country: address.country, paymentMethod: payMethod },
+        pricing
+      ),
+    [cart.items, cart.coupon, address.country, payMethod, pricing]
+  )
+  const isCod        = payMethod === 'contrassegno'
+  const isEstero     = !isDomesticCountry(address.country)
+  const baseShipping = totals.shippingCost + totals.foreignSurcharge
+  const displayTotal = totals.total
 
   useEffect(() => {
     if (isBrtPickup && payMethod === 'contrassegno') {
@@ -684,32 +716,22 @@ export function CheckoutClient({
             </div>
           ) : (
             <>
-              {!isEstero && (
+              {totals.shippingCost > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
-                  <span>{t('cart_shipping')}</span><span>+{formatPrice(shippingPrice)}</span>
+                  <span>{t('cart_shipping')}</span><span>+{formatPrice(totals.shippingCost)}</span>
                 </div>
               )}
-              {isEstero && cart.total >= shippingThreshold && (
+              {totals.foreignSurcharge > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
-                  <span>{t('checkout_foreign_surcharge')}</span><span>+{formatPrice(foreignSurcharge)}</span>
+                  <span>{t('checkout_foreign_surcharge')}</span><span>+{formatPrice(totals.foreignSurcharge)}</span>
                 </div>
-              )}
-              {isEstero && cart.total < shippingThreshold && (
-                <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
-                    <span>{t('cart_shipping')}</span><span>+{formatPrice(shippingPrice)}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
-                    <span>{t('checkout_foreign_surcharge')}</span><span>+{formatPrice(foreignSurcharge)}</span>
-                  </div>
-                </>
               )}
             </>
           )}
           {isCod && (
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--ink-3)' }}>
               <span>{t('checkout_cod_surcharge')}</span>
-              <span>+{formatPrice(codSurcharge)}</span>
+              <span>+{formatPrice(totals.codSurcharge)}</span>
             </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.0625rem', fontWeight: 700, color: 'var(--forest)', borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 4 }}>

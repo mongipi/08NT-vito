@@ -5,8 +5,8 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
-import { calcSubtotal, calcDiscount, calcTotal } from '@/lib/cart'
-import { getSettingsMap } from '@/lib/settings'
+import { computeOrderTotals } from '@/lib/domain/pricing'
+import { getPricingConfig } from '@/lib/domain/pricing-config'
 import { sendOrderConfirmation, sendAdminOrderNotification } from '@/lib/email'
 import { issueVerificationEmail } from '@/lib/verification'
 import { chunkMetadataValue } from '@/lib/stripe-metadata'
@@ -51,25 +51,22 @@ export interface ShippingAddress {
   guestPasswordHash?: string
 }
 
-interface ShippingInfo {
-  shippingCost: number
-  foreignSurcharge: number
-  freeShipping: boolean
-}
-
 export async function createPaymentIntent(
   items: CartItem[],
   coupon: AppliedCoupon | null,
-  shippingAddress: ShippingAddress,
-  shipping: ShippingInfo = { shippingCost: 0, foreignSurcharge: 0, freeShipping: false }
+  shippingAddress: ShippingAddress
 ) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
   const session = await auth()
 
-  const subtotal = calcSubtotal(items)
-  const discountAmount = calcDiscount(subtotal, coupon)
-  const total = calcTotal(subtotal, discountAmount) + shipping.shippingCost + shipping.foreignSurcharge
+  // I totali si calcolano qui, non si accettano dal client: spedizione e
+  // supplementi sarebbero altrimenti manipolabili dal browser.
+  const totals = computeOrderTotals(
+    { items, coupon, country: shippingAddress.country, paymentMethod: 'stripe' },
+    await getPricingConfig()
+  )
+  const { subtotal, discountAmount, total } = totals
 
   const amountInCents = Math.round(total * 100)
   if (amountInCents < 50) throw new Error('Importo minimo €0.50')
@@ -98,9 +95,9 @@ export async function createPaymentIntent(
       guestPasswordHash: shippingAddress.guestPasswordHash ?? '',
       subtotal: String(subtotal),
       discountAmount: String(discountAmount),
-      shippingCost: String(shipping.shippingCost),
-      foreignSurcharge: String(shipping.foreignSurcharge),
-      freeShipping: String(shipping.freeShipping),
+      shippingCost: String(totals.shippingCost),
+      foreignSurcharge: String(totals.foreignSurcharge),
+      freeShipping: String(totals.freeShipping),
       saveForNextTime: String(shippingAddress.saveForNextTime ?? false),
       couponCode: coupon?.code ?? '',
       // Stripe limita ogni valore di metadata a 500 caratteri: items e shippingAddress
@@ -124,9 +121,9 @@ export async function createPaymentIntent(
         status: 'pending',
         paymentMethod: 'stripe',
         stripePaymentIntentId: paymentIntent.id,
-        shippingCost: shipping.shippingCost,
-        foreignSurcharge: shipping.foreignSurcharge,
-        freeShipping: shipping.freeShipping,
+        shippingCost: totals.shippingCost,
+        foreignSurcharge: totals.foreignSurcharge,
+        freeShipping: totals.freeShipping,
         shippingNotes: shippingAddress.shippingNotes ?? null,
         deliveryType: shippingAddress.deliveryType ?? 'home',
         pickupCarrier: shippingAddress.pickupCarrier ?? null,
@@ -197,19 +194,16 @@ export async function createDirectOrder(
   items: CartItem[],
   coupon: AppliedCoupon | null,
   shippingAddress: ShippingAddress,
-  paymentMethod: 'bonifico' | 'contrassegno',
-  shipping: ShippingInfo = { shippingCost: 0, foreignSurcharge: 0, freeShipping: false }
+  paymentMethod: 'bonifico' | 'contrassegno'
 ) {
   const session = await auth()
 
-  const settings = await getSettingsMap()
-  const codSurchargeSetting = parseFloat(settings['COD_SURCHARGE'] ?? '5') || 5
-
-  const subtotal = calcSubtotal(items)
-  const discountAmount = calcDiscount(subtotal, coupon)
-  const base = calcTotal(subtotal, discountAmount)
-  const codSurcharge = paymentMethod === 'contrassegno' ? codSurchargeSetting : 0
-  const total = base + codSurcharge + shipping.shippingCost + shipping.foreignSurcharge
+  // Stessa regola del percorso Stripe: i totali li decide il server.
+  const totals = computeOrderTotals(
+    { items, coupon, country: shippingAddress.country, paymentMethod },
+    await getPricingConfig()
+  )
+  const { subtotal, discountAmount, codSurcharge, total } = totals
 
   const order = await prisma.order.create({
     data: {
@@ -221,9 +215,9 @@ export async function createDirectOrder(
       couponCode: coupon?.code ?? null,
       paymentMethod,
       codSurcharge,
-      shippingCost:     shipping.shippingCost,
-      foreignSurcharge: shipping.foreignSurcharge,
-      freeShipping:     shipping.freeShipping,
+      shippingCost:     totals.shippingCost,
+      foreignSurcharge: totals.foreignSurcharge,
+      freeShipping:     totals.freeShipping,
       shippingNotes:     shippingAddress.shippingNotes     ?? null,
       deliveryType:      shippingAddress.deliveryType      ?? 'home',
       pickupCarrier:     shippingAddress.pickupCarrier     ?? null,

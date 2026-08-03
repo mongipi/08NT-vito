@@ -4,6 +4,7 @@ import {
   DEFAULT_PRIVACY_OVERRIDE_JSON,
   DEFAULT_TERMS_OVERRIDE_JSON,
 } from '@/lib/legal-overrides'
+import { PRICING_FALLBACK } from '@/lib/domain/pricing'
 import { prisma } from '@/lib/prisma'
 import { isPrismaInitError, logPrismaInitError } from '@/lib/prisma-errors'
 
@@ -38,10 +39,12 @@ export type SettingKey = (typeof SETTING_KEYS)[keyof typeof SETTING_KEYS]
 const DEFAULTS: Record<string, string> = {
   IBAN_BONIFICO: 'IT00 X000 0000 0000 0000 0000 000',
   INTESTATARIO_BONIFICO: 'VIPHARMA di Tatulli Vito & Co. S.A.S.',
-  COD_SURCHARGE: '5',
-  SPEDIZIONE_GRATUITA: '39.90',
-  PREZZO_SPEDIZIONE: '5.90',
-  SUPPLEMENTO_ESTERO: '10',
+  // I valori numerici vivono in PRICING_FALLBACK (lib/domain/pricing.ts) per non
+  // ripeterli: qui servono solo come riga di partenza se il DB non risponde.
+  COD_SURCHARGE: String(PRICING_FALLBACK.codSurcharge),
+  SPEDIZIONE_GRATUITA: String(PRICING_FALLBACK.shippingThreshold),
+  PREZZO_SPEDIZIONE: String(PRICING_FALLBACK.shippingPrice),
+  SUPPLEMENTO_ESTERO: String(PRICING_FALLBACK.foreignSurcharge),
   COMPANY_LEGAL_NAME: '',
   COMPANY_ADDRESS: '',
   COMPANY_PHONE: '',
