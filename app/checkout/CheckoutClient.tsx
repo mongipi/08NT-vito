@@ -12,6 +12,7 @@ import { formatPrice } from '@/lib/cart'
 import Link from 'next/link'
 import { COUNTRIES, ISLAND_PROVINCES } from '@/lib/countries'
 import { computeOrderTotals, isDomesticCountry, type PricingConfig } from '@/lib/domain/pricing'
+import { toCustomerRole } from '@/lib/domain/roles'
 import { BrtFermopointPicker } from './BrtFermopointPicker'
 import { PosteLockerPicker } from './PosteLockerPicker'
 import { useLocale } from '@/contexts/LocaleContext'
@@ -126,7 +127,7 @@ export function CheckoutClient({
   async function applyCoupon() {
     if (!couponInput.trim()) return
     setCouponLoading(true); setCouponError(null)
-    const role = (session?.user?.role as 'consumer' | 'b2b') ?? 'consumer'
+    const role = toCustomerRole(session?.user?.role)
     const result = await validateCoupon(couponInput, cart.items, role)
     if (!result.valid) setCouponError(result.error ?? 'Codice non valido')
     else if (result.coupon) { cart.applyCoupon(result.coupon); setCouponInput('') }

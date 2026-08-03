@@ -1,14 +1,13 @@
 'use server'
 
-import { auth } from '@/auth'
 import { invalidateSettingsCache, SETTING_KEYS } from '@/lib/settings'
 import { saveSettingValues } from '@/services/settings'
+import { requireAdmin } from '@/lib/auth/guards'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export async function saveSettings(formData: FormData) {
-  const session = await auth()
-  if (!session?.user || (session.user as { role?: string }).role !== 'admin') redirect('/login')
+  await requireAdmin()
 
   const keys = [
     SETTING_KEYS.IBAN,

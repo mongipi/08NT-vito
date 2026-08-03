@@ -2,18 +2,8 @@
 
 import { useState } from 'react'
 import { searchPosteLockersAction } from '@/lib/actions/poste'
+import type { PosteLocker } from '@/lib/poste'
 
-interface PosteLocker {
-  officeCode: string
-  description: string
-  address: string
-  place: string
-  province: string
-  openTimeMon: string
-  closeTimeMon: string
-  openTimeSat: string
-  closeTimeSat: string
-}
 
 interface Props {
   pickupPointCode: string

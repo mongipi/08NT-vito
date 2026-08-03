@@ -1,16 +1,7 @@
 import { useState } from 'react'
 import { searchBrtFermopointsAction } from '@/lib/actions/brt'
+import type { BrtFermopoint } from '@/lib/brt'
 
-interface BrtFermopoint {
-  id: string
-  name: string
-  address: string
-  city: string
-  province: string
-  postalCode: string
-  distanceKm?: number
-  openingHours?: string
-}
 
 interface Props {
   pickupPointCode: string

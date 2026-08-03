@@ -2,6 +2,29 @@ import { prisma } from '@/lib/prisma'
 import { toImageStorageKey } from '@/lib/domain/product-images'
 import type { ProductImage } from '@prisma/client'
 
+export async function saveProductImage(
+  productId: string,
+  key: string,
+  data: Uint8Array<ArrayBuffer>,
+  mimeType: string
+): Promise<void> {
+  await prisma.productImage.upsert({
+    where: { productId_key: { productId, key } },
+    create: { productId, key, data, mimeType },
+    update: { data, mimeType },
+  })
+}
+
+/** Elimina le immagini di varianti non più presenti nel prodotto. */
+export async function deleteObsoleteVariantImages(
+  productId: string,
+  activeKeys: string[]
+): Promise<void> {
+  await prisma.productImage.deleteMany({
+    where: { productId, key: { startsWith: 'variant-', notIn: activeKeys } },
+  })
+}
+
 /** Immagini prodotto salvate su database. Unico accesso a prisma.productImage. */
 
 /**

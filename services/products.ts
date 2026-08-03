@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { isPrismaInitError, logPrismaInitError } from '@/lib/prisma-errors'
 import type { Product, ProductImages } from '@/types'
 import { IMAGE_KEY_TO_URL_PATH, type ImageKey } from '@/lib/domain/product-images'
+import { variantImageToken } from '@/lib/domain/variant-image'
+import type { Prisma } from '@prisma/client'
 
 const PRODUCT_LINE_OVERRIDES: Record<string, { color: string; colorLight: string }> = {
   'multivitaminico-minerali': { color: '#f47b20', colorLight: '#fff0e4' },
@@ -28,18 +30,6 @@ function normalizedPrice(price: number, comparePrice?: number | null) {
     price: Math.min(price, comparePrice),
     comparePrice: Math.max(price, comparePrice),
   }
-}
-
-function variantImageToken(quantity: number, label: string) {
-  if (quantity > 0) return String(quantity)
-  const quantityInLabel = label.match(/\d+/)?.[0]
-  if (quantityInLabel) return quantityInLabel
-  return label
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,6 +138,49 @@ export async function getAdminProducts() {
 /** Prodotto completo per il form di modifica admin. */
 export async function getProductForEdit(id: string) {
   return prisma.product.findUnique({ where: { id }, include: productInclude })
+}
+
+export async function createProduct(data: Prisma.ProductCreateInput) {
+  return prisma.product.create({ data })
+}
+
+export async function updateProduct(id: string, data: Prisma.ProductUpdateInput) {
+  return prisma.product.update({ where: { id }, data })
+}
+
+export async function deleteProduct(id: string): Promise<void> {
+  await prisma.product.delete({ where: { id } })
+}
+
+/** Sostituisce integralmente gli ingredienti del prodotto. */
+export async function replaceIngredients(
+  productId: string,
+  ingredients: { name: string; dosage: string | null; vnr: string | null }[]
+): Promise<void> {
+  await prisma.ingredient.deleteMany({ where: { productId } })
+  if (ingredients.length === 0) return
+  await prisma.ingredient.createMany({
+    data: ingredients.map((ingredient, order) => ({ ...ingredient, productId, order })),
+  })
+}
+
+/** Sostituisce integralmente le varianti del prodotto. */
+export async function replaceVariants(
+  productId: string,
+  variants: {
+    label: string
+    quantity: number
+    price: number
+    comparePrice: number | null
+    b2bPrice: number | null
+    stock: number
+  }[]
+): Promise<void> {
+  await prisma.productVariant.deleteMany({ where: { productId } })
+  if (variants.length === 0) return
+  await prisma.productVariant.createMany({
+    data: variants.map((variant, order) => ({ ...variant, productId, order })),
+  })
 }
 
 export async function getB2BPrice(productId: string): Promise<number | null> {

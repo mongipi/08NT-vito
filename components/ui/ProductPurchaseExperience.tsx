@@ -6,12 +6,8 @@ import { ProductPurchasePanel } from './ProductPurchasePanel'
 import { Localized } from './Localized'
 import { ProductTitle } from './ProductTitle'
 import type { ProductVariant } from '@/types'
+import type { GallerySlide } from '@/types/gallery'
 
-interface GallerySlide {
-  src: string
-  label: string
-  alt: string
-}
 
 interface Props {
   productId: string

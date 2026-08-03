@@ -2,12 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import type { GallerySlide as Slide } from '@/types/gallery'
 
-interface Slide {
-  src: string
-  alt: string
-  label: string
-}
 
 interface Props {
   slides: Slide[]

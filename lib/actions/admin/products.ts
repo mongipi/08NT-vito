@@ -1,205 +1,110 @@
 'use server'
-import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { IMAGE_KEYS } from '@/lib/domain/product-images'
+import { variantImageKey } from '@/lib/domain/variant-image'
+import { slugify } from '@/lib/utils'
+import { parseFormData } from '@/lib/validation/form'
+import {
+  idOnlySchema,
+  productFormSchema,
+  productUpdateSchema,
+  type VariantInput,
+} from '@/lib/validation/product'
+import {
+  createProduct as createProductRecord,
+  deleteProduct as deleteProductRecord,
+  replaceIngredients,
+  replaceVariants,
+  updateProduct as updateProductRecord,
+} from '@/services/products'
+import { deleteObsoleteVariantImages, saveProductImage } from '@/services/product-images'
 
-import { IMAGE_KEYS, IMAGE_KEY_TO_URL_PATH } from '@/lib/domain/product-images'
+const LIST_PATH = '/admin/prodotti'
 
-async function saveImages(productId: string, formData: FormData) {
+async function readUpload(formData: FormData, field: string) {
+  const file = formData.get(field) as File | null
+  if (!file || file.size === 0) return null
+  return { data: new Uint8Array(await file.arrayBuffer()), mimeType: file.type || 'image/png' }
+}
+
+/** Immagini fisse del prodotto (fronte, infografica, lati, etichetta). */
+async function saveProductImages(productId: string, formData: FormData) {
   for (const key of IMAGE_KEYS) {
-    const file = formData.get(`img_${key}`) as File | null
-    if (!file || file.size === 0) continue
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const mimeType = file.type || 'image/png'
-    await prisma.productImage.upsert({
-      where: { productId_key: { productId, key } },
-      create: { productId, key, data: buffer, mimeType },
-      update: { data: buffer, mimeType },
-    })
+    const upload = await readUpload(formData, `img_${key}`)
+    if (upload) await saveProductImage(productId, key, upload.data, upload.mimeType)
   }
 }
 
-async function syncIngredients(productId: string, formData: FormData) {
-  interface RawIngredient {
-    name: string
-    dosage?: string
-    vnr?: string
-  }
-  const raw: RawIngredient[] = JSON.parse((formData.get('ingredients') as string) || '[]')
-  await prisma.ingredient.deleteMany({ where: { productId } })
-  if (raw.length > 0) {
-    await prisma.ingredient.createMany({
-      data: raw.map((ing, i) => ({
-        productId,
-        name: ing.name,
-        dosage: ing.dosage ?? null,
-        vnr: ing.vnr ?? null,
-        order: i,
-      })),
-    })
-  }
-
-  interface RawVariant {
-    label: string
-    quantity: number
-  }
-  const variants: RawVariant[] = JSON.parse((formData.get('variants') as string) || '[]')
-  const activeVariantKeys: string[] = []
+/**
+ * Immagini delle varianti. Le immagini di varianti eliminate vengono rimosse,
+ * altrimenti resterebbero orfane a occupare spazio nel database.
+ */
+async function saveVariantImages(productId: string, variants: VariantInput[], formData: FormData) {
+  const activeKeys: string[] = []
 
   for (const [index, variant] of variants.entries()) {
-    const token = variantImageToken(variant.quantity, variant.label)
-    if (!token) continue
-    const key = `variant-${token}`
-    activeVariantKeys.push(key)
-    const file = formData.get(`img_variant_${index}`) as File | null
-    if (!file || file.size === 0) continue
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const mimeType = file.type || 'image/png'
-    await prisma.productImage.upsert({
-      where: { productId_key: { productId, key } },
-      create: { productId, key, data: buffer, mimeType },
-      update: { data: buffer, mimeType },
-    })
+    const key = variantImageKey(variant.quantity, variant.label)
+    if (key === 'variant-') continue
+    activeKeys.push(key)
+
+    const upload = await readUpload(formData, `img_variant_${index}`)
+    if (upload) await saveProductImage(productId, key, upload.data, upload.mimeType)
   }
 
-  await prisma.productImage.deleteMany({
-    where: {
-      productId,
-      key: { startsWith: 'variant-', notIn: activeVariantKeys },
-    },
-  })
+  await deleteObsoleteVariantImages(productId, activeKeys)
 }
 
-function variantImageToken(quantity: number, label: string) {
-  if (Number(quantity) > 0) return String(quantity)
-  const quantityInLabel = String(label ?? '').match(/\d+/)?.[0]
-  if (quantityInLabel) return quantityInLabel
-  return String(label ?? '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-}
-
-function parseDecimal(
-  value: FormDataEntryValue | string | number | null | undefined,
-  fallback = 0
+/** Salva ingredienti, varianti e immagini di un prodotto già esistente. */
+async function saveProductRelations(
+  productId: string,
+  data: {
+    ingredients: { name: string; dosage: string | null; vnr: string | null }[]
+    variants: VariantInput[]
+  },
+  formData: FormData
 ) {
-  const normalized = String(value ?? '')
-    .trim()
-    .replace(',', '.')
-  if (!normalized) return fallback
-  const parsed = Number.parseFloat(normalized)
-  return Number.isFinite(parsed) ? parsed : fallback
-}
-
-async function syncVariants(productId: string, formData: FormData) {
-  interface RawVariant {
-    label: string
-    quantity: number
-    price: number
-    comparePrice?: number | null
-    b2bPrice?: number | null
-    stock: number
-  }
-  const raw: RawVariant[] = JSON.parse((formData.get('variants') as string) || '[]')
-  await prisma.productVariant.deleteMany({ where: { productId } })
-  if (raw.length > 0) {
-    await prisma.productVariant.createMany({
-      data: raw.map((v, i) => ({
-        productId,
-        label: v.label,
-        quantity: v.quantity,
-        price: parseDecimal(v.price),
-        comparePrice: v.comparePrice == null ? null : parseDecimal(v.comparePrice),
-        b2bPrice: v.b2bPrice == null ? null : parseDecimal(v.b2bPrice),
-        stock: v.stock ?? 0,
-        order: i,
-      })),
-    })
-  }
-}
-
-function slugify(name: string) {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-}
-
-function parseProductData(formData: FormData) {
-  return {
-    name: formData.get('name') as string,
-    price: parseDecimal(formData.get('price')),
-    comparePrice: formData.get('comparePrice') ? parseDecimal(formData.get('comparePrice')) : null,
-    stock: parseInt(formData.get('stock') as string) || 0,
-    published: formData.get('published') === 'on',
-    order: parseInt(formData.get('order') as string) || 99,
-    shortDescription: formData.get('shortDescription') as string,
-    longDescription: formData.get('longDescription') as string,
-    usage: (formData.get('usage') as string) || null,
-    target: (formData.get('target') as string) || null,
-    format: (formData.get('format') as string) || null,
-    ingredientsText: (formData.get('ingredientsText') as string) || null,
-    nameEn: (formData.get('nameEn') as string) || null,
-    shortDescriptionEn: (formData.get('shortDescriptionEn') as string) || null,
-    longDescriptionEn: (formData.get('longDescriptionEn') as string) || null,
-    usageEn: (formData.get('usageEn') as string) || null,
-    targetEn: (formData.get('targetEn') as string) || null,
-    formatEn: (formData.get('formatEn') as string) || null,
-    ingredientsTextEn: (formData.get('ingredientsTextEn') as string) || null,
-    capsules: formData.get('capsules') ? parseInt(formData.get('capsules') as string) : null,
-    days: formData.get('days') ? parseInt(formData.get('days') as string) : null,
-    dosage: (formData.get('dosage') as string) || null,
-    notificationMs: (formData.get('notificationMs') as string) || null,
-    metaTitle: (formData.get('metaTitle') as string) || null,
-    metaDescription: (formData.get('metaDescription') as string) || null,
-  }
+  await Promise.all([
+    saveProductImages(productId, formData),
+    saveVariantImages(productId, data.variants, formData),
+    replaceIngredients(productId, data.ingredients),
+    replaceVariants(productId, data.variants),
+  ])
 }
 
 export async function createProduct(formData: FormData) {
-  const slug = slugify(formData.get('name') as string)
-  const product = await prisma.product.create({
-    data: {
-      slug,
-      ...parseProductData(formData),
-      line: { connect: { id: formData.get('lineId') as string } },
-    },
+  const { lineId, ingredients, variants, ...fields } = parseFormData(productFormSchema, formData)
+
+  const product = await createProductRecord({
+    ...fields,
+    slug: slugify(fields.name),
+    line: { connect: { id: lineId } },
   })
-  await Promise.all([
-    saveImages(product.id, formData),
-    syncIngredients(product.id, formData),
-    syncVariants(product.id, formData),
-  ])
-  revalidatePath('/admin/prodotti')
-  redirect('/admin/prodotti')
+
+  await saveProductRelations(product.id, { ingredients, variants }, formData)
+
+  revalidatePath(LIST_PATH)
+  redirect(LIST_PATH)
 }
 
 export async function updateProduct(formData: FormData) {
-  const id = formData.get('id') as string
-  await prisma.product.update({
-    where: { id },
-    data: {
-      ...parseProductData(formData),
-      line: { connect: { id: formData.get('lineId') as string } },
-    },
-  })
-  await Promise.all([
-    saveImages(id, formData),
-    syncIngredients(id, formData),
-    syncVariants(id, formData),
-  ])
-  revalidatePath('/admin/prodotti')
-  revalidatePath(`/admin/prodotti/${id}`)
-  redirect(`/admin/prodotti/${id}`)
+  const { id, lineId, ingredients, variants, ...fields } = parseFormData(
+    productUpdateSchema,
+    formData
+  )
+
+  await updateProductRecord(id, { ...fields, line: { connect: { id: lineId } } })
+
+  await saveProductRelations(id, { ingredients, variants }, formData)
+
+  revalidatePath(LIST_PATH)
+  revalidatePath(`${LIST_PATH}/${id}`)
+  redirect(`${LIST_PATH}/${id}`)
 }
 
 export async function deleteProduct(formData: FormData) {
-  const id = formData.get('id') as string
-  await prisma.product.delete({ where: { id } })
-  revalidatePath('/admin/prodotti')
-  redirect('/admin/prodotti')
+  const { id } = parseFormData(idOnlySchema, formData)
+  await deleteProductRecord(id)
+  revalidatePath(LIST_PATH)
+  redirect(LIST_PATH)
 }

@@ -14,6 +14,7 @@ import {
   ZERO_PRICING_CONFIG,
   type PricingConfig,
 } from '@/lib/domain/pricing'
+import { toCustomerRole } from '@/lib/domain/roles'
 import { useSession } from 'next-auth/react'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
@@ -44,7 +45,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     if (!couponInput.trim()) return
     setCouponLoading(true)
     setCouponError(null)
-    const role = (session?.user?.role as 'consumer' | 'b2b') ?? 'consumer'
+    const role = toCustomerRole(session?.user?.role)
     const result = await validateCoupon(couponInput, cart.items, role)
     if (!result.valid) setCouponError(result.error ?? 'Codice non valido')
     else if (result.coupon) { cart.applyCoupon(result.coupon); setCouponInput('') }

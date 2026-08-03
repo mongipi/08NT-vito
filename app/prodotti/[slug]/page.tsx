@@ -5,6 +5,7 @@ import { getProductBySlug } from '@/services/products'
 import { ProductPurchaseExperience } from '@/components/ui/ProductPurchaseExperience'
 import type { Metadata } from 'next'
 import type { ProductImages } from '@/types'
+import type { GallerySlide } from '@/types/gallery'
 import { IngredientsDisclosure } from '@/components/ui/IngredientsDisclosure'
 import { ProductRegulatoryNotice } from '@/components/ui/ProductRegulatoryNotice'
 import { Localized } from '@/components/ui/Localized'
@@ -15,7 +16,6 @@ interface Props {
 }
 
 export const dynamic = 'force-dynamic'
-type GallerySlide = { src: string; label: string; alt: string }
 
 const PRODUCT_PAGE_TEXTS = {
   breadcrumbBrandLabel: '08 Natural Technology',
