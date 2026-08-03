@@ -4,8 +4,8 @@ import {
   DEFAULT_PRIVACY_OVERRIDE_JSON,
   DEFAULT_TERMS_OVERRIDE_JSON,
 } from '@/lib/legal-overrides'
-import { prisma } from '@/lib/prisma'
 import { isPrismaInitError, logPrismaInitError } from '@/lib/prisma-errors'
+import { getAllSettings } from '@/services/settings'
 
 export const SETTING_KEYS = {
   IBAN: 'IBAN_BONIFICO',
@@ -70,7 +70,7 @@ const TTL = 60_000
 export async function getSettingsMap(): Promise<Record<string, string>> {
   if (cache && Date.now() - cacheAt < TTL) return cache
   try {
-    const rows = await prisma.setting.findMany()
+    const rows = await getAllSettings()
     cache = { ...DEFAULTS, ...Object.fromEntries(rows.map((r) => [r.key, r.value])) }
     cacheAt = Date.now()
     return cache

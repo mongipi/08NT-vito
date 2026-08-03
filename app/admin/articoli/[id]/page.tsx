@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getArticleById } from '@/services/articles'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { updateArticle, deleteArticle } from '@/lib/actions/admin/articles'
@@ -6,7 +6,7 @@ import { ArticleForm } from '../_ArticleForm'
 
 export default async function EditArticoloPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const article = await prisma.article.findUnique({ where: { id } })
+  const article = await getArticleById(id)
   if (!article) notFound()
 
   return (

@@ -25,7 +25,8 @@ export async function searchPosteLockersAction(zipCode: string): Promise<SearchP
     return { lockers }
   } catch (err) {
     console.error('Ricerca locker Poste fallita:', err)
-    const message = err instanceof Error ? err.message : 'Servizio Poste Italiane non disponibile al momento'
+    const message =
+      err instanceof Error ? err.message : 'Servizio Poste Italiane non disponibile al momento'
     return { error: message }
   }
 }

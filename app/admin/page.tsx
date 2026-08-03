@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getAdminDashboardStats } from '@/services/orders'
 import Link from 'next/link'
 import { Badge } from './_components/Badge'
 import { formatDate } from '@/lib/utils'
@@ -20,23 +20,14 @@ const td: React.CSSProperties = {
 }
 
 export default async function AdminDashboard() {
-  const [totalOrders, pendingOrders, totalUsers, totalProducts, revenueResult, recentOrders] =
-    await Promise.all([
-      prisma.order.count(),
-      prisma.order.count({ where: { status: 'pending' } }),
-      prisma.user.count(),
-      prisma.product.count({ where: { published: true } }),
-      prisma.order.aggregate({ where: { status: { in: ['paid', 'shipped', 'delivered'] } }, _sum: { total: true } }),
-      prisma.order.findMany({ orderBy: { createdAt: 'desc' }, take: 8, include: { user: { select: { email: true, name: true } } } }),
-    ])
-
-  const revenue = revenueResult._sum.total ?? 0
+  const { totalOrders, pendingOrders, totalUsers, publishedProducts, revenue, recentOrders } =
+    await getAdminDashboardStats()
 
   const stats = [
     { label: 'Fatturato', value: `€${revenue.toFixed(2)}`, sub: 'ordini pagati', color: '#1a4a2e', bg: '#f0f7f2' },
     { label: 'Ordini totali', value: totalOrders, sub: `${pendingOrders} in attesa`, color: '#1d4ed8', bg: '#eff6ff' },
     { label: 'Utenti', value: totalUsers, sub: 'registrati', color: '#7c3aed', bg: '#f5f3ff' },
-    { label: 'Prodotti attivi', value: totalProducts, sub: 'pubblicati', color: '#b45309', bg: '#fffbeb' },
+    { label: 'Prodotti attivi', value: publishedProducts, sub: 'pubblicati', color: '#b45309', bg: '#fffbeb' },
   ]
 
   return (

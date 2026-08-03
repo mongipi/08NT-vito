@@ -1,27 +1,17 @@
-import { prisma } from '@/lib/prisma'
+import { getOrderById } from '@/services/orders'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Badge } from '../../_components/Badge'
 import { formatDate } from '@/lib/utils'
 import { updateOrderStatus } from '@/lib/actions/admin/orders'
+import { ORDER_STATUS_OPTIONS as STATUS_OPTIONS } from '@/lib/domain/order-status'
 import { s } from '../../_components/styles'
 
 export const metadata = { title: 'Dettaglio ordine' }
 
-const STATUS_OPTIONS = [
-  { value: 'pending',   label: 'In attesa' },
-  { value: 'paid',      label: 'Pagato' },
-  { value: 'shipped',   label: 'Spedito' },
-  { value: 'delivered', label: 'Consegnato' },
-  { value: 'cancelled', label: 'Annullato' },
-]
-
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: { user: true, items: true, shippingAddress: true },
-  })
+  const order = await getOrderById(id)
   if (!order) notFound()
 
   const items = order.items

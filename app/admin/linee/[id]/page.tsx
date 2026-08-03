@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getLineById } from '@/services/lines'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { updateLine, deleteLine } from '@/lib/actions/admin/lines'
@@ -6,7 +6,7 @@ import { LineForm } from '../_LineForm'
 
 export default async function EditLineaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const line = await prisma.line.findUnique({ where: { id } })
+  const line = await getLineById(id)
   if (!line) notFound()
 
   return (

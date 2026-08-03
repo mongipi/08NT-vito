@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getUserByEmail } from '@/services/users'
 import { issuePasswordResetEmail } from '@/lib/verification'
 
 export async function POST(req: NextRequest) {
@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Email mancante' }, { status: 400 })
   }
 
-  const user = await prisma.user.findUnique({ where: { email } })
+  const user = await getUserByEmail(email)
   // Non riveliamo se l'account esiste o è solo OAuth
   if (user?.password) {
     await issuePasswordResetEmail(email, user.name)

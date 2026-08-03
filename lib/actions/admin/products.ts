@@ -3,16 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-const IMAGE_KEYS = ['fronte', 'infografica', 'lato1', 'lato2', 'etichetta'] as const
-type ImageKey = typeof IMAGE_KEYS[number]
-
-const KEY_TO_PATH: Record<ImageKey, string> = {
-  fronte: 'fronte',
-  infografica: 'infografica',
-  lato1: 'lato-1',
-  lato2: 'lato-2',
-  etichetta: 'etichetta',
-}
+import { IMAGE_KEYS, IMAGE_KEY_TO_URL_PATH } from '@/lib/domain/product-images'
 
 async function saveImages(productId: string, formData: FormData) {
   for (const key of IMAGE_KEYS) {
@@ -29,7 +20,11 @@ async function saveImages(productId: string, formData: FormData) {
 }
 
 async function syncIngredients(productId: string, formData: FormData) {
-  interface RawIngredient { name: string; dosage?: string; vnr?: string }
+  interface RawIngredient {
+    name: string
+    dosage?: string
+    vnr?: string
+  }
   const raw: RawIngredient[] = JSON.parse((formData.get('ingredients') as string) || '[]')
   await prisma.ingredient.deleteMany({ where: { productId } })
   if (raw.length > 0) {
@@ -44,7 +39,10 @@ async function syncIngredients(productId: string, formData: FormData) {
     })
   }
 
-  interface RawVariant { label: string; quantity: number }
+  interface RawVariant {
+    label: string
+    quantity: number
+  }
   const variants: RawVariant[] = JSON.parse((formData.get('variants') as string) || '[]')
   const activeVariantKeys: string[] = []
 
@@ -84,8 +82,13 @@ function variantImageToken(quantity: number, label: string) {
     .replace(/(^-|-$)/g, '')
 }
 
-function parseDecimal(value: FormDataEntryValue | string | number | null | undefined, fallback = 0) {
-  const normalized = String(value ?? '').trim().replace(',', '.')
+function parseDecimal(
+  value: FormDataEntryValue | string | number | null | undefined,
+  fallback = 0
+) {
+  const normalized = String(value ?? '')
+    .trim()
+    .replace(',', '.')
   if (!normalized) return fallback
   const parsed = Number.parseFloat(normalized)
   return Number.isFinite(parsed) ? parsed : fallback

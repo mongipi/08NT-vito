@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { hashPassword } from '@/lib/auth/password'
 import { consumePasswordResetToken } from '@/lib/verification'
+import { setUserPassword } from '@/services/users'
 
 export async function POST(req: NextRequest) {
   const { token, password, confirmPassword } = await req.json()
@@ -19,8 +19,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Link scaduto o non valido' }, { status: 400 })
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10)
-  await prisma.user.update({ where: { email }, data: { password: hashedPassword } })
+  await setUserPassword(email, await hashPassword(password))
 
   return NextResponse.json({ ok: true })
 }

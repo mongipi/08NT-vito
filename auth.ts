@@ -2,8 +2,11 @@ import NextAuth, { CredentialsSignin } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import authConfig from './auth.config'
 import { PrismaAdapter } from '@auth/prisma-adapter'
+// prisma serve qui solo come storage dell'adapter NextAuth; le query applicative
+// passano da services/users.
 import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { verifyPassword } from '@/lib/auth/password'
+import { createUser, getUserByEmail, updateUser } from '@/services/users'
 
 class EmailNotVerifiedError extends CredentialsSignin {
   code = 'email_not_verified'
@@ -38,11 +41,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        })
+        const user = await getUserByEmail(credentials.email as string)
         if (!user?.password) return null
-        const valid = await bcrypt.compare(credentials.password as string, user.password)
+        const valid = await verifyPassword(credentials.password as string, user.password)
         if (!valid) return null
         if (!user.emailVerified) throw new EmailNotVerifiedError()
         return {
@@ -59,22 +60,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig.callbacks,
     async signIn({ user, account }) {
       if (account?.provider === 'google') {
-        const existing = await prisma.user.findUnique({ where: { email: user.email! } })
+        const email = user.email!
+        const existing = await getUserByEmail(email)
         if (!existing) {
-          await prisma.user.create({
-            data: {
-              email: user.email!,
-              name: user.name,
-              image: user.image,
-              role: 'consumer',
-              emailVerified: new Date(),
-            },
+          await createUser({
+            email,
+            name: user.name,
+            image: user.image,
+            role: 'consumer',
+            emailVerified: new Date(),
           })
         } else if (!existing.emailVerified) {
-          await prisma.user.update({
-            where: { id: existing.id },
-            data: { emailVerified: new Date() },
-          })
+          await updateUser(existing.id, { emailVerified: new Date() })
         }
       }
       return true

@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getCustomerOrders } from '@/services/orders'
 import type { Metadata } from 'next'
 import { AccountContent } from './AccountContent'
 
@@ -10,12 +10,7 @@ export default async function AccountPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
-  const orders = await prisma.order.findMany({
-    where: { userId: session.user.id },
-    include: { items: { select: { qty: true } } },
-    orderBy: { createdAt: 'desc' },
-    take: 20,
-  })
+  const orders = await getCustomerOrders(session.user.id)
 
   const name = session.user.name ?? ''
   const email = session.user.email ?? ''
@@ -26,14 +21,7 @@ export default async function AccountPage() {
       name={name}
       email={email}
       isB2B={isB2B}
-      orders={orders.map((order) => ({
-        id: order.id,
-        status: order.status,
-        total: order.total,
-        discountAmount: order.discountAmount,
-        createdAt: order.createdAt.toISOString(),
-        itemCount: order.items.reduce((n, i) => n + i.qty, 0),
-      }))}
+      orders={orders}
     />
   )
 }

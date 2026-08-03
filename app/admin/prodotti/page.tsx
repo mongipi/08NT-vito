@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getAdminProducts } from '@/services/products'
 import Link from 'next/link'
 import { PageHeader } from '../_components/PageHeader'
 
@@ -8,7 +8,7 @@ const th: React.CSSProperties = { padding: '0.625rem 1rem', textAlign: 'left', f
 const td: React.CSSProperties = { padding: '0.6875rem 1rem', fontSize: '0.8125rem', color: '#374151', borderBottom: '1px solid #f7f8f9' }
 
 export default async function ProdottiPage() {
-  const products = await prisma.product.findMany({ orderBy: { order: 'asc' }, include: { line: true } })
+  const products = await getAdminProducts()
 
   return (
     <div>

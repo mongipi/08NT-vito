@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { consumeEmailVerificationToken } from '@/lib/verification'
+import { markEmailVerified } from '@/services/users'
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token')
@@ -10,19 +11,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  const record = await prisma.verificationToken.findUnique({ where: { token } })
-
-  if (!record || record.expires < new Date()) {
-    if (record) await prisma.verificationToken.delete({ where: { token } }).catch(() => {})
+  const email = await consumeEmailVerificationToken(token)
+  if (!email) {
     loginUrl.searchParams.set('verify', 'expired')
     return NextResponse.redirect(loginUrl)
   }
 
-  await prisma.user.update({
-    where: { email: record.identifier },
-    data: { emailVerified: new Date() },
-  })
-  await prisma.verificationToken.delete({ where: { token } })
+  await markEmailVerified(email)
 
   loginUrl.searchParams.set('verify', 'success')
   return NextResponse.redirect(loginUrl)

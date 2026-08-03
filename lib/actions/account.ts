@@ -1,135 +1,106 @@
 'use server'
 
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import * as addresses from '@/services/addresses'
+import type { AddressInput } from '@/services/addresses'
+import { updateUser } from '@/services/users'
 
-export async function updateUserInfo(formData: FormData) {
+const PROFILE_PATH = '/account/profilo'
+
+/** Campo di form opzionale: stringa vuota equivale ad assente. */
+function optional(formData: FormData, key: string): string | null {
+  return (formData.get(key) as string) || null
+}
+
+function required(formData: FormData, key: string): string {
+  return formData.get(key) as string
+}
+
+/** Mappatura form → indirizzo, prima ricopiata identica in creazione e modifica. */
+function parseAddressInput(formData: FormData): AddressInput {
+  return {
+    label: optional(formData, 'label'),
+    isDefault: formData.get('isDefault') === 'on',
+    firstName: required(formData, 'firstName'),
+    lastName: required(formData, 'lastName'),
+    company: optional(formData, 'company'),
+    vatNumber: optional(formData, 'vatNumber'),
+    fiscalCode: optional(formData, 'fiscalCode'),
+    address: required(formData, 'address'),
+    city: required(formData, 'city'),
+    postalCode: required(formData, 'postalCode'),
+    province: optional(formData, 'province'),
+    country: (formData.get('country') as string) || 'IT',
+    phone: optional(formData, 'phone'),
+  }
+}
+
+async function requireUserId(): Promise<string> {
   const session = await auth()
   if (!session?.user) redirect('/login')
+  return session.user.id
+}
 
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: {
-      name:        (formData.get('name') as string) || null,
-      phone:       (formData.get('phone') as string) || null,
-      fiscalCode:  (formData.get('fiscalCode') as string) || null,
-      company:     (formData.get('company') as string) || null,
-      vatNumber:   (formData.get('vatNumber') as string) || null,
-      pec:         (formData.get('pec') as string) || null,
-      sdiCode:     (formData.get('sdiCode') as string) || null,
-    },
+export async function updateUserInfo(formData: FormData) {
+  const userId = await requireUserId()
+
+  await updateUser(userId, {
+    name: optional(formData, 'name'),
+    phone: optional(formData, 'phone'),
+    fiscalCode: optional(formData, 'fiscalCode'),
+    company: optional(formData, 'company'),
+    vatNumber: optional(formData, 'vatNumber'),
+    pec: optional(formData, 'pec'),
+    sdiCode: optional(formData, 'sdiCode'),
   })
 
   revalidatePath('/account')
-  revalidatePath('/account/profilo')
-  redirect('/account/profilo?saved=1')
+  revalidatePath(PROFILE_PATH)
+  redirect(`${PROFILE_PATH}?saved=1`)
 }
 
 export async function createAddress(formData: FormData) {
-  const session = await auth()
-  if (!session?.user) redirect('/login')
+  const userId = await requireUserId()
 
-  const isDefault = formData.get('isDefault') === 'on'
+  await addresses.createAddress(userId, parseAddressInput(formData))
 
-  if (isDefault) {
-    await prisma.userAddress.updateMany({
-      where: { userId: session.user.id },
-      data: { isDefault: false },
-    })
-  }
-
-  await prisma.userAddress.create({
-    data: {
-      userId:     session.user.id,
-      label:      (formData.get('label') as string) || null,
-      isDefault,
-      firstName:  formData.get('firstName') as string,
-      lastName:   formData.get('lastName') as string,
-      company:    (formData.get('company') as string) || null,
-      vatNumber:  (formData.get('vatNumber') as string) || null,
-      fiscalCode: (formData.get('fiscalCode') as string) || null,
-      address:    formData.get('address') as string,
-      city:       formData.get('city') as string,
-      postalCode: formData.get('postalCode') as string,
-      province:   (formData.get('province') as string) || null,
-      country:    (formData.get('country') as string) || 'IT',
-      phone:      (formData.get('phone') as string) || null,
-    },
-  })
-
-  revalidatePath('/account/profilo')
-  redirect('/account/profilo')
+  revalidatePath(PROFILE_PATH)
+  redirect(PROFILE_PATH)
 }
 
 export async function updateAddress(formData: FormData) {
-  const session = await auth()
-  if (!session?.user) redirect('/login')
-
+  const userId = await requireUserId()
   const id = formData.get('id') as string
-  const existing = await prisma.userAddress.findUnique({ where: { id } })
-  if (!existing || existing.userId !== session.user.id) redirect('/account/profilo')
 
-  const isDefault = formData.get('isDefault') === 'on'
+  if (!(await addresses.getOwnedAddress(id, userId))) redirect(PROFILE_PATH)
 
-  if (isDefault) {
-    await prisma.userAddress.updateMany({
-      where: { userId: session.user.id },
-      data: { isDefault: false },
-    })
-  }
+  await addresses.updateAddress(id, userId, parseAddressInput(formData))
 
-  await prisma.userAddress.update({
-    where: { id },
-    data: {
-      label:      (formData.get('label') as string) || null,
-      isDefault,
-      firstName:  formData.get('firstName') as string,
-      lastName:   formData.get('lastName') as string,
-      company:    (formData.get('company') as string) || null,
-      vatNumber:  (formData.get('vatNumber') as string) || null,
-      fiscalCode: (formData.get('fiscalCode') as string) || null,
-      address:    formData.get('address') as string,
-      city:       formData.get('city') as string,
-      postalCode: formData.get('postalCode') as string,
-      province:   (formData.get('province') as string) || null,
-      country:    (formData.get('country') as string) || 'IT',
-      phone:      (formData.get('phone') as string) || null,
-    },
-  })
-
-  revalidatePath('/account/profilo')
-  redirect('/account/profilo')
+  revalidatePath(PROFILE_PATH)
+  redirect(PROFILE_PATH)
 }
 
 export async function deleteAddress(formData: FormData) {
-  const session = await auth()
-  if (!session?.user) redirect('/login')
-
+  const userId = await requireUserId()
   const id = formData.get('id') as string
-  const existing = await prisma.userAddress.findUnique({ where: { id } })
-  if (!existing || existing.userId !== session.user.id) redirect('/account/profilo')
 
-  await prisma.userAddress.delete({ where: { id } })
+  if (!(await addresses.getOwnedAddress(id, userId))) redirect(PROFILE_PATH)
 
-  revalidatePath('/account/profilo')
-  redirect('/account/profilo')
+  await addresses.deleteAddress(id)
+
+  revalidatePath(PROFILE_PATH)
+  redirect(PROFILE_PATH)
 }
 
 export async function setDefaultAddress(formData: FormData) {
-  const session = await auth()
-  if (!session?.user) redirect('/login')
-
+  const userId = await requireUserId()
   const id = formData.get('id') as string
-  const existing = await prisma.userAddress.findUnique({ where: { id } })
-  if (!existing || existing.userId !== session.user.id) return
 
-  await prisma.userAddress.updateMany({
-    where: { userId: session.user.id },
-    data: { isDefault: false },
-  })
-  await prisma.userAddress.update({ where: { id }, data: { isDefault: true } })
+  if (!(await addresses.getOwnedAddress(id, userId))) return
 
-  revalidatePath('/account/profilo')
+  await addresses.makeDefault(id, userId)
+
+  revalidatePath(PROFILE_PATH)
 }

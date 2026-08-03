@@ -1,14 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { isPrismaInitError, logPrismaInitError } from '@/lib/prisma-errors'
 import type { Product, ProductImages } from '@/types'
-
-const KEY_TO_URL_PATH: Record<string, string> = {
-  fronte: 'fronte',
-  infografica: 'infografica',
-  lato1: 'lato-1',
-  lato2: 'lato-2',
-  etichetta: 'etichetta',
-}
+import { IMAGE_KEY_TO_URL_PATH, type ImageKey } from '@/lib/domain/product-images'
 
 const PRODUCT_LINE_OVERRIDES: Record<string, { color: string; colorLight: string }> = {
   'multivitaminico-minerali': { color: '#f47b20', colorLight: '#fff0e4' },
@@ -17,9 +10,9 @@ const PRODUCT_LINE_OVERRIDES: Record<string, { color: string; colorLight: string
 function buildImageMap(productId: string, productImages: { key: string }[]): ProductImages {
   const result: ProductImages = {}
   for (const img of productImages) {
-    const path = KEY_TO_URL_PATH[img.key]
+    const path = IMAGE_KEY_TO_URL_PATH[img.key as ImageKey]
     if (path) {
-      (result as Record<string, string>)[img.key] = `/api/product-images/${productId}/${path}`
+      ;(result as Record<string, string>)[img.key] = `/api/product-images/${productId}/${path}`
     } else if (img.key.startsWith('variant-')) {
       const token = img.key.slice('variant-'.length)
       result.variants ??= {}
@@ -53,9 +46,15 @@ function variantImageToken(quantity: number, label: string) {
 function mapProduct(p: any): Product {
   const lineOverride = PRODUCT_LINE_OVERRIDES[p.slug]
   const images = buildImageMap(p.id, p.productImages ?? [])
-  const productPricing = normalizedPrice(Number(p.price), p.comparePrice == null ? null : Number(p.comparePrice))
+  const productPricing = normalizedPrice(
+    Number(p.price),
+    p.comparePrice == null ? null : Number(p.comparePrice)
+  )
   const variants = (p.variants ?? []).map((variant: any) => {
-    const pricing = normalizedPrice(Number(variant.price), variant.comparePrice == null ? null : Number(variant.comparePrice))
+    const pricing = normalizedPrice(
+      Number(variant.price),
+      variant.comparePrice == null ? null : Number(variant.comparePrice)
+    )
     const token = variantImageToken(Number(variant.quantity ?? 0), String(variant.label ?? ''))
     return {
       ...variant,
@@ -136,6 +135,19 @@ export async function getProductSlugs(): Promise<string[]> {
     if (isPrismaInitError(error)) return []
     throw error
   }
+}
+
+/**
+ * Elenco prodotti per l'area admin: include anche i non pubblicati e non applica
+ * il mapping storefront, perche' la tabella mostra i campi grezzi del database.
+ */
+export async function getAdminProducts() {
+  return prisma.product.findMany({ orderBy: { order: 'asc' }, include: { line: true } })
+}
+
+/** Prodotto completo per il form di modifica admin. */
+export async function getProductForEdit(id: string) {
+  return prisma.product.findUnique({ where: { id }, include: productInclude })
 }
 
 export async function getB2BPrice(productId: string): Promise<number | null> {

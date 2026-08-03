@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getUserById } from '@/services/users'
+import { getUserAddresses } from '@/services/addresses'
 import type { Metadata } from 'next'
 import { updateUserInfo, deleteAddress, setDefaultAddress } from '@/lib/actions/account'
 import { ProfiloContent } from './ProfiloContent'
@@ -12,11 +13,8 @@ export default async function ProfiloPage({ searchParams }: { searchParams: Prom
   if (!session?.user) redirect('/login')
 
   const [user, addresses] = await Promise.all([
-    prisma.user.findUnique({ where: { id: session.user.id } }),
-    prisma.userAddress.findMany({
-      where: { userId: session.user.id },
-      orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
-    }),
+    getUserById(session.user.id),
+    getUserAddresses(session.user.id),
   ])
   if (!user) redirect('/login')
 

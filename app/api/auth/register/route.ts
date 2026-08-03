@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { hashPassword } from '@/lib/auth/password'
 import { issueVerificationEmail } from '@/lib/verification'
+import { createUser, getUserByEmail } from '@/services/users'
 
 export async function POST(req: NextRequest) {
   const { name, email, password, confirmPassword } = await req.json()
@@ -14,15 +14,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Le password non coincidono' }, { status: 400 })
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } })
+  const existing = await getUserByEmail(email)
   if (existing) {
     return NextResponse.json({ error: 'Email già registrata' }, { status: 409 })
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10)
-  await prisma.user.create({
-    data: { name, email, password: hashedPassword, role: 'consumer' },
-  })
+  await createUser({ name, email, password: await hashPassword(password), role: 'consumer' })
 
   await issueVerificationEmail(email, name)
 

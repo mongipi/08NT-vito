@@ -1,8 +1,8 @@
 'use server'
 
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
 import { invalidateSettingsCache, SETTING_KEYS } from '@/lib/settings'
+import { saveSettingValues } from '@/services/settings'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -36,15 +36,8 @@ export async function saveSettings(formData: FormData) {
     SETTING_KEYS.LEGAL_TERMS_OVERRIDE,
   ]
 
-  await Promise.all(
-    keys.map((key) => {
-      const value = (formData.get(key) as string)?.trim() ?? ''
-      return prisma.setting.upsert({
-        where: { key },
-        update: { value },
-        create: { key, value },
-      })
-    })
+  await saveSettingValues(
+    Object.fromEntries(keys.map((key) => [key, (formData.get(key) as string)?.trim() ?? '']))
   )
 
   invalidateSettingsCache()

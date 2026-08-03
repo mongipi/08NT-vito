@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
+import { getCheckoutProfile } from '@/services/users'
+import { getDefaultAddress } from '@/services/addresses'
 import { getPricingConfig } from '@/lib/domain/pricing-config'
 import { CheckoutClient } from './CheckoutClient'
 
@@ -17,13 +18,8 @@ export default async function CheckoutPage() {
 
   if (session?.user) {
     const [user, defaultAddr] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { name: true, phone: true, fiscalCode: true, company: true, vatNumber: true, pec: true, sdiCode: true },
-      }),
-      prisma.userAddress.findFirst({
-        where: { userId: session.user.id, isDefault: true },
-      }),
+      getCheckoutProfile(session.user.id),
+      getDefaultAddress(session.user.id),
     ])
 
     const nameParts = (user?.name ?? '').split(' ')

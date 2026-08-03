@@ -15,7 +15,10 @@ export async function searchBrtFermopointsAction(
   latitude?: number,
   longitude?: number
 ): Promise<SearchBrtFermopointsResult> {
-  if ((!postalCode || !/^\d{5}$/.test(postalCode)) && (typeof latitude !== 'number' || typeof longitude !== 'number')) {
+  if (
+    (!postalCode || !/^\d{5}$/.test(postalCode)) &&
+    (typeof latitude !== 'number' || typeof longitude !== 'number')
+  ) {
     return { error: 'CAP non valido' }
   }
 
@@ -31,7 +34,8 @@ export async function searchBrtFermopointsAction(
     return { points }
   } catch (err) {
     console.error('Ricerca Fermopoint BRT fallita:', err)
-    const message = err instanceof Error ? err.message : 'Servizio BRT Fermopoint non disponibile al momento'
+    const message =
+      err instanceof Error ? err.message : 'Servizio BRT Fermopoint non disponibile al momento'
     return { error: message }
   }
 }

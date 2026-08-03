@@ -1,11 +1,12 @@
 'use server'
 
-import { prisma } from '@/lib/prisma'
 import { calcDiscount, calcSubtotal } from '@/lib/cart'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
-
-const NEWSLETTER_DISCOUNT_CODE = 'BENVENUTO5'
-const NEWSLETTER_DISCOUNT_PERCENT = 5
+import {
+  NEWSLETTER_DISCOUNT_CODE,
+  NEWSLETTER_DISCOUNT_PERCENT,
+} from '@/lib/domain/newsletter-discount'
+import { getDiscountByCode } from '@/services/discounts'
 
 interface ValidateCouponResult {
   valid: boolean
@@ -24,13 +25,14 @@ export async function validateCoupon(
   let doc = null
 
   try {
-    doc = await prisma.discount.findUnique({ where: { code: normalizedCode } })
+    doc = await getDiscountByCode(normalizedCode)
   } catch (error) {
     console.error('coupon lookup failed', error)
   }
 
   if (!doc && normalizedCode === NEWSLETTER_DISCOUNT_CODE) {
-    if (userRole !== 'consumer') return { valid: false, error: 'Codice non applicabile al tuo account' }
+    if (userRole !== 'consumer')
+      return { valid: false, error: 'Codice non applicabile al tuo account' }
     const coupon: AppliedCoupon = {
       code: NEWSLETTER_DISCOUNT_CODE,
       type: 'percent',
