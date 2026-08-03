@@ -11,6 +11,8 @@ import {
 } from '@/services/orders'
 import { incrementDiscountUsage } from '@/services/discounts'
 import { decrementStock } from '@/services/inventory'
+import { buildOrderEmailPayload } from '@/lib/domain/order-email'
+import { buildOrderCreateData } from '@/lib/domain/order'
 
 interface StripeOrderItem {
   slug?: string
@@ -48,43 +50,12 @@ export async function finalizeSucceededStripePayment(paymentIntent: Stripe.Payme
   }
 
   const completedOrder = await getCompletedOrderOrThrow(orderId)
-  const shippingAddress = completedOrder.shippingAddress
-  if (!shippingAddress) throw new Error('Indirizzo di spedizione mancante per ordine Stripe')
-
-  const customerName =
-    completedOrder.user?.name ?? `${shippingAddress.firstName} ${shippingAddress.lastName}`.trim()
-  const customerEmail = completedOrder.user?.email ?? completedOrder.guestEmail ?? ''
-
-  const emailData = {
-    orderId: completedOrder.id,
-    paymentMethod: 'stripe',
-    total: completedOrder.total,
-    subtotal: completedOrder.subtotal,
-    discountAmount: completedOrder.discountAmount,
-    couponCode: completedOrder.couponCode,
-    codSurcharge: 0,
-    customerName,
-    customerEmail,
-    items: completedOrder.items.map((item) => ({
-      name: item.name,
-      qty: item.qty,
-      unitPrice: item.unitPrice,
-    })),
-    address: {
-      firstName: shippingAddress.firstName,
-      lastName: shippingAddress.lastName,
-      address: shippingAddress.address,
-      city: shippingAddress.city,
-      postalCode: shippingAddress.postalCode,
-      province: shippingAddress.province,
-      country: shippingAddress.country,
-      phone: shippingAddress.phone,
-    },
-    deliveryType: completedOrder.deliveryType ?? 'home',
-    pickupCarrier: completedOrder.pickupCarrier ?? null,
-    pickupPointCode: completedOrder.pickupPointCode ?? null,
-    pickupPointAddress: completedOrder.pickupPointAddress ?? null,
+  if (!completedOrder.shippingAddress) {
+    throw new Error('Indirizzo di spedizione mancante per ordine Stripe')
   }
+
+  const emailData = buildOrderEmailPayload(completedOrder)
+  const customerEmail = emailData.customerEmail
 
   await Promise.all([
     decrementStock(
@@ -156,68 +127,37 @@ async function createPaidOrderFromMetadata(
   address: ShippingAddress
 ) {
   const meta = paymentIntent.metadata
-  return createOrder({
-    userId: meta.userId || undefined,
-    guestEmail: meta.guestEmail || undefined,
+
+  // I totali sono quelli registrati nei metadata al momento della creazione
+  // dell'intent, quando sono stati calcolati dal server.
+  const totals = {
     subtotal: Number(meta.subtotal ?? 0),
     discountAmount: Number(meta.discountAmount ?? 0),
-    total: paymentIntent.amount / 100,
-    couponCode: meta.couponCode || null,
-    status: 'paid',
-    paymentMethod: 'stripe',
-    stripePaymentIntentId: paymentIntent.id,
+    itemsTotal: Number(meta.subtotal ?? 0) - Number(meta.discountAmount ?? 0),
     shippingCost: Number(meta.shippingCost ?? 0),
     foreignSurcharge: Number(meta.foreignSurcharge ?? 0),
+    codSurcharge: 0, // Stripe non prevede il contrassegno
     freeShipping: meta.freeShipping === 'true',
-    shippingNotes: address.shippingNotes ?? null,
-    deliveryType: address.deliveryType ?? 'home',
-    pickupCarrier: address.pickupCarrier ?? null,
-    pickupPointCode: address.pickupPointCode ?? null,
-    pickupPointAddress: address.pickupPointAddress ?? null,
-    ...(address.billingDifferent && address.billingAddress
-      ? {
-          billingAddress: {
-            create: {
-              firstName: address.billingFirstName ?? address.firstName,
-              lastName: address.billingLastName ?? address.lastName,
-              company: address.billingCompany ?? null,
-              vatNumber: address.billingVatNumber ?? null,
-              fiscalCode: address.billingFiscalCode ?? null,
-              address: address.billingAddress,
-              city: address.billingCity ?? '',
-              postalCode: address.billingPostalCode ?? '',
-              province: address.billingProvince ?? null,
-              country: address.billingCountry ?? 'IT',
-            },
-          },
-        }
-      : {}),
-    items: {
-      create: items.map((item) => ({
-        slug: item.slug ?? null,
+    total: paymentIntent.amount / 100,
+  }
+
+  return createOrder(
+    buildOrderCreateData({
+      userId: meta.userId || undefined,
+      guestEmail: meta.guestEmail || undefined,
+      status: 'paid',
+      paymentMethod: 'stripe',
+      stripePaymentIntentId: paymentIntent.id,
+      couponCode: meta.couponCode || null,
+      totals,
+      address,
+      lines: items.map((item) => ({
+        slug: item.slug,
         name: item.name,
-        variantLabel: item.variantLabel ?? null,
+        variantLabel: item.variantLabel,
         unitPrice: Number(item.unitPrice),
         qty: Number(item.qty),
       })),
-    },
-    shippingAddress: {
-      create: {
-        firstName: address.firstName,
-        lastName: address.lastName,
-        company: address.company ?? null,
-        vatNumber: address.vatNumber ?? null,
-        fiscalCode: address.fiscalCode ?? null,
-        sdiCode: address.sdiCode ?? null,
-        pec: address.pec ?? null,
-        docType: address.docType ?? null,
-        address: address.address,
-        city: address.city,
-        postalCode: address.postalCode,
-        province: address.province ?? null,
-        country: address.country ?? 'IT',
-        phone: address.phone ?? null,
-      },
-    },
-  })
+    })
+  )
 }

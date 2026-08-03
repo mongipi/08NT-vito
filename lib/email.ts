@@ -5,7 +5,8 @@ const BRAND_GREEN = '#1a4a2e'
 const BRAND_LIGHT = '#f0f7f2'
 const DEFAULT_EMAIL = '08naturaltechnology@gmail.com'
 const DEFAULT_FROM_NAME = '08 Natural Technology'
-const SITE_URL = process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'https://08naturaltechnology.it'
+const SITE_URL =
+  process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'https://08naturaltechnology.it'
 
 type MailMessage = Parameters<nodemailer.Transporter['sendMail']>[0]
 
@@ -23,7 +24,9 @@ function resolveSmtpConfig(): SmtpConfig {
   const pass = process.env.SMTP_PASS?.trim() ?? ''
 
   if (!user || !pass) {
-    throw new Error('SMTP non configurato: imposta SMTP_USER e SMTP_PASS nel file .env.local o nel provider hosting.')
+    throw new Error(
+      'SMTP non configurato: imposta SMTP_USER e SMTP_PASS nel file .env.local o nel provider hosting.'
+    )
   }
 
   const port = Number(process.env.SMTP_PORT ?? '465')
@@ -139,26 +142,61 @@ function itemsTable(
   total: number,
   discountAmount = 0,
   couponCode?: string | null,
-  codSurcharge = 0
+  codSurcharge = 0,
+  shippingCost = 0,
+  foreignSurcharge = 0
 ) {
-  const rows = items.map((item) => `
+  const rows = items
+    .map(
+      (item) => `
     <tr>
       <td style="padding:0.5rem 0;font-size:0.875rem;color:#374151;border-bottom:1px solid #f5f5f0">${escapeHtml(item.name)}</td>
       <td style="padding:0.5rem 0;font-size:0.875rem;color:#6b7280;text-align:center;border-bottom:1px solid #f5f5f0">x${escapeHtml(item.qty)}</td>
       <td style="padding:0.5rem 0;font-size:0.875rem;font-weight:500;color:#111827;text-align:right;border-bottom:1px solid #f5f5f0">${formatEuro(item.unitPrice * item.qty)}</td>
-    </tr>`).join('')
+    </tr>`
+    )
+    .join('')
 
-  const discountRow = discountAmount > 0 ? `
+  const discountRow =
+    discountAmount > 0
+      ? `
     <tr>
       <td colspan="2" style="padding:0.25rem 0;font-size:0.8125rem;color:#dc2626">Sconto${couponCode ? ` (${escapeHtml(couponCode)})` : ''}</td>
       <td style="padding:0.25rem 0;font-size:0.8125rem;color:#dc2626;text-align:right">-${formatEuro(discountAmount)}</td>
-    </tr>` : ''
+    </tr>`
+      : ''
 
-  const codRow = codSurcharge > 0 ? `
+  const codRow =
+    codSurcharge > 0
+      ? `
     <tr>
       <td colspan="2" style="padding:0.25rem 0;font-size:0.8125rem;color:#6b7280">Supplemento contrassegno</td>
       <td style="padding:0.25rem 0;font-size:0.8125rem;color:#6b7280;text-align:right">+${formatEuro(codSurcharge)}</td>
-    </tr>` : ''
+    </tr>`
+      : ''
+
+  // Spedizione e supplemento estero: senza queste righe le voci non sommavano al totale.
+  const shippingRow =
+    shippingCost > 0
+      ? `
+    <tr>
+      <td colspan="2" style="padding:0.25rem 0;font-size:0.8125rem;color:#6b7280">Spedizione</td>
+      <td style="padding:0.25rem 0;font-size:0.8125rem;color:#6b7280;text-align:right">+${formatEuro(shippingCost)}</td>
+    </tr>`
+      : `
+    <tr>
+      <td colspan="2" style="padding:0.25rem 0;font-size:0.8125rem;color:#16a34a">Spedizione</td>
+      <td style="padding:0.25rem 0;font-size:0.8125rem;color:#16a34a;text-align:right">Gratuita</td>
+    </tr>`
+
+  const foreignRow =
+    foreignSurcharge > 0
+      ? `
+    <tr>
+      <td colspan="2" style="padding:0.25rem 0;font-size:0.8125rem;color:#6b7280">Supplemento estero</td>
+      <td style="padding:0.25rem 0;font-size:0.8125rem;color:#6b7280;text-align:right">+${formatEuro(foreignSurcharge)}</td>
+    </tr>`
+      : ''
 
   return `
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:1rem">
@@ -171,7 +209,7 @@ function itemsTable(
       </thead>
       <tbody>${rows}</tbody>
       <tfoot>
-        ${discountRow}${codRow}
+        ${discountRow}${shippingRow}${foreignRow}${codRow}
         <tr>
           <td colspan="2" style="padding:0.625rem 0 0;font-size:0.9375rem;font-weight:700;color:${BRAND_GREEN};border-top:2px solid #f0f0ec">Totale</td>
           <td style="padding:0.625rem 0 0;font-size:0.9375rem;font-weight:700;color:${BRAND_GREEN};text-align:right;border-top:2px solid #f0f0ec">${formatEuro(total)}</td>
@@ -190,7 +228,10 @@ function addressBlock(addr: {
   country: string
   phone?: string | null
 }) {
-  const cityLine = [addr.postalCode, addr.city, addr.province].filter(Boolean).map(escapeHtml).join(' ')
+  const cityLine = [addr.postalCode, addr.city, addr.province]
+    .filter(Boolean)
+    .map(escapeHtml)
+    .join(' ')
 
   return `
     <div style="background:#f9f9f7;border:1px solid #e8e8e4;padding:0.875rem 1rem;font-size:0.8125rem;color:#374151;line-height:1.7">
@@ -222,6 +263,8 @@ export interface OrderData {
   discountAmount: number
   couponCode?: string | null
   codSurcharge: number
+  shippingCost?: number
+  foreignSurcharge?: number
   customerName: string
   customerEmail: string
   items: { name: string; qty: number; unitPrice: number }[]
@@ -254,7 +297,9 @@ function pickupCarrierLabel(carrier: OrderData['pickupCarrier']) {
   return carrier ? String(carrier) : 'Punto di ritiro'
 }
 
-function pickupBlock(data: Pick<OrderData, 'deliveryType' | 'pickupCarrier' | 'pickupPointCode' | 'pickupPointAddress'>) {
+function pickupBlock(
+  data: Pick<OrderData, 'deliveryType' | 'pickupCarrier' | 'pickupPointCode' | 'pickupPointAddress'>
+) {
   if (data.deliveryType !== 'pickup' || !data.pickupPointAddress?.trim()) return ''
 
   return `
@@ -271,24 +316,30 @@ export async function sendOrderConfirmation(data: OrderData) {
   const iban = settings['IBAN_BONIFICO'] ?? ''
   const intestatario = settings['INTESTATARIO_BONIFICO'] ?? ''
 
-  const bonifico = data.paymentMethod === 'bonifico' ? infoBox(
-    BRAND_GREEN,
-    '#f0f7f2',
-    '#bbf7d0',
-    'Istruzioni bonifico bancario',
-    `Effettua il bonifico entro <strong>5 giorni lavorativi</strong>.<br>
+  const bonifico =
+    data.paymentMethod === 'bonifico'
+      ? infoBox(
+          BRAND_GREEN,
+          '#f0f7f2',
+          '#bbf7d0',
+          'Istruzioni bonifico bancario',
+          `Effettua il bonifico entro <strong>5 giorni lavorativi</strong>.<br>
     <strong>Intestatario:</strong> ${escapeHtml(intestatario)}<br>
     <strong>IBAN:</strong> <span style="font-family:monospace;font-weight:600">${escapeHtml(iban)}</span><br>
     <strong>Causale:</strong> Ordine #${escapeHtml(data.orderId.slice(-8).toUpperCase())}`
-  ) : ''
+        )
+      : ''
 
-  const contrassegno = data.paymentMethod === 'contrassegno' ? infoBox(
-    '#a16207',
-    '#fffbeb',
-    '#fde68a',
-    'Pagamento alla consegna',
-    `Tieni pronti <strong>${formatEuro(data.total)}</strong> in contanti da consegnare al corriere. Il supplemento contrassegno &egrave; gi&agrave; incluso nel totale.`
-  ) : ''
+  const contrassegno =
+    data.paymentMethod === 'contrassegno'
+      ? infoBox(
+          '#a16207',
+          '#fffbeb',
+          '#fde68a',
+          'Pagamento alla consegna',
+          `Tieni pronti <strong>${formatEuro(data.total)}</strong> in contanti da consegnare al corriere. Il supplemento contrassegno &egrave; gi&agrave; incluso nel totale.`
+        )
+      : ''
 
   const html = layout(`
     <p style="margin:0 0 0.25rem;font-size:0.625rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#9ca3af">Ordine confermato</p>
@@ -296,7 +347,7 @@ export async function sendOrderConfirmation(data: OrderData) {
     <p style="margin:0 0 1.5rem;font-size:0.875rem;color:#6b7280;font-weight:300;line-height:1.7">
       Il tuo ordine <strong style="color:#111827;font-family:monospace">#${escapeHtml(data.orderId.slice(-8).toUpperCase())}</strong> &egrave; stato ricevuto e sar&agrave; presto in lavorazione.
     </p>
-    ${itemsTable(data.items, data.total, data.discountAmount, data.couponCode, data.codSurcharge)}
+    ${itemsTable(data.items, data.total, data.discountAmount, data.couponCode, data.codSurcharge, data.shippingCost, data.foreignSurcharge)}
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:1.25rem">
       <tr>
         <td style="padding-right:0.5rem;vertical-align:top;width:50%">
@@ -325,7 +376,13 @@ export async function sendOrderConfirmation(data: OrderData) {
 
 export async function sendOrderShipped(data: OrderData) {
   const tracking = data.trackingNumber
-    ? infoBox(BRAND_GREEN, BRAND_LIGHT, '#bbf7d0', 'Numero di tracking', `<span style="font-family:monospace;font-size:1rem;font-weight:600;color:${BRAND_GREEN}">${escapeHtml(data.trackingNumber)}</span>`)
+    ? infoBox(
+        BRAND_GREEN,
+        BRAND_LIGHT,
+        '#bbf7d0',
+        'Numero di tracking',
+        `<span style="font-family:monospace;font-size:1rem;font-weight:600;color:${BRAND_GREEN}">${escapeHtml(data.trackingNumber)}</span>`
+      )
     : ''
 
   const html = layout(`
@@ -357,7 +414,7 @@ export async function sendOrderDelivered(data: OrderData) {
     <p style="margin:0 0 1.5rem;font-size:0.875rem;color:#6b7280;font-weight:300;line-height:1.7">
       Il tuo ordine <strong style="color:#111827;font-family:monospace">#${escapeHtml(data.orderId.slice(-8).toUpperCase())}</strong> &egrave; stato consegnato. Speriamo che i nostri prodotti ti diano i risultati che meriti.
     </p>
-    ${itemsTable(data.items, data.total, data.discountAmount, data.couponCode, data.codSurcharge)}
+    ${itemsTable(data.items, data.total, data.discountAmount, data.couponCode, data.codSurcharge, data.shippingCost, data.foreignSurcharge)}
     <p style="margin:1.25rem 0 0.875rem;font-size:0.875rem;color:#6b7280;font-weight:300;line-height:1.7">Hai trovato qualcosa che ami? Scopri l'intera linea 08 Natural Technology.</p>
     ${cta(`${SITE_URL}/prodotti`, 'Esplora il catalogo &rarr;')}
   `)
@@ -377,7 +434,7 @@ export async function sendOrderCancelled(data: OrderData) {
     <p style="margin:0 0 1.5rem;font-size:0.875rem;color:#6b7280;font-weight:300;line-height:1.7">
       L'ordine <strong style="color:#111827;font-family:monospace">#${escapeHtml(data.orderId.slice(-8).toUpperCase())}</strong> &egrave; stato annullato. Se hai effettuato un pagamento online, il rimborso sar&agrave; elaborato entro 5-7 giorni lavorativi.
     </p>
-    ${itemsTable(data.items, data.total, data.discountAmount, data.couponCode, data.codSurcharge)}
+    ${itemsTable(data.items, data.total, data.discountAmount, data.couponCode, data.codSurcharge, data.shippingCost, data.foreignSurcharge)}
     <p style="margin:1.25rem 0 0.875rem;font-size:0.875rem;color:#6b7280;font-weight:300;line-height:1.7">Per qualsiasi domanda, contattaci rispondendo a questa email o tramite la pagina contatti.</p>
     ${cta(`${SITE_URL}/contatti`, 'Contattaci &rarr;')}
   `)
@@ -395,7 +452,7 @@ export async function sendAdminOrderNotification(data: OrderData) {
   const html = layout(`
     <p style="margin:0 0 0.25rem;font-size:0.625rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#9ca3af">Nuovo ordine ricevuto</p>
     <h1 style="margin:0 0 1.5rem;font-size:1.375rem;font-weight:600;color:#111827">#${escapeHtml(data.orderId.slice(-8).toUpperCase())} - ${formatEuro(data.total)}</h1>
-    ${itemsTable(data.items, data.total, data.discountAmount, data.couponCode, data.codSurcharge)}
+    ${itemsTable(data.items, data.total, data.discountAmount, data.couponCode, data.codSurcharge, data.shippingCost, data.foreignSurcharge)}
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:1.25rem">
       <tr>
         <td style="padding-right:0.5rem;vertical-align:top;width:50%">
@@ -474,9 +531,8 @@ export interface ContactMessageData {
 }
 
 export async function sendContactNotification(data: ContactMessageData) {
-  const recipient = process.env.CONTACT_EMAIL_TO?.trim()
-    || process.env.ADMIN_EMAIL?.trim()
-    || DEFAULT_EMAIL
+  const recipient =
+    process.env.CONTACT_EMAIL_TO?.trim() || process.env.ADMIN_EMAIL?.trim() || DEFAULT_EMAIL
   const safeSubject = data.subject.trim() || 'Richiesta dal sito'
 
   const html = `<!DOCTYPE html>

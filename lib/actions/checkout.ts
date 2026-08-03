@@ -2,11 +2,13 @@
 
 import Stripe from 'stripe'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
 import { computeOrderTotals } from '@/lib/domain/pricing'
 import { getPricingConfig } from '@/lib/domain/pricing-config'
+import { buildOrderCreateData, type OrderLineInput } from '@/lib/domain/order'
+import { buildOrderEmailPayload } from '@/lib/domain/order-email'
+import { createOrder, getOrderForEmail } from '@/services/orders'
 import { sendOrderConfirmation, sendAdminOrderNotification } from '@/lib/email'
 import { issueVerificationEmail } from '@/lib/verification'
 import { chunkMetadataValue } from '@/lib/stripe-metadata'
@@ -14,45 +16,24 @@ import { createUser, getUserByEmail, getUserContact, updateUser } from '@/servic
 import { createAddress, upsertDefaultAddress, type AddressInput } from '@/services/addresses'
 import { decrementStock } from '@/services/inventory'
 import { hashPassword } from '@/lib/auth/password'
+import type { ShippingAddress } from '@/types/checkout'
 
 const STRIPE_EXCLUDED_PAYMENT_METHOD_TYPES: Stripe.PaymentIntentCreateParams.ExcludedPaymentMethodType[] =
   ['amazon_pay', 'eps']
 
-export interface ShippingAddress {
-  firstName: string
-  lastName: string
-  company?: string
-  vatNumber?: string
-  fiscalCode?: string
-  sdiCode?: string
-  pec?: string
-  docType?: 'fattura' | 'scontrino' | 'nessuno' | null
-  address: string
-  city: string
-  postalCode: string
-  province?: string
-  country: string
-  phone?: string
-  shippingNotes?: string
-  deliveryType?: 'home' | 'pickup'
-  pickupCarrier?: 'BRT' | 'POSTE' | null
-  pickupPointCode?: string
-  pickupPointAddress?: string
-  billingDifferent?: boolean
-  billingFirstName?: string
-  billingLastName?: string
-  billingCompany?: string
-  billingVatNumber?: string
-  billingFiscalCode?: string
-  billingAddress?: string
-  billingCity?: string
-  billingPostalCode?: string
-  billingProvince?: string
-  billingCountry?: string
-  saveForNextTime?: boolean
-  guestEmail?: string
-  createAccount?: boolean
-  guestPasswordHash?: string
+// Il tipo vive in types/checkout.ts: e' usato anche dal dominio e dal client,
+// che non devono dipendere da un modulo 'use server'.
+export type { ShippingAddress }
+
+/** Righe d'ordine a partire dal carrello. */
+function toOrderLines(items: CartItem[]): OrderLineInput[] {
+  return items.map((item) => ({
+    slug: item.slug,
+    name: item.name,
+    variantLabel: item.variantLabel,
+    unitPrice: item.price,
+    qty: item.qty,
+  }))
 }
 
 export async function createPaymentIntent(
@@ -114,72 +95,19 @@ export async function createPaymentIntent(
 
   let order
   try {
-    order = await prisma.order.create({
-      data: {
-        userId: session?.user?.id ?? undefined,
-        guestEmail: session?.user ? undefined : (shippingAddress.guestEmail ?? undefined),
-        subtotal,
-        discountAmount,
-        total,
-        couponCode: coupon?.code ?? null,
+    order = await createOrder(
+      buildOrderCreateData({
+        userId: session?.user?.id,
+        guestEmail: session?.user ? undefined : shippingAddress.guestEmail,
         status: 'pending',
         paymentMethod: 'stripe',
         stripePaymentIntentId: paymentIntent.id,
-        shippingCost: totals.shippingCost,
-        foreignSurcharge: totals.foreignSurcharge,
-        freeShipping: totals.freeShipping,
-        shippingNotes: shippingAddress.shippingNotes ?? null,
-        deliveryType: shippingAddress.deliveryType ?? 'home',
-        pickupCarrier: shippingAddress.pickupCarrier ?? null,
-        pickupPointCode: shippingAddress.pickupPointCode ?? null,
-        pickupPointAddress: shippingAddress.pickupPointAddress ?? null,
-        ...(shippingAddress.billingDifferent && shippingAddress.billingAddress
-          ? {
-              billingAddress: {
-                create: {
-                  firstName: shippingAddress.billingFirstName ?? shippingAddress.firstName,
-                  lastName: shippingAddress.billingLastName ?? shippingAddress.lastName,
-                  company: shippingAddress.billingCompany ?? null,
-                  vatNumber: shippingAddress.billingVatNumber ?? null,
-                  fiscalCode: shippingAddress.billingFiscalCode ?? null,
-                  address: shippingAddress.billingAddress,
-                  city: shippingAddress.billingCity ?? '',
-                  postalCode: shippingAddress.billingPostalCode ?? '',
-                  province: shippingAddress.billingProvince ?? null,
-                  country: shippingAddress.billingCountry ?? 'IT',
-                },
-              },
-            }
-          : {}),
-        items: {
-          create: items.map((item) => ({
-            slug: item.slug ?? null,
-            name: item.name,
-            variantLabel: item.variantLabel ?? null,
-            unitPrice: item.price,
-            qty: item.qty,
-          })),
-        },
-        shippingAddress: {
-          create: {
-            firstName: shippingAddress.firstName,
-            lastName: shippingAddress.lastName,
-            company: shippingAddress.company ?? null,
-            vatNumber: shippingAddress.vatNumber ?? null,
-            fiscalCode: shippingAddress.fiscalCode ?? null,
-            sdiCode: shippingAddress.sdiCode ?? null,
-            pec: shippingAddress.pec ?? null,
-            docType: shippingAddress.docType ?? null,
-            address: shippingAddress.address,
-            city: shippingAddress.city,
-            postalCode: shippingAddress.postalCode,
-            province: shippingAddress.province ?? null,
-            country: shippingAddress.country,
-            phone: shippingAddress.phone ?? null,
-          },
-        },
-      },
-    })
+        couponCode: coupon?.code,
+        totals,
+        address: shippingAddress,
+        lines: toOrderLines(items),
+      })
+    )
   } catch (error) {
     await stripe.paymentIntents.cancel(paymentIntent.id).catch(() => undefined)
     throw error
@@ -213,72 +141,18 @@ export async function createDirectOrder(
   )
   const { subtotal, discountAmount, codSurcharge, total } = totals
 
-  const order = await prisma.order.create({
-    data: {
-      userId: session?.user?.id ?? undefined,
-      guestEmail: session?.user ? undefined : (shippingAddress.guestEmail ?? undefined),
-      subtotal,
-      discountAmount,
-      total,
-      couponCode: coupon?.code ?? null,
-      paymentMethod,
-      codSurcharge,
-      shippingCost: totals.shippingCost,
-      foreignSurcharge: totals.foreignSurcharge,
-      freeShipping: totals.freeShipping,
-      shippingNotes: shippingAddress.shippingNotes ?? null,
-      deliveryType: shippingAddress.deliveryType ?? 'home',
-      pickupCarrier: shippingAddress.pickupCarrier ?? null,
-      pickupPointCode: shippingAddress.pickupPointCode ?? null,
-      pickupPointAddress: shippingAddress.pickupPointAddress ?? null,
+  const order = await createOrder(
+    buildOrderCreateData({
+      userId: session?.user?.id,
+      guestEmail: session?.user ? undefined : shippingAddress.guestEmail,
       status: 'pending',
-      ...(shippingAddress.billingDifferent && shippingAddress.billingAddress
-        ? {
-            billingAddress: {
-              create: {
-                firstName: shippingAddress.billingFirstName ?? shippingAddress.firstName,
-                lastName: shippingAddress.billingLastName ?? shippingAddress.lastName,
-                company: shippingAddress.billingCompany ?? null,
-                vatNumber: shippingAddress.billingVatNumber ?? null,
-                fiscalCode: shippingAddress.billingFiscalCode ?? null,
-                address: shippingAddress.billingAddress,
-                city: shippingAddress.billingCity ?? '',
-                postalCode: shippingAddress.billingPostalCode ?? '',
-                province: shippingAddress.billingProvince ?? null,
-                country: shippingAddress.billingCountry ?? 'IT',
-              },
-            },
-          }
-        : {}),
-      items: {
-        create: items.map((i) => ({
-          slug: i.slug ?? null,
-          name: i.name,
-          variantLabel: i.variantLabel ?? null,
-          unitPrice: i.price,
-          qty: i.qty,
-        })),
-      },
-      shippingAddress: {
-        create: {
-          firstName: shippingAddress.firstName,
-          lastName: shippingAddress.lastName,
-          company: shippingAddress.company ?? null,
-          vatNumber: shippingAddress.vatNumber ?? null,
-          fiscalCode: shippingAddress.fiscalCode ?? null,
-          sdiCode: shippingAddress.sdiCode ?? null,
-          pec: shippingAddress.pec ?? null,
-          docType: shippingAddress.docType ?? null,
-          address: shippingAddress.address,
-          city: shippingAddress.city,
-          postalCode: shippingAddress.postalCode,
-          province: shippingAddress.province ?? null,
-          country: shippingAddress.country,
-          phone: shippingAddress.phone ?? null,
-        },
-      },
-    },
-  })
+      paymentMethod,
+      couponCode: coupon?.code,
+      totals,
+      address: shippingAddress,
+      lines: toOrderLines(items),
+    })
+  )
 
   // Bonifico/contrassegno non hanno un webhook di conferma pagamento: le scorte
   // si riservano subito alla creazione dell'ordine, a differenza di Stripe che
@@ -306,31 +180,15 @@ export async function createDirectOrder(
     )
   }
 
+  // Il payload email si ricava dall'ordine appena salvato, così le email
+  // riflettono esattamente ciò che è a database.
+  const savedOrder = await getOrderForEmail(order.id)
+  if (!savedOrder) throw new Error(`Ordine ${order.id} non trovato dopo la creazione`)
+
   const emailData = {
-    orderId: order.id,
-    paymentMethod,
-    total,
-    subtotal,
-    discountAmount,
-    couponCode: coupon?.code ?? null,
-    codSurcharge,
+    ...buildOrderEmailPayload(savedOrder),
     customerName,
     customerEmail,
-    items: items.map((i) => ({ name: i.name, qty: i.qty, unitPrice: i.price })),
-    address: {
-      firstName: shippingAddress.firstName,
-      lastName: shippingAddress.lastName,
-      address: shippingAddress.address,
-      city: shippingAddress.city,
-      postalCode: shippingAddress.postalCode,
-      province: shippingAddress.province ?? null,
-      country: shippingAddress.country,
-      phone: shippingAddress.phone ?? null,
-    },
-    deliveryType: shippingAddress.deliveryType ?? 'home',
-    pickupCarrier: shippingAddress.pickupCarrier ?? null,
-    pickupPointCode: shippingAddress.pickupPointCode ?? null,
-    pickupPointAddress: shippingAddress.pickupPointAddress ?? null,
   }
 
   if (emailData.customerEmail) {

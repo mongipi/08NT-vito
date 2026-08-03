@@ -2,6 +2,7 @@
 import { revalidatePath } from 'next/cache'
 import { sendOrderShipped, sendOrderDelivered, sendOrderCancelled } from '@/lib/email'
 import { ORDER_STATUSES, isOrderStatus } from '@/lib/domain/order-status'
+import { buildOrderEmailPayload } from '@/lib/domain/order-email'
 import { getOrderForEmail, setOrderStatus } from '@/services/orders'
 
 export async function updateOrderStatus(formData: FormData) {
@@ -20,31 +21,7 @@ export async function updateOrderStatus(formData: FormData) {
   const order = await getOrderForEmail(id)
 
   if (order?.user?.email) {
-    const emailData = {
-      orderId: order.id,
-      paymentMethod: order.paymentMethod,
-      total: order.total,
-      subtotal: order.subtotal,
-      discountAmount: order.discountAmount,
-      couponCode: order.couponCode,
-      codSurcharge: order.codSurcharge,
-      customerName: order.user.name ?? 'Cliente',
-      customerEmail: order.user.email,
-      items: order.items.map((i) => ({ name: i.name, qty: i.qty, unitPrice: i.unitPrice })),
-      address: order.shippingAddress
-        ? {
-            firstName: order.shippingAddress.firstName,
-            lastName: order.shippingAddress.lastName,
-            address: order.shippingAddress.address,
-            city: order.shippingAddress.city,
-            postalCode: order.shippingAddress.postalCode,
-            province: order.shippingAddress.province,
-            country: order.shippingAddress.country,
-            phone: order.shippingAddress.phone,
-          }
-        : { firstName: '', lastName: '', address: '', city: '', postalCode: '', country: 'IT' },
-      trackingNumber,
-    }
+    const emailData = buildOrderEmailPayload(order, { trackingNumber })
 
     if (status === 'shipped') {
       sendOrderShipped(emailData).catch((e) => console.error('Email spedizione failed:', e))
