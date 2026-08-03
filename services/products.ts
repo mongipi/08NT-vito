@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { isPrismaInitError, logPrismaInitError } from '@/lib/prisma-errors'
-import type { Product, ProductImages } from '@/types'
+import type { Product, ProductImages, ProductVariant } from '@/types'
 import { IMAGE_KEY_TO_URL_PATH, type ImageKey } from '@/lib/domain/product-images'
 import { variantImageToken } from '@/lib/domain/variant-image'
 import type { Prisma } from '@prisma/client'
@@ -32,42 +32,85 @@ function normalizedPrice(price: number, comparePrice?: number | null) {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapProduct(p: any): Product {
-  const lineOverride = PRODUCT_LINE_OVERRIDES[p.slug]
-  const images = buildImageMap(p.id, p.productImages ?? [])
-  const productPricing = normalizedPrice(
-    Number(p.price),
-    p.comparePrice == null ? null : Number(p.comparePrice)
-  )
-  const variants = (p.variants ?? []).map((variant: any) => {
-    const pricing = normalizedPrice(
-      Number(variant.price),
-      variant.comparePrice == null ? null : Number(variant.comparePrice)
-    )
-    const token = variantImageToken(Number(variant.quantity ?? 0), String(variant.label ?? ''))
-    return {
-      ...variant,
-      ...pricing,
-      image: images.variants?.[token] ?? images.fronte,
-    }
-  })
-
-  return {
-    ...p,
-    ...productPricing,
-    line: lineOverride ? { ...p.line, ...lineOverride } : p.line,
-    images,
-    variants,
-  }
-}
-
 const productInclude = {
   line: true,
   ingredients: { orderBy: { order: 'asc' as const } },
   productImages: { select: { key: true } },
   variants: { orderBy: { order: 'asc' as const } },
 } as const
+
+/**
+ * Riga prodotto come arriva da Prisma, derivata dall'include invece che
+ * dichiarata a mano: se lo schema cambia, il compilatore segnala qui.
+ */
+type ProductRow = Prisma.ProductGetPayload<{ include: typeof productInclude }> & {
+  b2bPricing?: unknown
+}
+
+type ProductVariantRow = ProductRow['variants'][number]
+
+function mapVariant(variant: ProductVariantRow, images: ProductImages): ProductVariant {
+  const pricing = normalizedPrice(
+    Number(variant.price),
+    variant.comparePrice == null ? null : Number(variant.comparePrice)
+  )
+  const token = variantImageToken(variant.quantity, variant.label)
+  return {
+    id: variant.id,
+    label: variant.label,
+    quantity: variant.quantity,
+    stock: variant.stock,
+    order: variant.order,
+    b2bPrice: variant.b2bPrice,
+    ...pricing,
+    image: images.variants?.[token] ?? images.fronte,
+  }
+}
+
+/** Unico punto in cui una riga di database diventa un prodotto del sito. */
+function mapProduct(p: ProductRow): Product {
+  const lineOverride = PRODUCT_LINE_OVERRIDES[p.slug]
+  const images = buildImageMap(p.id, p.productImages)
+  const pricing = normalizedPrice(
+    Number(p.price),
+    p.comparePrice == null ? null : Number(p.comparePrice)
+  )
+
+  return {
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    line: lineOverride ? { ...p.line, ...lineOverride } : p.line,
+    ...pricing,
+    stock: p.stock,
+    published: p.published,
+    order: p.order,
+    shortDescription: p.shortDescription,
+    longDescription: p.longDescription,
+    usage: p.usage,
+    target: p.target,
+    format: p.format,
+    ingredientsText: p.ingredientsText,
+    nameEn: p.nameEn,
+    shortDescriptionEn: p.shortDescriptionEn,
+    longDescriptionEn: p.longDescriptionEn,
+    usageEn: p.usageEn,
+    targetEn: p.targetEn,
+    formatEn: p.formatEn,
+    ingredientsTextEn: p.ingredientsTextEn,
+    capsules: p.capsules,
+    days: p.days,
+    dosage: p.dosage,
+    notificationMs: p.notificationMs,
+    metaTitle: p.metaTitle,
+    metaDescription: p.metaDescription,
+    ingredients: p.ingredients,
+    images,
+    variants: p.variants.map((variant) => mapVariant(variant, images)),
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+  }
+}
 
 export async function getProducts(): Promise<Product[]> {
   try {

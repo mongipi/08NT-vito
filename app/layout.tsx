@@ -5,7 +5,6 @@ import { SiteShell } from './_components/SiteShell'
 import { organizationJsonLd } from '@/lib/jsonld'
 import { getPublicSiteSettings } from '@/lib/site-settings'
 import { getProductNavLinks } from '@/services/products'
-// @ts-ignore
 import './globals.css'
 
 const montserrat = Montserrat({

@@ -139,8 +139,6 @@ export async function createDirectOrder(
     { items, coupon, country: shippingAddress.country, paymentMethod },
     await getPricingConfig()
   )
-  const { subtotal, discountAmount, codSurcharge, total } = totals
-
   const order = await createOrder(
     buildOrderCreateData({
       userId: session?.user?.id,

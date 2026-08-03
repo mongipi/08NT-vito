@@ -15,9 +15,12 @@ interface Props {
 export function ProductGallery({ slides, color, contained = false }: Props) {
   const [active, setActive] = useState(0)
 
+  // Cambiando prodotto (quindi prima immagine) si torna alla prima slide.
+  const firstSlideSrc = slides[0]?.src
+
   useEffect(() => {
     setActive(0)
-  }, [slides[0]?.src])
+  }, [firstSlideSrc])
 
   if (slides.length === 0) return null
 

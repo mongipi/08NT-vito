@@ -44,7 +44,7 @@ export function CheckoutClient({
   /** Configurazione gestita da /admin/impostazioni, letta dal server. */
   pricing: PricingConfig
 }) {
-  const { codSurcharge, shippingPrice, foreignSurcharge } = pricing
+  const { codSurcharge, foreignSurcharge } = pricing
   const { locale } = useLocale()
   const t = useTranslation(locale)
 
