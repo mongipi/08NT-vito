@@ -68,8 +68,7 @@ export default async function ImpostazioniPage({
 
   const iban = get(SETTING_KEYS.IBAN)
   const intestatario = get(SETTING_KEYS.INTESTATARIO)
-  // getSettingsMap() applica già i default di lib/settings.ts, che derivano da
-  // PRICING_FALLBACK: nessun numero va ripetuto qui.
+  // Importi gestiti solo qui: nessun valore di default nel codice.
   const codSurcharge = get(SETTING_KEYS.COD_SURCHARGE)
   const speGratuita = get(SETTING_KEYS.SPEDIZIONE_GRATUITA)
   const prezzoSpe = get(SETTING_KEYS.PREZZO_SPEDIZIONE)

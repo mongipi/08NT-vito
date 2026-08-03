@@ -25,14 +25,18 @@ export interface PricingConfig {
 }
 
 /**
- * Usati solo se il DB non risponde o la chiave è vuota. In esercizio normale
- * i valori arrivano sempre da /admin/impostazioni.
+ * Configurazione neutra: nessun importo. Usata finché i valori reali non sono
+ * stati letti da /admin/impostazioni, e quando il DB non risponde.
+ *
+ * Attenzione: con questa configurazione la spedizione risulta sempre gratuita e
+ * non viene applicato alcun sovrapprezzo. È una scelta deliberata: nel codice
+ * non esiste alcuna copia degli importi, che vivono solo nel database.
  */
-export const PRICING_FALLBACK: PricingConfig = {
-  codSurcharge: 5,
-  shippingThreshold: 39.9,
-  shippingPrice: 5.9,
-  foreignSurcharge: 10,
+export const ZERO_PRICING_CONFIG: PricingConfig = {
+  codSurcharge: 0,
+  shippingThreshold: 0,
+  shippingPrice: 0,
+  foreignSurcharge: 0,
 }
 
 export interface OrderTotalsInput {
@@ -98,4 +102,10 @@ export function computeOrderTotals(
 /** Quanto manca alla spedizione gratuita, 0 se già raggiunta. */
 export function amountMissingForFreeShipping(itemsTotal: number, config: PricingConfig): number {
   return roundCurrency(Math.max(0, config.shippingThreshold - itemsTotal))
+}
+
+/** Avanzamento verso la spedizione gratuita, 0-100. Senza soglia è già completo. */
+export function freeShippingProgress(itemsTotal: number, config: PricingConfig): number {
+  if (config.shippingThreshold <= 0) return 100
+  return Math.min(100, (itemsTotal / config.shippingThreshold) * 100)
 }

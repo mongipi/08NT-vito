@@ -10,7 +10,8 @@ import { getShippingConfig } from '@/lib/actions/public'
 import {
   amountMissingForFreeShipping,
   computeOrderTotals,
-  PRICING_FALLBACK,
+  freeShippingProgress,
+  ZERO_PRICING_CONFIG,
   type PricingConfig,
 } from '@/lib/domain/pricing'
 import { useSession } from 'next-auth/react'
@@ -25,9 +26,9 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const [couponInput, setCouponInput] = useState('')
   const [couponError, setCouponError] = useState<string | null>(null)
   const [couponLoading, setCouponLoading] = useState(false)
-  // Parte dal fallback e viene sostituita dai valori di /admin/impostazioni.
-  // Le righe spedizione restano nascoste finché non arriva la configurazione reale.
-  const [pricing, setPricing] = useState<PricingConfig>(PRICING_FALLBACK)
+  // Gli importi arrivano solo da /admin/impostazioni: finché non sono caricati
+  // la configurazione è a zero e le righe spedizione restano nascoste.
+  const [pricing, setPricing] = useState<PricingConfig>(ZERO_PRICING_CONFIG)
   const [pricingLoaded, setPricingLoaded] = useState(false)
 
   useEffect(() => {
@@ -64,7 +65,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const shippingPrice   = pricing.shippingPrice
   const missingForFree  = amountMissingForFreeShipping(totals.itemsTotal, pricing)
   const hasFreeShipping = totals.freeShipping
-  const progressPct     = Math.min(100, (totals.itemsTotal / freeThreshold) * 100)
+  const progressPct     = freeShippingProgress(totals.itemsTotal, pricing)
   const estimatedTotal  = totals.total
 
   return (
