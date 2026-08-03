@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
+import { postJson } from '@/lib/api-client'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -68,11 +69,7 @@ export function LoginForm() {
   async function handleResend() {
     if (!unverifiedEmail) return
     setResendState('sending')
-    await fetch('/api/auth/resend-verification', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: unverifiedEmail }),
-    })
+    await postJson('/api/auth/resend-verification', { email: unverifiedEmail }).catch(() => null)
     setResendState('sent')
   }
 

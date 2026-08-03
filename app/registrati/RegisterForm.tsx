@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
+import { ApiError, postJson } from '@/lib/api-client'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -41,21 +42,15 @@ export function RegisterForm() {
 
     setLoading(true)
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, confirmPassword }),
+      await postJson('/api/auth/register', { name, email, password, confirmPassword }, {
+        fallbackError: t('register_generic_error'),
       })
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error ?? t('register_generic_error'))
-        setLoading(false)
-        return
-      }
       setSubmitted(true)
-      setLoading(false)
-    } catch {
-      setError(t('register_network_error'))
+    } catch (caught) {
+      setError(caught instanceof ApiError && caught.status !== 0
+        ? caught.message
+        : t('register_network_error'))
+    } finally {
       setLoading(false)
     }
   }

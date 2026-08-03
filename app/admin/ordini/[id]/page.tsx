@@ -5,6 +5,7 @@ import { Badge } from '../../_components/Badge'
 import { formatDate } from '@/lib/utils'
 import { updateOrderStatus } from '@/lib/actions/admin/orders'
 import { ORDER_STATUS_OPTIONS as STATUS_OPTIONS } from '@/lib/domain/order-status'
+import { buildOrderSummaryRows } from '@/lib/domain/order-summary'
 import { s } from '../../_components/styles'
 
 export const metadata = { title: 'Dettaglio ordine' }
@@ -63,18 +64,20 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
             {/* Totali */}
             <div style={{ marginTop: '0.875rem', paddingTop: '0.875rem', borderTop: '1px solid #f0f1f3', display: 'flex', flexDirection: 'column', gap: '0.4375rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#6b7280' }}>
-                <span>Subtotale</span><span>€{order.subtotal.toFixed(2)}</span>
-              </div>
-              {order.discountAmount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#dc2626' }}>
-                  <span>Sconto{order.couponCode ? ` (${order.couponCode})` : ''}</span>
-                  <span>−€{order.discountAmount.toFixed(2)}</span>
-                </div>
+              {buildOrderSummaryRows(order).map((row) =>
+                row.kind === 'total' ? (
+                  <div key={row.key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9375rem', fontWeight: 700, color: '#111827', borderTop: '1px solid #f0f1f3', paddingTop: '0.5625rem', marginTop: '0.125rem' }}>
+                    <span>{row.label}</span><span>€{row.amount.toFixed(2)}</span>
+                  </div>
+                ) : (
+                  <div key={row.key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: row.kind === 'discount' ? '#dc2626' : row.free ? '#16a34a' : '#6b7280' }}>
+                    <span>{row.label}</span>
+                    <span>
+                      {row.free ? 'Gratuita' : `${row.amount < 0 ? '−' : ''}€${Math.abs(row.amount).toFixed(2)}`}
+                    </span>
+                  </div>
+                )
               )}
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9375rem', fontWeight: 700, color: '#111827', borderTop: '1px solid #f0f1f3', paddingTop: '0.5625rem', marginTop: '0.125rem' }}>
-                <span>Totale</span><span>€{order.total.toFixed(2)}</span>
-              </div>
             </div>
           </div>
 

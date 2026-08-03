@@ -5,6 +5,7 @@ import Image from 'next/image'
 import type { Order, OrderItem, OrderAddress } from '@prisma/client'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation, type DictionaryKey } from '@/lib/i18n/dictionary'
+import { buildOrderSummaryRows } from '@/lib/domain/order-summary'
 
 const STATUS_KEY: Record<string, DictionaryKey> = {
   pending: 'order_status_pending', paid: 'order_status_paid', shipped: 'order_status_shipped',
@@ -147,18 +148,23 @@ export function OrderDetailContent({ order }: Props) {
               <SectionLabel>{t('order_detail_amount_summary')}</SectionLabel>
             </div>
             <div style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-              <AmountRow label={t('order_detail_subtotal')} value={`€${order.subtotal.toFixed(2)}`} />
-              {order.discountAmount > 0 && (
-                <AmountRow
-                  label={`${t('order_detail_discount')}${order.couponCode ? ` · ${order.couponCode}` : ''}`}
-                  value={`−€${order.discountAmount.toFixed(2)}`}
-                  valueStyle={{ color: '#16a34a' }}
-                />
+              {buildOrderSummaryRows(order).map((row) =>
+                row.kind === 'total' ? (
+                  <div key={row.key} style={{ borderTop: '0.5px solid var(--border)', paddingTop: '0.75rem', marginTop: '0.125rem', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>{t('order_detail_total')}</span>
+                    <span style={{ fontSize: '1.375rem', fontWeight: 300, color: 'var(--forest)', fontFamily: 'var(--font-cormorant)' }}>€{row.amount.toFixed(2)}</span>
+                  </div>
+                ) : (
+                  <AmountRow
+                    key={row.key}
+                    label={row.key === 'subtotal' ? t('order_detail_subtotal') : row.label}
+                    value={
+                      row.free ? t('cart_shipping_free') : `${row.amount < 0 ? '−' : ''}€${Math.abs(row.amount).toFixed(2)}`
+                    }
+                    valueStyle={row.kind === 'discount' || row.free ? { color: '#16a34a' } : undefined}
+                  />
+                )
               )}
-              <div style={{ borderTop: '0.5px solid var(--border)', paddingTop: '0.75rem', marginTop: '0.125rem', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <span style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>{t('order_detail_total')}</span>
-                <span style={{ fontSize: '1.375rem', fontWeight: 300, color: 'var(--forest)', fontFamily: 'var(--font-cormorant)' }}>€{order.total.toFixed(2)}</span>
-              </div>
             </div>
           </div>
 

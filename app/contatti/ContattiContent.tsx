@@ -9,6 +9,7 @@ import { useTranslation } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
 import { useSiteSettings } from '@/contexts/SiteSettingsContext'
 import { formatWhatsappHref, getSocialLinks } from '@/lib/site-settings'
+import { postJson } from '@/lib/api-client'
 
 export function ContattiContent() {
   const { locale } = useLocale()
@@ -34,18 +35,17 @@ export function ContattiContent() {
     try {
       const form = event.currentTarget
       const data = new FormData(form)
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const result = await postJson<{ ok?: boolean; message?: string }>(
+        '/api/contact',
+        {
           name: data.get('nome'),
           email: data.get('email'),
           subject: data.get('oggetto'),
           message: data.get('messaggio'),
-        }),
-      })
-      const result = await response.json()
-      if (!response.ok || !result.ok) throw new Error(result.message || 'Invio non riuscito.')
+        },
+        { fallbackError: 'Invio non riuscito.' }
+      )
+      if (!result.ok) throw new Error(result.message || 'Invio non riuscito.')
       form.reset()
       setFormMessage({
         type: 'success',

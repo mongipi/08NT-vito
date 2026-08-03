@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useSiteSettings } from '@/contexts/SiteSettingsContext'
+import { postJson } from '@/lib/api-client'
 
 interface NewsletterSignupProps {
   variant?: 'section' | 'footer' | 'popup'
@@ -25,13 +26,11 @@ export function NewsletterSignup({ variant = 'section', onDone }: NewsletterSign
     setMessage('')
 
     try {
-      const res = await fetch('/api/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), locale, source: variant }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data?.message || 'Errore iscrizione')
+      const data = await postJson<{ message?: string }>(
+        '/api/newsletter',
+        { email: email.trim(), locale, source: variant },
+        { fallbackError: 'Non siamo riusciti a completare l iscrizione.' }
+      )
       setStatus('success')
       setMessage(data?.message || 'Iscrizione confermata. Il tuo extra sconto 5% e stato riservato.')
       setEmail('')
