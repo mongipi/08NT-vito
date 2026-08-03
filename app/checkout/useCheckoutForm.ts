@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
 import { useSession } from 'next-auth/react'
 import { useCart } from '@/contexts/CartContext'
 import { useLocale } from '@/contexts/LocaleContext'
@@ -169,6 +169,12 @@ export function useCheckoutForm(pricing: PricingConfig, prefill?: CheckoutPrefil
     if (isBrtPickup && payMethod === 'contrassegno') setPayMethod('stripe')
   }, [isBrtPickup, payMethod])
 
+  /** Un solo handler stabile per entrambi i picker, invece di due funzioni inline. */
+  const selectPickupPoint = useCallback((code: string, addressLabel: string) => {
+    setPickupPointCode(code)
+    setPickupPointAddress(addressLabel)
+  }, [])
+
   async function applyCoupon() {
     if (!couponInput.trim()) return
     setCouponLoading(true)
@@ -287,6 +293,7 @@ export function useCheckoutForm(pricing: PricingConfig, prefill?: CheckoutPrefil
     setPickupPointCode,
     pickupPointAddress,
     setPickupPointAddress,
+    selectPickupPoint,
     guestEmail,
     setGuestEmail,
     createAccount,

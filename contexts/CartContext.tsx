@@ -1,6 +1,13 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useReducer } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+} from 'react'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
 import { calcSubtotal, calcDiscount, calcTotal, cartItemKey } from '@/lib/cart'
 
@@ -90,32 +97,55 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }, [state])
 
-  const subtotal = calcSubtotal(state.items)
-  const discountAmount = calcDiscount(subtotal, state.coupon)
-  const total = calcTotal(subtotal, discountAmount)
+  // Le azioni dipendono solo da dispatch, che React garantisce stabile: senza
+  // useCallback venivano ricreate a ogni render, rendendo inutile qualsiasi
+  // memoizzazione nei componenti che le ricevono.
+  const addItem = useCallback((item: CartItem) => {
+    dispatch({ type: 'ADD_ITEM', item })
+    window.dispatchEvent(new Event('cart:open'))
+  }, [])
 
-  return (
-    <CartContext.Provider
-      value={{
-        ...state,
-        addItem: (item) => {
-          dispatch({ type: 'ADD_ITEM', item })
-          window.dispatchEvent(new Event('cart:open'))
-        },
-        removeItem: (productId, variantId) => dispatch({ type: 'REMOVE_ITEM', productId, variantId }),
-        updateQty: (productId, qty, variantId) => dispatch({ type: 'UPDATE_QTY', productId, qty, variantId }),
-        applyCoupon: (coupon) => dispatch({ type: 'APPLY_COUPON', coupon }),
-        removeCoupon: () => dispatch({ type: 'REMOVE_COUPON' }),
-        clearCart: () => dispatch({ type: 'CLEAR' }),
-        itemCount: state.items.reduce((sum, i) => sum + i.qty, 0),
-        subtotal,
-        discountAmount,
-        total,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+  const removeItem = useCallback(
+    (productId: string, variantId?: string) =>
+      dispatch({ type: 'REMOVE_ITEM', productId, variantId }),
+    []
   )
+
+  const updateQty = useCallback(
+    (productId: string, qty: number, variantId?: string) =>
+      dispatch({ type: 'UPDATE_QTY', productId, qty, variantId }),
+    []
+  )
+
+  const applyCoupon = useCallback(
+    (coupon: AppliedCoupon) => dispatch({ type: 'APPLY_COUPON', coupon }),
+    []
+  )
+
+  const removeCoupon = useCallback(() => dispatch({ type: 'REMOVE_COUPON' }), [])
+  const clearCart = useCallback(() => dispatch({ type: 'CLEAR' }), [])
+
+  // Senza useMemo il valore del context era un oggetto nuovo a ogni render,
+  // quindi ogni consumatore si ri-renderizzava anche a carrello invariato.
+  const value = useMemo<CartContextValue>(() => {
+    const subtotal = calcSubtotal(state.items)
+    const discountAmount = calcDiscount(subtotal, state.coupon)
+    return {
+      ...state,
+      addItem,
+      removeItem,
+      updateQty,
+      applyCoupon,
+      removeCoupon,
+      clearCart,
+      itemCount: state.items.reduce((sum, item) => sum + item.qty, 0),
+      subtotal,
+      discountAmount,
+      total: calcTotal(subtotal, discountAmount),
+    }
+  }, [state, addItem, removeItem, updateQty, applyCoupon, removeCoupon, clearCart])
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }
 
 export function useCart() {
