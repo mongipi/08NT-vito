@@ -39,3 +39,4 @@ npm-debug.log*
 08NT_mockup_sito_V2.html
 .vercel
 .env*
+.backups/

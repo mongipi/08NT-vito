@@ -21,12 +21,15 @@ This is a **Next.js 15 App Router** project (Italian language, `lang="it"`) for 
 
 ### Data layer
 
-All product and article data is static mock data — no backend or CMS yet.
+Data is stored in PostgreSQL via Prisma (`prisma/schema.prisma`). There is no CMS.
 
-- `lib/mock-data.ts` — source of truth for `PRODUCTS` and `ARTICLES` arrays
-- `lib/lines.ts` — defines the four product lines (`menopausa`, `beauty`, `circolo`, `energia`) with brand colors
-- `services/products.ts` and `services/articles.ts` — async wrappers over mock data (designed to be swapped for real API calls later)
+- `services/` — read-side data access (`products.ts`, `articles.ts`); returns mapped DTOs, not raw Prisma rows
+- `lib/actions/` — server actions for mutations (checkout, account, coupon, and `lib/actions/admin/*`)
+- `lib/settings.ts` — key/value `Setting` table with a 60s in-process cache; `SETTING_KEYS` is the authoritative list of admin-editable values (`/admin/impostazioni`)
+- `lib/site-settings.ts` — maps those settings into `PublicSiteSettings` for the storefront
 - `types/index.ts` — shared TypeScript interfaces (`Product`, `Article`, `Line`, `Ingredient`)
+
+Content that is *not* in `SETTING_KEYS` is intentionally hardcoded in the component that renders it (nav links, footer sections, home features, product page copy, `/metodo` content in `lib/method-page.ts`).
 
 ### Routing
 
@@ -34,13 +37,15 @@ App Router pages under `app/`:
 - `/` — homepage
 - `/prodotti` — product listing; `/prodotti/[slug]` — product detail
 - `/blog` — article listing; `/blog/[slug]` — article detail
-- `/brand`, `/metodo`, `/trasparenza`, `/contatti`, `/b2b` — static content pages
+- `/checkout`, `/account/**` — cart-to-order flow and customer area
+- `/admin/**` — admin panel (guarded by `middleware.ts` + `app/admin/layout.tsx`)
+- `/metodo`, `/contatti`, `/b2b`, `/lavora-con-noi`, `/privacy`, `/cookie`, `/note-legali`, `/termini-condizioni-vendita`, `/resi-e-spedizioni` — static content pages
 
 ### Components
 
 - `components/layout/` — `Navbar`, `Footer`, `Logo` (shared across all pages via `app/layout.tsx`)
 - `components/ui/` — reusable UI primitives: `Button`, `PageHeader`, `ProductCard`, `ProductGallery`
-- `components/sections/` — page-level section components
+- `app/admin/_components/` — admin-only primitives (`AdminShell`, `Badge`, `ConfirmModal`, `styles.ts`)
 
 ### Styling
 
@@ -49,8 +54,10 @@ Tailwind CSS v4 with PostCSS. Three Google Fonts loaded as CSS variables:
 - `--font-cormorant` (editorial/headings)
 - `--font-great-vibes` (accent script)
 
-Utility: `lib/utils.ts` exports `cn()` (clsx + tailwind-merge). `lib/social-links.tsx` exports social link definitions.
+Utility: `lib/utils.ts` exports `cn()` (clsx + tailwind-merge), `formatDate()`, `slugify()`. Social links come from `getSocialLinks()` in `lib/site-settings.ts` (URLs are admin-editable).
+
+Note: `Navbar`, `Footer` and several storefront sections still use the legacy `v61-*` CSS classes from `app/globals.css`. Do not convert them to Tailwind without an explicit request — a previous attempt changed the layout and was rolled back.
 
 ### Images
 
-Product images are stored under `public/products/<slug>/` with four standard views: `fronte.png`, `infografica.png`, `lato-1.png`, `lato-2.png` (plus optional `etichetta.png`). Next.js Image optimization is configured for avif/webp.
+Product images live in the database (`ProductImage` model, `Bytes`) and are served by `app/api/product-images/[productId]/[key]/route.ts` with immutable caching. Standard keys: `fronte`, `infografica`, `lato-1`, `lato-2` (plus optional `etichetta`). Legacy copies under `public/products/<slug>/` are still on disk as a fallback. Next.js Image optimization is configured for avif/webp.
