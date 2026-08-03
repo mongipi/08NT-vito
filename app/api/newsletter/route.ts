@@ -5,7 +5,7 @@ import {
   NEWSLETTER_DISCOUNT_DATA,
 } from '@/lib/domain/newsletter-discount'
 import { subscribeToNewsletter } from '@/services/newsletter'
-import { upsertDiscount } from '@/services/discounts'
+import { ensureDiscountExists } from '@/services/discounts'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -27,11 +27,11 @@ export async function POST(request: Request) {
 
     try {
       await subscribeToNewsletter(email, locale, source)
-      await upsertDiscount(
-        NEWSLETTER_DISCOUNT_CODE,
-        { code: NEWSLETTER_DISCOUNT_CODE, ...NEWSLETTER_DISCOUNT_DATA },
-        { ...NEWSLETTER_DISCOUNT_DATA }
-      )
+      // Solo creazione: se il coupon esiste, comanda quanto impostato in /admin/sconti.
+      await ensureDiscountExists(NEWSLETTER_DISCOUNT_CODE, {
+        code: NEWSLETTER_DISCOUNT_CODE,
+        ...NEWSLETTER_DISCOUNT_DATA,
+      })
     } catch (error) {
       console.error('newsletter persistence failed', error)
     }

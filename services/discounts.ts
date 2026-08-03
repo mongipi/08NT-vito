@@ -15,12 +15,17 @@ export async function createDiscount(data: Prisma.DiscountCreateInput): Promise<
   return prisma.discount.create({ data })
 }
 
-export async function upsertDiscount(
+/**
+ * Crea il coupon solo se non esiste già.
+ *
+ * Non aggiorna la riga esistente: le modifiche fatte in /admin/sconti (valore,
+ * scadenza, attivazione) non devono essere sovrascritte da codice.
+ */
+export async function ensureDiscountExists(
   code: string,
-  create: Prisma.DiscountCreateInput,
-  update: Prisma.DiscountUpdateInput
+  create: Prisma.DiscountCreateInput
 ): Promise<Discount> {
-  return prisma.discount.upsert({ where: { code }, create, update })
+  return prisma.discount.upsert({ where: { code }, create, update: {} })
 }
 
 export async function deleteDiscount(id: string): Promise<void> {
