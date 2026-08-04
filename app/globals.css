@@ -83,7 +83,7 @@ img{max-width:100%;height:auto}
 .v61-product-detail-copy{display:flex;flex-direction:column;justify-content:center;padding:clamp(2rem,5vw,4rem)}.v61-detail-kicker{font-size:.56rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem}.v61-product-detail-copy h2{font-family:var(--font-cormorant),Georgia,serif;font-size:clamp(2.15rem,4vw,3.45rem);font-weight:400;line-height:1.05;color:var(--ink);margin-bottom:1rem}.v61-product-detail-copy p{font-size:.82rem;font-weight:300;color:var(--ink-3);line-height:1.92;max-width:640px;margin-bottom:1.45rem}.v61-price-row{display:flex;align-items:baseline;gap:.75rem;margin-bottom:1.2rem}.v61-price-row span{font-size:clamp(1.35rem,2.5vw,1.8rem);font-weight:800;color:var(--accent)}.v61-price-row del{font-size:1rem;color:color-mix(in srgb,var(--accent),transparent 55%)}
 .v61-ingredients-section{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.v61-narrow{max-width:760px}.v61-section-label{font-size:.54rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;opacity:.78;margin-bottom:1.12rem;padding-bottom:.75rem;border-bottom:.5px solid}.v61-ingredients-table{width:100%;border-collapse:collapse}.v61-ingredients-table th{text-align:left;font-size:.54rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:color-mix(in srgb,var(--accent),transparent 36%);padding:0 0 .8rem}.v61-ingredients-table th:last-child{text-align:right}.v61-ingredients-table tr{border-bottom:.5px solid color-mix(in srgb,var(--accent),transparent 88%)}.v61-ingredients-table tbody tr:nth-child(odd){background:color-mix(in srgb,var(--accent),transparent 96%)}.v61-ingredients-table td{padding:.72rem 0;font-size:.75rem;color:var(--ink-2)}.v61-ingredients-table td:first-child{display:flex;align-items:center;gap:.62rem}.v61-ingredients-table td:first-child span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.55}.v61-ingredients-table td:last-child{text-align:right;font-weight:700;color:var(--accent)}
 .v61-detail-info-section{background:var(--paper)}.v61-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}.v61-detail-card{background:#fff;border:1px solid var(--border-2);padding:1.65rem}.v61-detail-card p{font-size:.76rem;font-weight:300;color:var(--ink-3);line-height:1.9}
-.v61-regulatory-notice{padding:1.25rem var(--pad-x);background:color-mix(in srgb,var(--accent),transparent 95%);border-top:.5px solid color-mix(in srgb,var(--accent),transparent 84%)}.v61-regulatory-notice div{max-width:860px;margin:auto;padding:1rem 1.25rem;background:#fff;border:.5px solid color-mix(in srgb,var(--accent),transparent 78%);font-size:.69rem;font-weight:300;line-height:1.75;color:var(--ink-3)}.v61-bottle-stub{width:210px;height:280px;margin:auto;border:.5px solid;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.75rem;color:var(--accent)}
+.v61-regulatory-notice{padding:1.25rem var(--pad-x);background:color-mix(in srgb,var(--accent),transparent 95%);border-top:.5px solid color-mix(in srgb,var(--accent),transparent 84%)}.v61-regulatory-notice div{max-width:860px;margin:auto;padding:1rem 1.25rem;background:#fff;border:.5px solid color-mix(in srgb,var(--accent),transparent 78%);font-size:.69rem;font-weight:300;line-height:1.75;color:var(--ink-3)}
 @media(max-width:980px){.v61-product-detail-shell{grid-template-columns:1fr}.v61-product-detail-gallery{min-height:420px;border-right:0;border-bottom:1px solid var(--border-2)}.v61-detail-grid{grid-template-columns:1fr}.v61-product-breadcrumb{align-items:flex-start;flex-direction:column}.v61-product-breadcrumb a{white-space:normal}}
 
 .page-hero .v61-title em{color:var(--amber)}
@@ -1321,16 +1321,6 @@ img{max-width:100%;height:auto}
 }
 
 /* Final commercial, newsletter, chat and tablet refinements */
-.goog-te-banner-frame,
-.goog-te-gadget-icon,
-body > .skiptranslate{
-  display:none!important;
-}
-
-body{
-  top:0!important;
-}
-
 .v61-product-purchase-grid{
   display:grid;
   grid-template-columns:minmax(320px,.48fr) minmax(0,.52fr);

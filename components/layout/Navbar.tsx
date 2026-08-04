@@ -27,7 +27,6 @@ const NAV_LINKS = [
 const LANG_FLAGS = [
   { code: 'it', label: 'Italiano', src: '/v61/flags/it.png', enabled: true },
   { code: 'en', label: 'English', src: '/v61/flags/gb.png', enabled: true },
-  { code: 'fr', label: 'Francais', src: '/v61/flags/fr.png', enabled: true },
 ] as const
 
 function CartButton({ size = 18, onOpen }: { size?: number; onOpen: () => void }) {

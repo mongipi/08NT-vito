@@ -2,8 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-export type Locale = 'it' | 'en' | 'fr'
-export const AVAILABLE_LOCALES: Locale[] = ['it', 'en', 'fr']
+export type Locale = 'it' | 'en'
+export const AVAILABLE_LOCALES: Locale[] = ['it', 'en']
 
 const STORAGE_KEY = '08nt-locale'
 
