@@ -488,6 +488,9 @@ export const dictionary = {
     register_check_email_title: 'Controlla la tua email',
     register_check_email_body:
       "Ti abbiamo inviato un link a **{email}** per confermare il tuo indirizzo. Clicca sul link entro 24 ore per attivare l'account.",
+    register_email_failed_title: 'Account creato, email non inviata',
+    register_email_failed_body:
+      'Il tuo account **{email}** è stato creato, ma non siamo riusciti a inviare l\'email di conferma. Vai alla pagina di accesso e usa "Invia di nuovo l\'email di verifica".',
 
     // Password dimenticata / reimposta
     forgot_eyebrow: 'Recupero account',
@@ -1093,6 +1096,9 @@ export const dictionary = {
     register_check_email_title: 'Check your email',
     register_check_email_body:
       "We've sent a link to **{email}** to confirm your address. Click the link within 24 hours to activate your account.",
+    register_email_failed_title: 'Account created, email not sent',
+    register_email_failed_body:
+      'Your account **{email}** was created, but we could not send the confirmation email. Go to the sign-in page and use "Resend verification email".',
 
     forgot_eyebrow: 'Account recovery',
     forgot_title: 'Forgot your password?',

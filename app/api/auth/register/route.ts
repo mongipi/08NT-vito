@@ -21,7 +21,18 @@ export async function POST(req: NextRequest) {
 
   await createUser({ name, email, password: await hashPassword(password), role: 'consumer' })
 
-  await issueVerificationEmail(email, name)
+  // L'account è già creato: se l'invio dell'email fallisce (SMTP non
+  // raggiungibile o mal configurato) non ha senso rispondere con un errore.
+  // Restituirebbe 500 lasciando a database un utente che al secondo tentativo
+  // riceverebbe "email già registrata", senza via d'uscita.
+  // Chi si registra può richiedere una nuova email dalla pagina di accesso.
+  let emailSent = true
+  try {
+    await issueVerificationEmail(email, name)
+  } catch (error) {
+    emailSent = false
+    console.error('Invio email di verifica fallito per', email, error)
+  }
 
-  return NextResponse.json({ ok: true }, { status: 201 })
+  return NextResponse.json({ ok: true, emailSent }, { status: 201 })
 }
