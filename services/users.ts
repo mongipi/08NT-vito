@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { normalizeEmail } from '@/lib/domain/email'
 import type { Prisma, Role, User } from '@prisma/client'
 
 /**
@@ -35,8 +36,9 @@ export async function getUserWithRecentOrders(id: string): Promise<UserWithRecen
   return prisma.user.findUnique({ where: { id }, include: userWithRecentOrdersInclude })
 }
 
+/** L'indirizzo viene normalizzato: la ricerca non deve dipendere da maiuscole e minuscole. */
 export async function getUserByEmail(email: string): Promise<User | null> {
-  return prisma.user.findUnique({ where: { email } })
+  return prisma.user.findUnique({ where: { email: normalizeEmail(email) } })
 }
 
 export async function getCheckoutProfile(userId: string): Promise<CheckoutProfile | null> {
@@ -67,7 +69,7 @@ export async function searchUsers(query?: string): Promise<User[]> {
 }
 
 export async function createUser(data: Prisma.UserCreateInput): Promise<User> {
-  return prisma.user.create({ data })
+  return prisma.user.create({ data: { ...data, email: normalizeEmail(data.email) } })
 }
 
 export async function updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User> {
@@ -79,9 +81,15 @@ export async function setUserRole(id: string, role: Role): Promise<User> {
 }
 
 export async function setUserPassword(email: string, passwordHash: string): Promise<void> {
-  await prisma.user.update({ where: { email }, data: { password: passwordHash } })
+  await prisma.user.update({
+    where: { email: normalizeEmail(email) },
+    data: { password: passwordHash },
+  })
 }
 
 export async function markEmailVerified(email: string): Promise<void> {
-  await prisma.user.update({ where: { email }, data: { emailVerified: new Date() } })
+  await prisma.user.update({
+    where: { email: normalizeEmail(email) },
+    data: { emailVerified: new Date() },
+  })
 }
