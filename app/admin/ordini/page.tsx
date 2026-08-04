@@ -1,5 +1,4 @@
-import { prisma } from '@/lib/prisma'
-import type { Prisma } from '@prisma/client'
+import { searchOrders } from '@/services/orders'
 import Link from 'next/link'
 import { PageHeader } from '../_components/PageHeader'
 import { Badge } from '../_components/Badge'
@@ -18,21 +17,7 @@ interface Props {
 export default async function OrdiniPage({ searchParams }: Props) {
   const { q } = await searchParams
 
-  const where: Prisma.OrderWhereInput | undefined = q ? {
-    OR: [
-      { id: { contains: q, mode: 'insensitive' } },
-      { guestEmail: { contains: q, mode: 'insensitive' } },
-      { couponCode: { contains: q, mode: 'insensitive' } },
-      { user: { name: { contains: q, mode: 'insensitive' } } },
-      { user: { email: { contains: q, mode: 'insensitive' } } },
-    ],
-  } : undefined
-
-  const orders = await prisma.order.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    include: { user: { select: { email: true, name: true } }, items: { select: { qty: true } } },
-  })
+  const orders = await searchOrders(q)
 
   return (
     <div>

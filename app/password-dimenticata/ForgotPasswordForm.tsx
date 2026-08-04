@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
+import { postJson } from '@/lib/api-client'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -29,11 +30,8 @@ export function ForgotPasswordForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    await fetch('/api/auth/forgot-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    })
+    // La risposta e' sempre positiva per non rivelare se l'account esiste.
+    await postJson('/api/auth/forgot-password', { email }).catch(() => null)
     setSubmitted(true)
     setLoading(false)
   }

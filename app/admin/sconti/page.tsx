@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getDiscounts } from '@/services/discounts'
 import Link from 'next/link'
 import { PageHeader } from '../_components/PageHeader'
 import { Badge } from '../_components/Badge'
@@ -11,7 +11,7 @@ const th: React.CSSProperties = { padding: '0.625rem 1rem', textAlign: 'left', f
 const td: React.CSSProperties = { padding: '0.6875rem 1rem', fontSize: '0.8125rem', color: '#374151', borderBottom: '1px solid #f7f8f9' }
 
 export default async function ScontiPage() {
-  const discounts = await prisma.discount.findMany({ orderBy: { createdAt: 'desc' } })
+  const discounts = await getDiscounts()
 
   return (
     <div>

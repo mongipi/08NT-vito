@@ -3,65 +3,89 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Logo } from './Logo'
-import { SOCIAL_LINKS } from '@/lib/social-links'
 import { CookiePreferencesButton } from '@/components/ui/CookieConsent'
+import { NewsletterSignup } from '@/components/ui/NewsletterSignup'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
+import { useSiteSettings } from '@/contexts/SiteSettingsContext'
+import { formatWhatsappHref, getSocialLinks } from '@/lib/site-settings'
 
-const FOOTER_SECTIONS = [
+const FOOTER_PAGE_SECTIONS = [
   {
-    titleKey: 'nav_products' as const,
+    id: 'footer-company',
+    title: 'Azienda',
     links: [
-      { label: 'Menopausa Complex', href: '/prodotti/menopausa-complex' },
-      { label: 'Capelli, Pelle & Unghie', href: '/prodotti/capelli-pelle-unghie' },
-      { label: 'Microcircolo Superior', href: '/prodotti/microcircolo-superior' },
-      { label: 'Multivitaminico & Minerali', href: '/prodotti/multivitaminico-minerali' },
+      { id: 'fc-1', label: 'Qualità 08', href: '/metodo' },
+      { id: 'fc-2', label: 'Blog', href: '/blog' },
+      { id: 'fc-3', label: 'Lavora con noi', href: '/lavora-con-noi' },
+      { id: 'fc-4', label: 'Resi e spedizioni', href: '/resi-e-spedizioni' },
+      { id: 'fc-5', label: 'Contatti', href: '/contatti' },
     ],
   },
   {
-    titleKey: 'footer_company' as const,
+    id: 'footer-legal',
+    title: 'Legale',
     links: [
-      { labelKey: 'nav_quality' as const, href: '/metodo' },
-      { labelKey: 'nav_blog' as const, href: '/blog' },
-      { labelKey: 'nav_careers' as const, href: '/lavora-con-noi' },
-      { labelKey: 'footer_returns_shipping' as const, href: '/resi-e-spedizioni' },
-      { labelKey: 'nav_contact' as const, href: '/contatti' },
-    ],
-  },
-  {
-    titleKey: 'footer_legal' as const,
-    links: [
-      { labelKey: 'footer_terms' as const, href: '/termini-condizioni-vendita' },
-      { labelKey: 'footer_privacy' as const, href: '/privacy' },
-      { labelKey: 'footer_cookie_policy' as const, href: '/cookie' },
-      { labelKey: 'footer_legal_notices' as const, href: '/note-legali' },
+      { id: 'fl-1', label: 'Termini e condizioni', href: '/termini-condizioni-vendita' },
+      { id: 'fl-2', label: 'Privacy policy', href: '/privacy' },
+      { id: 'fl-3', label: 'Cookie policy', href: '/cookie' },
+      { id: 'fl-4', label: 'Note legali', href: '/note-legali' },
     ],
   },
 ]
 
-const CONTACTS = [
-  { label: 'Telefono', href: 'tel:0803031103', text: '080 303 1103', icon: 'phone.svg' },
-  { label: 'WhatsApp', href: 'https://wa.me/393515078701', text: '351 507 8701', icon: 'whatsapp.svg' },
-  { label: 'Email', href: 'mailto:08naturaltechnology@gmail.com', text: '08naturaltechnology@gmail.com', icon: 'email.svg' },
+const FOOTER_PAYMENTS = ['Visa', 'Mastercard', 'PayPal', 'Google Pay', 'Apple Pay', 'Contrassegno', 'Bonifico']
+
+const FOOTER_COURIERS = [
+  { label: 'GLS', src: '/v61/img/gls%20logo.png', width: 57, height: 20 },
+  { label: 'BRT', src: '/v61/img/brt%20logo.png', width: 50, height: 24 },
+  { label: 'SDA', src: '/v61/img/sda%20logo.png', width: 100, height: 20 },
 ]
 
-const COURIERS = ['GLS', 'BRT', 'POSTE ITALIANE'] as const
+const FOOTER_MINISTRY_LOGO = {
+  label: 'Ministero della Salute',
+  src: '/v61/img/ministero.png',
+  width: 190,
+  height: 42,
+}
 
-export function Footer() {
+export function Footer({ products }: { products: { name: string; slug: string }[] }) {
   const { locale } = useLocale()
   const t = useTranslation(locale)
+  const siteSettings = useSiteSettings()
+  const socialLinks = getSocialLinks(siteSettings)
+  const contacts = [
+    {
+      label: 'Telefono',
+      href: `tel:${siteSettings.companyPhone.replace(/\s+/g, '')}`,
+      text: siteSettings.companyPhone,
+      icon: 'phone.svg',
+    },
+    {
+      label: 'WhatsApp',
+      href: formatWhatsappHref(siteSettings.companyWhatsapp),
+      text: siteSettings.companyWhatsapp,
+      icon: 'whatsapp.svg',
+    },
+    {
+      label: 'Email',
+      href: `mailto:${siteSettings.companyEmail}`,
+      text: siteSettings.companyEmail,
+      icon: 'email.svg',
+    },
+  ]
 
   return (
-    <footer className="v61-footer">
+    <footer id="footer" className="v61-footer">
       <div className="v61-footer-grid">
         <div className="v61-footer-brand">
           <Logo variant="light" height={90} />
           <p>
-            VIPHARMA di Tatulli Vito & Co. S.A.S.<br />
-            Via Don Luigi Sturzo 44/46/48 - Bitonto (BA) 70032
+            {siteSettings.companyLegalName}<br />
+            {siteSettings.companyAddress}
           </p>
           <div className="v61-footer-contacts">
-            {CONTACTS.map((contact) => (
+            {contacts.map((contact) => (
               <a key={contact.label} href={contact.href} target={contact.href.startsWith('http') ? '_blank' : undefined} rel={contact.href.startsWith('http') ? 'noopener noreferrer' : undefined}>
                 <Image src={`/v61/icons/${contact.icon}`} alt={contact.label} width={16} height={16} />
                 <span>{contact.text}</span>
@@ -69,30 +93,60 @@ export function Footer() {
             ))}
           </div>
           <div className="v61-footer-couriers" aria-label={t('footer_couriers')}>
-            {COURIERS.map((courier) => (
-              <span key={courier}>{courier}</span>
+            {FOOTER_COURIERS.map((courier) => (
+              <span key={courier.label}>
+                <Image src={courier.src} alt={courier.label} width={courier.width} height={courier.height} />
+              </span>
             ))}
+          </div>
+          <div className="v61-footer-payments" aria-label="Pagamenti disponibili">
+            {FOOTER_PAYMENTS.map((payment) => <span key={payment}>{payment}</span>)}
           </div>
         </div>
 
-        {FOOTER_SECTIONS.map((section) => (
-          <div key={section.titleKey}>
-            <p className="v61-footer-title">{t(section.titleKey)}</p>
+        {[
+          {
+            id: 'footer-products',
+            title: 'Prodotti & Shop',
+            links: products.map((product) => ({
+              id: product.slug,
+              label: product.name,
+              href: `/prodotti/${product.slug}`,
+            })),
+          },
+          ...FOOTER_PAGE_SECTIONS,
+        ].map((section) => (
+          <div key={section.id}>
+            <p className="v61-footer-title">{section.title}</p>
             <ul>
               {section.links.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href}>{'labelKey' in link ? t(link.labelKey) : link.label}</Link>
+                  <Link href={link.href}>{link.label}</Link>
                 </li>
               ))}
             </ul>
           </div>
         ))}
+
+        <div className="v61-footer-newsletter">
+          <NewsletterSignup variant="footer" />
+          <div className="v61-footer-ministry-logo" aria-label={FOOTER_MINISTRY_LOGO.label}>
+            <Image
+              src={FOOTER_MINISTRY_LOGO.src}
+              alt={FOOTER_MINISTRY_LOGO.label}
+              width={FOOTER_MINISTRY_LOGO.width}
+              height={FOOTER_MINISTRY_LOGO.height}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="v61-footer-bottom">
-        <span>© {new Date().getFullYear()} 08 Natural Technology · {t('footer_rights')}</span>
+        <span>
+          © {new Date().getFullYear()} 08 Natural Technology · {t('footer_rights')}
+        </span>
         <div className="v61-footer-socials">
-          {SOCIAL_LINKS.map(({ href, label }) => (
+          {socialLinks.map(({ href, label }) => (
             <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
               <Image src={`/v61/icons/${label.toLowerCase()}.svg`} alt="" width={17} height={17} />
             </a>

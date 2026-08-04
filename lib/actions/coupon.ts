@@ -1,8 +1,8 @@
 'use server'
 
-import { prisma } from '@/lib/prisma'
-import { calcSubtotal } from '@/lib/cart'
+import { calcDiscount, calcSubtotal } from '@/lib/cart'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
+import { getDiscountByCode } from '@/services/discounts'
 
 interface ValidateCouponResult {
   valid: boolean
@@ -17,7 +17,17 @@ export async function validateCoupon(
 ): Promise<ValidateCouponResult> {
   if (!code) return { valid: false, error: 'Inserisci un codice sconto' }
 
-  const doc = await prisma.discount.findUnique({ where: { code: code.toUpperCase().trim() } })
+  const normalizedCode = code.toUpperCase().trim()
+  let doc = null
+
+  try {
+    doc = await getDiscountByCode(normalizedCode)
+  } catch (error) {
+    console.error('coupon lookup failed', error)
+  }
+
+  // Nessun coupon vive nel codice: la fonte di verità è /admin/sconti.
+  // Disattivare o eliminare un codice da admin lo disattiva davvero.
   if (!doc) return { valid: false, error: 'Codice non valido' }
   if (!doc.active) return { valid: false, error: 'Codice non attivo' }
   if (doc.expiresAt && doc.expiresAt < new Date()) return { valid: false, error: 'Codice scaduto' }
@@ -31,14 +41,13 @@ export async function validateCoupon(
     return { valid: false, error: `Importo minimo ordine: €${doc.minOrderAmount.toFixed(2)}` }
   }
 
-  const type = doc.type as 'percent' | 'fixed'
-  const discountAmount =
-    type === 'percent'
-      ? Math.round((subtotal * doc.value) / 100 * 100) / 100
-      : Math.min(doc.value, subtotal)
-
-  return {
-    valid: true,
-    coupon: { code: code.toUpperCase(), type, value: doc.value, discountAmount },
+  const coupon: AppliedCoupon = {
+    code: normalizedCode,
+    type: doc.type as 'percent' | 'fixed',
+    value: doc.value,
+    discountAmount: 0,
   }
+  coupon.discountAmount = calcDiscount(subtotal, coupon)
+
+  return { valid: true, coupon }
 }

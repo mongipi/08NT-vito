@@ -20,9 +20,14 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored === 'it' || stored === 'en') setLocaleState(stored)
+      if (AVAILABLE_LOCALES.includes(stored as Locale)) setLocaleState(stored as Locale)
     } catch {}
   }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+    document.documentElement.dataset.locale = locale
+  }, [locale])
 
   function setLocale(next: Locale) {
     setLocaleState(next)

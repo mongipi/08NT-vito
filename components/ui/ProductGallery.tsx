@@ -1,13 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import type { GallerySlide as Slide } from '@/types/gallery'
 
-interface Slide {
-  src: string
-  alt: string
-  label: string
-}
 
 interface Props {
   slides: Slide[]
@@ -18,6 +14,13 @@ interface Props {
 
 export function ProductGallery({ slides, color, contained = false }: Props) {
   const [active, setActive] = useState(0)
+
+  // Cambiando prodotto (quindi prima immagine) si torna alla prima slide.
+  const firstSlideSrc = slides[0]?.src
+
+  useEffect(() => {
+    setActive(0)
+  }, [firstSlideSrc])
 
   if (slides.length === 0) return null
 
@@ -57,17 +60,22 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: contained ? '2.25rem 2.5rem' : '2rem 5rem',
+                padding: contained
+                  ? (slide.label === 'Fronte' ? '2rem 2.25rem' : '1.25rem')
+                  : '2rem 5rem',
                 background: contained
                   ? 'transparent'
                   : (i % 2 === 0 ? 'var(--paper-2)' : '#f0f0ec'),
               }}
             >
               <div
+                className={`v61-product-gallery-frame ${slide.label === 'Fronte' ? 'bottle' : 'document'}`}
                 style={{
                   position: 'relative',
                   width: '100%',
-                  maxWidth: contained ? 260 : 760,
+                  maxWidth: contained
+                    ? (slide.label === 'Fronte' ? 'var(--product-gallery-max-width, 285px)' : 'min(92%, 760px)')
+                    : 760,
                   height: '100%',
                 }}
               >

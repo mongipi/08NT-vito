@@ -168,6 +168,7 @@ const sections: LegalSection[] = [
 export default function NoteLegaliPage() {
   return (
     <LegalDocument
+      documentKey="legal-notes"
       eyebrow="Legale"
       eyebrowEn="Legal"
       title="Note Legali"

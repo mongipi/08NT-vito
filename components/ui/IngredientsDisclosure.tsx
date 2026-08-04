@@ -11,6 +11,7 @@ interface Props {
 
 export function IngredientsDisclosure({ ingredients, color }: Props) {
   const [open, setOpen] = useState(false)
+  const showVnr = ingredients.some((ing) => Boolean(ing.vnr?.trim()))
 
   return (
     <div className="v61-ingredients-disclosure" style={{ '--accent': color } as CSSProperties}>
@@ -32,6 +33,7 @@ export function IngredientsDisclosure({ ingredients, color }: Props) {
             <tr>
               <th>Ingrediente</th>
               <th>Per dose</th>
+              {showVnr && <th>%VNR</th>}
             </tr>
           </thead>
           <tbody>
@@ -39,6 +41,7 @@ export function IngredientsDisclosure({ ingredients, color }: Props) {
               <tr key={`${ing.name}-${i}`}>
                 <td><span />{ing.name}</td>
                 <td>{ing.dosage ?? '-'}</td>
+                {showVnr && <td>{ing.vnr || '-'}</td>}
               </tr>
             ))}
           </tbody>

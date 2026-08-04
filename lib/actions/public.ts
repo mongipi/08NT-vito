@@ -1,12 +1,9 @@
 'use server'
 
-import { getSettingsMap } from '@/lib/settings'
+import { getPricingConfig } from '@/lib/domain/pricing-config'
+import type { PricingConfig } from '@/lib/domain/pricing'
 
-export async function getShippingConfig() {
-  const settings = await getSettingsMap()
-  return {
-    threshold:       parseFloat(settings['SPEDIZIONE_GRATUITA'] ?? '50')  || 50,
-    price:           parseFloat(settings['PREZZO_SPEDIZIONE']   ?? '5.90') || 5.90,
-    foreignSurcharge: parseFloat(settings['SUPPLEMENTO_ESTERO'] ?? '10')  || 10,
-  }
+/** Espone al client la configurazione prezzi gestita da /admin/impostazioni. */
+export async function getShippingConfig(): Promise<PricingConfig> {
+  return getPricingConfig()
 }

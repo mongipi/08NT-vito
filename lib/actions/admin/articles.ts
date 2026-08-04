@@ -1,60 +1,31 @@
 'use server'
-import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { slugify } from '@/lib/utils'
+import { parseFormData } from '@/lib/validation/form'
+import { idOnlySchema } from '@/lib/validation/product'
+import { articleSchema, articleUpdateSchema } from '@/lib/validation/admin'
+import * as articles from '@/services/articles'
 
-function toSlug(title: string) {
-  return title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-}
+const LIST_PATH = '/admin/articoli'
 
 export async function createArticle(formData: FormData) {
-  await prisma.article.create({
-    data: {
-      slug: toSlug(formData.get('title') as string),
-      title: formData.get('title') as string,
-      excerpt: formData.get('excerpt') as string,
-      body: formData.get('body') as string,
-      tag: formData.get('tag') as string,
-      publishedAt: new Date(formData.get('publishedAt') as string),
-      readingTime: formData.get('readingTime') ? parseInt(formData.get('readingTime') as string) : null,
-      published: formData.get('published') === 'on',
-      metaTitle: formData.get('metaTitle') as string || null,
-      metaDescription: formData.get('metaDescription') as string || null,
-      titleEn: formData.get('titleEn') as string || null,
-      excerptEn: formData.get('excerptEn') as string || null,
-      bodyEn: formData.get('bodyEn') as string || null,
-    },
-  })
-  revalidatePath('/admin/articoli')
-  redirect('/admin/articoli')
+  const fields = parseFormData(articleSchema, formData)
+  await articles.createArticle({ ...fields, slug: slugify(fields.title) })
+  revalidatePath(LIST_PATH)
+  redirect(LIST_PATH)
 }
 
 export async function updateArticle(formData: FormData) {
-  const id = formData.get('id') as string
-  await prisma.article.update({
-    where: { id },
-    data: {
-      title: formData.get('title') as string,
-      excerpt: formData.get('excerpt') as string,
-      body: formData.get('body') as string,
-      tag: formData.get('tag') as string,
-      publishedAt: new Date(formData.get('publishedAt') as string),
-      readingTime: formData.get('readingTime') ? parseInt(formData.get('readingTime') as string) : null,
-      published: formData.get('published') === 'on',
-      metaTitle: formData.get('metaTitle') as string || null,
-      metaDescription: formData.get('metaDescription') as string || null,
-      titleEn: formData.get('titleEn') as string || null,
-      excerptEn: formData.get('excerptEn') as string || null,
-      bodyEn: formData.get('bodyEn') as string || null,
-    },
-  })
-  revalidatePath('/admin/articoli')
-  revalidatePath(`/admin/articoli/${id}`)
+  const { id, ...fields } = parseFormData(articleUpdateSchema, formData)
+  await articles.updateArticle(id, fields)
+  revalidatePath(LIST_PATH)
+  revalidatePath(`${LIST_PATH}/${id}`)
 }
 
 export async function deleteArticle(formData: FormData) {
-  const id = formData.get('id') as string
-  await prisma.article.delete({ where: { id } })
-  revalidatePath('/admin/articoli')
-  redirect('/admin/articoli')
+  const { id } = parseFormData(idOnlySchema, formData)
+  await articles.deleteArticle(id)
+  revalidatePath(LIST_PATH)
+  redirect(LIST_PATH)
 }

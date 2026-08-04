@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
+import { ApiError, postJson } from '@/lib/api-client'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
@@ -58,20 +59,15 @@ export function ResetPasswordForm() {
     }
 
     setLoading(true)
-    const res = await fetch('/api/auth/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, password, confirmPassword }),
-    })
-
-    if (!res.ok) {
-      const data = await res.json()
-      setError(data.error ?? t('reset_generic_error'))
+    try {
+      await postJson('/api/auth/reset-password', { token, password, confirmPassword }, {
+        fallbackError: t('reset_generic_error'),
+      })
+      router.push('/login?reset=success')
+    } catch (caught) {
+      setError(caught instanceof ApiError ? caught.message : t('reset_generic_error'))
       setLoading(false)
-      return
     }
-
-    router.push('/login?reset=success')
   }
 
   return (

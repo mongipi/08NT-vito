@@ -1,5 +1,3 @@
-import { log } from "console"
-
 export interface PosteLocker {
   officeCode: string
   description: string
@@ -19,6 +17,16 @@ export interface PosteLocker {
 
 let cachedToken: { value: string; expiresAt: number } | null = null
 
+export function isPosteConfigured() {
+  return Boolean(
+    process.env.POSTE_CLIENT_ID
+      && process.env.POSTE_CLIENT_SECRET
+      && process.env.POSTE_AUTH_URL
+      && process.env.POSTE_SCOPE
+      && process.env.POSTE_DELIVERY_POINT_URL
+  )
+}
+
 async function getPosteAccessToken(): Promise<string> {
   if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) {
     return cachedToken.value
@@ -36,13 +44,15 @@ async function getPosteAccessToken(): Promise<string> {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Accept: 'application/json',
       POSTE_ClientID: clientId,
     },
     body: JSON.stringify({ clientId, secretId, scope, grantType: 'client_credentials' }),
   })
 
   if (!res.ok) {
-    throw new Error(`Autenticazione Poste Italiane fallita (${res.status})`)
+    const details = await res.text().catch(() => '')
+    throw new Error(`Autenticazione Poste Italiane fallita (${res.status})${details ? `: ${details.slice(0, 240)}` : ''}`)
   }
 
   const data = await res.json()
@@ -70,23 +80,27 @@ async function searchPosteLockersByType(zipCode: string, serviceType: string): P
 
   let res: Response
   try {
-    res = await fetch(deliveryPointUrl, {
-      method: 'POST',
+    const url = new URL(deliveryPointUrl)
+    url.searchParams.set('zipCode', zipCode)
+    url.searchParams.set('serviceType', serviceType)
+
+    res = await fetch(url, {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        Accept: 'application/json',
         POSTE_ClientID: clientId,
-        Authorization: accessToken,
+        Authorization: accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({ arg0: { zipCode, serviceType } }),
     })
   } catch (err) {
-    log(`Chiamata a ${deliveryPointUrl} (serviceType=${serviceType}) fallita:`, err)
+    console.error(`Chiamata a ${deliveryPointUrl} (serviceType=${serviceType}) fallita:`, err)
     throw err
   }
 
   if (!res.ok) {
-    log(`Ricerca Poste Italiane (serviceType=${serviceType}) fallita con status ${res.status}:`, await res.text().catch(() => ''))
-    throw new Error(`Ricerca locker Poste Italiane fallita (${res.status})`)
+    const details = await res.text().catch(() => '')
+    console.error(`Ricerca Poste Italiane (serviceType=${serviceType}) fallita con status ${res.status}:`, details)
+    throw new Error(`Ricerca locker Poste Italiane fallita (${res.status})${details ? `: ${details.slice(0, 240)}` : ''}`)
   }
 
   const data = await res.json()
@@ -116,7 +130,7 @@ export async function searchPosteLockers(zipCode: string): Promise<PosteLocker[]
   const byOfficeCode = new Map<string, Record<string, string>>()
   for (const r of results) {
     if (r.status !== 'fulfilled') {
-      log('Una delle ricerche per tipo è fallita:', r.reason)
+      console.error('Una delle ricerche per tipo è fallita:', r.reason)
       continue
     }
     for (const p of r.value) {

@@ -1,37 +1,31 @@
 'use server'
 
-import { prisma } from '@/lib/prisma'
-import { auth } from '@/auth'
-import { redirect } from 'next/navigation'
+import { invalidateSettingsCache } from '@/lib/settings'
+import { saveSettingValues } from '@/services/settings'
+import { requireAdmin } from '@/lib/auth/guards'
+import { settingsSchema } from '@/lib/validation/settings'
 import { revalidatePath } from 'next/cache'
-import { invalidateSettingsCache, SETTING_KEYS } from '@/lib/settings'
+import { redirect } from 'next/navigation'
+
+const SETTINGS_PATH = '/admin/impostazioni'
 
 export async function saveSettings(formData: FormData) {
-  const session = await auth()
-  if (!session?.user || (session.user as { role?: string }).role !== 'admin') redirect('/login')
+  await requireAdmin()
 
-  const keys = [
-    SETTING_KEYS.IBAN,
-    SETTING_KEYS.INTESTATARIO,
-    SETTING_KEYS.COD_SURCHARGE,
-    SETTING_KEYS.SPEDIZIONE_GRATUITA,
-    SETTING_KEYS.PREZZO_SPEDIZIONE,
-    SETTING_KEYS.SUPPLEMENTO_ESTERO,
-  ]
+  const result = settingsSchema.safeParse(Object.fromEntries(formData.entries()))
 
-  await Promise.all(
-    keys.map((key) => {
-      const value = (formData.get(key) as string)?.trim() ?? ''
-      return prisma.setting.upsert({
-        where: { key },
-        update: { value },
-        create: { key, value },
-      })
-    })
-  )
+  if (!result.success) {
+    // Niente crash: si torna alla pagina con il motivo, così il valore
+    // precedente resta a database e l'admin capisce cosa correggere.
+    const message = result.error.issues.map((issue) => issue.message).join(' · ')
+    redirect(`${SETTINGS_PATH}?error=${encodeURIComponent(message)}`)
+  }
+
+  await saveSettingValues(result.data)
 
   invalidateSettingsCache()
-  revalidatePath('/admin/impostazioni')
+  revalidatePath(SETTINGS_PATH)
   revalidatePath('/checkout')
-  redirect('/admin/impostazioni?saved=1')
+  revalidatePath('/')
+  redirect(`${SETTINGS_PATH}?saved=1`)
 }

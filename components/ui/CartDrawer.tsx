@@ -1,12 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
 import { formatPrice } from '@/lib/cart'
 import { validateCoupon } from '@/lib/actions/coupon'
 import { getShippingConfig } from '@/lib/actions/public'
+import {
+  amountMissingForFreeShipping,
+  computeOrderTotals,
+  freeShippingProgress,
+  ZERO_PRICING_CONFIG,
+  type PricingConfig,
+} from '@/lib/domain/pricing'
+import { toCustomerRole } from '@/lib/domain/roles'
 import { useSession } from 'next-auth/react'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
@@ -19,29 +27,47 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const [couponInput, setCouponInput] = useState('')
   const [couponError, setCouponError] = useState<string | null>(null)
   const [couponLoading, setCouponLoading] = useState(false)
-  const [shipping, setShipping] = useState<{ threshold: number; price: number; foreignSurcharge: number } | null>(null)
+  // Gli importi arrivano solo da /admin/impostazioni: finché non sono caricati
+  // la configurazione è a zero e le righe spedizione restano nascoste.
+  const [pricing, setPricing] = useState<PricingConfig>(ZERO_PRICING_CONFIG)
+  const [pricingLoaded, setPricingLoaded] = useState(false)
 
   useEffect(() => {
-    getShippingConfig().then(setShipping).catch(() => {})
+    getShippingConfig()
+      .then((config) => {
+        setPricing(config)
+        setPricingLoaded(true)
+      })
+      .catch(() => {})
   }, [])
 
   async function applyCoupon() {
     if (!couponInput.trim()) return
     setCouponLoading(true)
     setCouponError(null)
-    const role = (session?.user?.role as 'consumer' | 'b2b') ?? 'consumer'
+    const role = toCustomerRole(session?.user?.role)
     const result = await validateCoupon(couponInput, cart.items, role)
     if (!result.valid) setCouponError(result.error ?? 'Codice non valido')
     else if (result.coupon) { cart.applyCoupon(result.coupon); setCouponInput('') }
     setCouponLoading(false)
   }
 
-  const freeThreshold  = shipping?.threshold ?? 50
-  const shippingPrice  = shipping?.price     ?? 5.90
-  const missingForFree = Math.max(0, freeThreshold - cart.total)
-  const hasFreeShipping = cart.total >= freeThreshold
-  const progressPct    = Math.min(100, (cart.total / freeThreshold) * 100)
-  const estimatedTotal = cart.total + (hasFreeShipping ? 0 : (shipping?.price ?? 0))
+  // Il carrello non conosce ancora paese di spedizione né metodo di pagamento:
+  // mostra la stima domestica, il totale definitivo arriva dal checkout.
+  const totals = useMemo(
+    () =>
+      computeOrderTotals(
+        { items: cart.items, coupon: cart.coupon, country: 'IT', paymentMethod: 'stripe' },
+        pricing
+      ),
+    [cart.items, cart.coupon, pricing]
+  )
+  const freeThreshold   = pricing.shippingThreshold
+  const shippingPrice   = pricing.shippingPrice
+  const missingForFree  = amountMissingForFreeShipping(totals.itemsTotal, pricing)
+  const hasFreeShipping = totals.freeShipping
+  const progressPct     = freeShippingProgress(totals.itemsTotal, pricing)
+  const estimatedTotal  = totals.total
 
   return (
     <>
@@ -95,7 +121,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         </div>
 
         {/* Banner spedizione gratuita */}
-        {cart.items.length > 0 && shipping && (
+        {cart.items.length > 0 && pricingLoaded && (
           <div style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid var(--border)', background: hasFreeShipping ? '#f0fdf4' : '#fafaf8' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.375rem' }}>
               <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: hasFreeShipping ? '#15803d' : 'var(--ink-3)', letterSpacing: '0.05em' }}>
@@ -225,7 +251,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   <span>{t('cart_discount')}</span><span>−{formatPrice(cart.discountAmount)}</span>
                 </div>
               )}
-              {shipping && (
+              {pricingLoaded && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: hasFreeShipping ? '#16a34a' : 'var(--ink-3)' }}>
                   <span>{t('cart_shipping')}</span>
                   <span>{hasFreeShipping ? t('cart_shipping_free') : formatPrice(shippingPrice)}</span>
@@ -252,6 +278,9 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
 
             <p style={{ textAlign: 'center', fontSize: '0.6875rem', color: 'var(--ink-4)', margin: 0 }}>
               {t('cart_checkout_note')}
+            </p>
+            <p style={{ textAlign: 'center', fontSize: '0.6875rem', color: 'var(--ink-4)', margin: 0, lineHeight: 1.55 }}>
+              Spedizione gratuita da {formatPrice(freeThreshold)}.
             </p>
           </div>
         )}
