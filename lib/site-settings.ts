@@ -12,10 +12,6 @@ export type PublicSiteSettings = {
   facebookUrl: string
   instagramUrl: string
   tiktokUrl: string
-  newsletterKicker: string
-  newsletterTitle: string
-  newsletterBody: string
-  newsletterButtonLabel: string
   legalPrivacyOverride: ManagedLegalOverrideDocument | null
   legalCookieOverride: ManagedLegalOverrideDocument | null
   legalNotesOverride: ManagedLegalOverrideDocument | null
@@ -35,10 +31,6 @@ export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
     facebookUrl: settings[SETTING_KEYS.SOCIAL_FACEBOOK] ?? '',
     instagramUrl: settings[SETTING_KEYS.SOCIAL_INSTAGRAM] ?? '',
     tiktokUrl: settings[SETTING_KEYS.SOCIAL_TIKTOK] ?? '',
-    newsletterKicker: settings[SETTING_KEYS.NEWSLETTER_KICKER] ?? '',
-    newsletterTitle: settings[SETTING_KEYS.NEWSLETTER_TITLE] ?? '',
-    newsletterBody: settings[SETTING_KEYS.NEWSLETTER_BODY] ?? '',
-    newsletterButtonLabel: settings[SETTING_KEYS.NEWSLETTER_BUTTON_LABEL] ?? '',
     legalPrivacyOverride: normalizeManagedLegalOverride(
       settings[SETTING_KEYS.LEGAL_PRIVACY_OVERRIDE]
     ),

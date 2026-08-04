@@ -2442,3 +2442,22 @@ html[data-locale="pt"] .v61-hero h1>span:last-child{
     height:38px;
   }
 }
+
+.v61-newsletter-consent{
+  display:flex;
+  align-items:flex-start;
+  gap:.5rem;
+  margin-top:.75rem;
+  font-size:.6875rem;
+  line-height:1.5;
+  color:var(--ink-3);
+}
+.v61-newsletter-consent input{
+  margin-top:.15rem;
+  accent-color:var(--forest);
+  flex-shrink:0;
+}
+.v61-newsletter-consent a{
+  color:inherit;
+  text-decoration:underline;
+}

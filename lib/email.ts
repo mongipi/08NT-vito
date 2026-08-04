@@ -501,7 +501,51 @@ export async function sendVerificationEmail(email: string, name: string | null, 
   })
 }
 
-export async function sendNewsletterConfirmation(email: string, discountCode: string) {
+/** Piè di pagina con il link di revoca, obbligatorio in ogni email commerciale. */
+function unsubscribeFooter(token: string) {
+  const url = `${SITE_URL}/api/newsletter/disiscrizione?token=${encodeURIComponent(token)}`
+  return `
+    <p style="margin:1.5rem 0 0;padding-top:1rem;border-top:1px solid #f0f0ec;font-size:0.6875rem;color:#9ca3af;line-height:1.6">
+      Ricevi questa email perche&#39; il tuo indirizzo e&#39; iscritto alla newsletter di 08 Natural Technology.
+      <a href="${url}" style="color:#6b7280;text-decoration:underline">Cancella l&#39;iscrizione</a> in qualsiasi momento.
+    </p>`
+}
+
+/**
+ * Primo passo del doppio consenso: chiede di confermare l'indirizzo.
+ * Il codice sconto non viene comunicato qui, altrimenti basterebbe iscrivere
+ * un indirizzo altrui per ottenerlo.
+ */
+export async function sendNewsletterOptIn(email: string, token: string) {
+  const confirmUrl = `${SITE_URL}/api/newsletter/conferma?token=${encodeURIComponent(token)}`
+  const html = layout(`
+    <p style="margin:0 0 0.25rem;font-size:0.625rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#9ca3af">Newsletter 08</p>
+    <h1 style="margin:0 0 0.75rem;font-size:1.625rem;font-weight:300;color:${BRAND_GREEN};font-family:Georgia,serif;letter-spacing:0.02em">Conferma la tua iscrizione.</h1>
+    <p style="margin:0 0 1.25rem;font-size:0.875rem;color:#6b7280;font-weight:300;line-height:1.7">
+      Abbiamo ricevuto una richiesta di iscrizione alla newsletter di 08 Natural Technology per questo indirizzo.
+      Conferma con il pulsante qui sotto: subito dopo riceverai il tuo codice di extra sconto del 5%.
+    </p>
+    ${cta(confirmUrl, 'Confermo l&#39;iscrizione')}
+    <p style="margin:1.5rem 0 0;font-size:0.75rem;color:#9ca3af;line-height:1.6">
+      Il link e&#39; valido 24 ore. Se non hai richiesto tu questa iscrizione non devi fare nulla:
+      senza conferma il tuo indirizzo non ricevera&#39; alcuna comunicazione e verra&#39; ignorato.
+    </p>
+  `)
+
+  await sendMail({
+    from: buildFrom(),
+    to: email,
+    subject: 'Conferma la tua iscrizione alla newsletter 08',
+    html,
+  })
+}
+
+/** Secondo passo: iscrizione confermata, con il codice sconto. */
+export async function sendNewsletterConfirmation(
+  email: string,
+  discountCode: string,
+  unsubscribeToken: string
+) {
   const html = layout(`
     <p style="margin:0 0 0.25rem;font-size:0.625rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#9ca3af">Newsletter 08</p>
     <h1 style="margin:0 0 0.75rem;font-size:1.625rem;font-weight:300;color:${BRAND_GREEN};font-family:Georgia,serif;letter-spacing:0.02em">Iscrizione confermata.</h1>
@@ -512,7 +556,7 @@ export async function sendNewsletterConfirmation(email: string, discountCode: st
       <p style="margin:0.625rem 0 0;font-size:0.8125rem;color:#374151;line-height:1.6">Usa questo codice al checkout per applicare il 5% di sconto extra sul tuo ordine.</p>
     </div>
     ${cta(`${SITE_URL}/prodotti`, 'Scopri i prodotti')}
-    <p style="margin:1.5rem 0 0;font-size:0.75rem;color:#9ca3af;line-height:1.6">Se non hai richiesto tu questa iscrizione, puoi ignorare questa email o contattarci rispondendo a questo messaggio.</p>
+    ${unsubscribeFooter(unsubscribeToken)}
   `)
 
   await sendMail({

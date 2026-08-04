@@ -9,6 +9,7 @@ const variants: Record<string, string> = {
   admin:     'bg-[#0b1e12]/10 text-[#0b1e12] border-[#0b1e12]/20',
   active:    'bg-green-50 text-green-700 border-green-200',
   inactive:  'bg-slate-50 text-slate-500 border-slate-200',
+  unsubscribed: 'bg-slate-50 text-slate-500 border-slate-200',
 }
 
 const labels: Record<string, string> = {
@@ -16,6 +17,7 @@ const labels: Record<string, string> = {
   delivered: 'Consegnato', cancelled: 'Annullato',
   consumer: 'Consumer', b2b: 'B2B', admin: 'Admin',
   active: 'Attivo', inactive: 'Inattivo',
+  unsubscribed: 'Disiscritto',
 }
 
 export function Badge({ value }: { value: string }) {

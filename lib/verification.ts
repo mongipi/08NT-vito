@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { sendVerificationEmail, sendPasswordResetEmail } from '@/lib/email'
+import { NEWSLETTER_TOKEN_PREFIX } from '@/lib/domain/newsletter'
 import {
   deleteVerificationToken,
   findVerificationToken,
@@ -52,6 +53,31 @@ async function consumeToken(token: string, expectReset: boolean): Promise<string
 
 export async function consumePasswordResetToken(token: string): Promise<string | null> {
   return consumeToken(token, true)
+}
+
+/**
+ * Token di conferma iscrizione alla newsletter.
+ * Riusa la tabella VerificationToken con un identifier prefissato, come il
+ * reset password.
+ */
+export async function issueNewsletterConfirmationToken(email: string): Promise<string> {
+  const token = newToken()
+  await replaceVerificationToken(
+    NEWSLETTER_TOKEN_PREFIX + email,
+    token,
+    new Date(Date.now() + TOKEN_TTL_MS)
+  )
+  return token
+}
+
+export async function consumeNewsletterToken(token: string): Promise<string | null> {
+  const record = await findVerificationToken(token)
+  if (!record || !record.identifier.startsWith(NEWSLETTER_TOKEN_PREFIX)) return null
+
+  await deleteVerificationToken(token)
+  if (record.expires < new Date()) return null
+
+  return record.identifier.slice(NEWSLETTER_TOKEN_PREFIX.length)
 }
 
 /** Prima era reimplementato inline in app/api/auth/verify-email/route.ts. */

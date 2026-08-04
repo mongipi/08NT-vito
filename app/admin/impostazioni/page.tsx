@@ -82,10 +82,6 @@ export default async function ImpostazioniPage({
   const socialFacebook = get(SETTING_KEYS.SOCIAL_FACEBOOK)
   const socialInstagram = get(SETTING_KEYS.SOCIAL_INSTAGRAM)
   const socialTiktok = get(SETTING_KEYS.SOCIAL_TIKTOK)
-  const newsletterKicker = get(SETTING_KEYS.NEWSLETTER_KICKER)
-  const newsletterTitle = get(SETTING_KEYS.NEWSLETTER_TITLE)
-  const newsletterBody = get(SETTING_KEYS.NEWSLETTER_BODY)
-  const newsletterButtonLabel = get(SETTING_KEYS.NEWSLETTER_BUTTON_LABEL)
   const legalPrivacyOverride = get(SETTING_KEYS.LEGAL_PRIVACY_OVERRIDE)
   const legalCookieOverride = get(SETTING_KEYS.LEGAL_COOKIE_OVERRIDE)
   const legalNotesOverride = get(SETTING_KEYS.LEGAL_NOTES_OVERRIDE)
@@ -365,55 +361,6 @@ export default async function ImpostazioniPage({
           </div>
         </Section>
 
-        <Section title="Newsletter contenuti">
-          <div style={{ display: 'grid', gap: '1rem' }}>
-            <div>
-              <label style={label} htmlFor="newsletterKicker">
-                Eyebrow
-              </label>
-              <input
-                id="newsletterKicker"
-                name={SETTING_KEYS.NEWSLETTER_KICKER}
-                defaultValue={newsletterKicker}
-                style={input}
-              />
-            </div>
-            <div>
-              <label style={label} htmlFor="newsletterTitle">
-                Titolo
-              </label>
-              <input
-                id="newsletterTitle"
-                name={SETTING_KEYS.NEWSLETTER_TITLE}
-                defaultValue={newsletterTitle}
-                style={input}
-              />
-            </div>
-            <div>
-              <label style={label} htmlFor="newsletterBody">
-                Testo
-              </label>
-              <textarea
-                id="newsletterBody"
-                name={SETTING_KEYS.NEWSLETTER_BODY}
-                defaultValue={newsletterBody}
-                rows={4}
-                style={{ ...input, resize: 'vertical' }}
-              />
-            </div>
-            <div>
-              <label style={label} htmlFor="newsletterButtonLabel">
-                Testo bottone
-              </label>
-              <input
-                id="newsletterButtonLabel"
-                name={SETTING_KEYS.NEWSLETTER_BUTTON_LABEL}
-                defaultValue={newsletterButtonLabel}
-                style={{ ...input, maxWidth: '20rem' }}
-              />
-            </div>
-          </div>
-        </Section>
 
         <Section title="Pagine legali italiane">
           <div style={{ display: 'grid', gap: '1rem' }}>
