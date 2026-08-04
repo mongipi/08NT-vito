@@ -94,31 +94,23 @@ export default async function ProductPage({ params }: Props) {
 
       <section className="section v61-product-detail-section">
         <div className="v61-inner">
-          {gallerySlides.length > 0 ? (
-            <ProductPurchaseExperience
-              productId={product.id}
-              slug={product.slug}
-              name={product.name}
-              nameEn={nameEn}
-              image={images.fronte}
-              price={product.price}
-              comparePrice={product.comparePrice}
-              stock={product.stock}
-              variants={product.variants}
-              color={line.color}
-              slides={gallerySlides}
-              metaPills={metaPills}
-              kicker={kicker}
-              description={longDescription || shortDescription}
-              descriptionEn={longDescriptionEn || shortDescriptionEn}
-            />
-          ) : (
-            <div className="v61-product-purchase-grid">
-              <div className="v61-product-purchase-media">
-                <BottleStub color={line.color} colorLight={line.colorLight} label={name} />
-              </div>
-            </div>
-          )}
+          <ProductPurchaseExperience
+            productId={product.id}
+            slug={product.slug}
+            name={product.name}
+            nameEn={nameEn}
+            image={images.fronte}
+            price={product.price}
+            comparePrice={product.comparePrice}
+            stock={product.stock}
+            variants={product.variants}
+            color={line.color}
+            slides={gallerySlides}
+            metaPills={metaPills}
+            kicker={kicker}
+            description={longDescription || shortDescription}
+            descriptionEn={longDescriptionEn || shortDescriptionEn}
+          />
         </div>
       </section>
 
@@ -193,10 +185,3 @@ function DetailCard({ title, color, children }: { title: string; color: string; 
   )
 }
 
-function BottleStub({ color, colorLight, label }: { color: string; colorLight: string; label: string }) {
-  return (
-    <div className="v61-bottle-stub" style={{ color, background: `linear-gradient(150deg, ${colorLight} 0%, #fff 80%)`, borderColor: `${color}20` }}>
-      {label}
-    </div>
-  )
-}

@@ -58,9 +58,13 @@ export function ProductPurchaseExperience({
 
   return (
     <div className="v61-product-purchase-grid">
-      <div className={`v61-product-purchase-media v61-product-media-${slug}`}>
-        <ProductGallery slides={activeSlides} color={color} contained />
-      </div>
+      {/* Senza immagini la colonna non viene renderizzata affatto: il prezzo e il
+          pulsante di acquisto restano comunque visibili. */}
+      {activeSlides.length > 0 && (
+        <div className={`v61-product-purchase-media v61-product-media-${slug}`}>
+          <ProductGallery slides={activeSlides} color={color} contained />
+        </div>
+      )}
 
       <div className="v61-product-purchase-content">
         <div className="v61-product-detail-meta">

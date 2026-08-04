@@ -1330,6 +1330,10 @@ img{max-width:100%;height:auto}
   overflow:hidden;
 }
 
+.v61-product-purchase-grid > .v61-product-purchase-content:only-child{
+  grid-column:1 / -1;
+}
+
 .v61-product-purchase-media{
   display:flex;
   min-height:560px;
