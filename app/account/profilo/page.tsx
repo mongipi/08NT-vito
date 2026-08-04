@@ -4,6 +4,9 @@ import { getUserById } from '@/services/users'
 import { getUserAddresses } from '@/services/addresses'
 import type { Metadata } from 'next'
 import { updateUserInfo, deleteAddress, setDefaultAddress } from '@/lib/actions/account'
+import { subscribeFromAccount, unsubscribeFromAccount } from '@/lib/actions/newsletter'
+import { getSubscriberByEmail } from '@/services/newsletter'
+import { NEWSLETTER_STATUS } from '@/lib/domain/newsletter'
 import { ProfiloContent } from './ProfiloContent'
 
 export const metadata: Metadata = { title: 'Il mio profilo — 08 Natural Technology' }
@@ -12,9 +15,10 @@ export default async function ProfiloPage({ searchParams }: { searchParams: Prom
   const session = await auth()
   if (!session?.user) redirect('/login')
 
-  const [user, addresses] = await Promise.all([
+  const [user, addresses, subscriber] = await Promise.all([
     getUserById(session.user.id),
     getUserAddresses(session.user.id),
+    session.user.email ? getSubscriberByEmail(session.user.email) : null,
   ])
   if (!user) redirect('/login')
 
@@ -46,6 +50,9 @@ export default async function ProfiloPage({ searchParams }: { searchParams: Prom
         phone: addr.phone,
       }))}
       saved={saved}
+      newsletterActive={subscriber?.status === NEWSLETTER_STATUS.active}
+      subscribeToNewsletter={subscribeFromAccount}
+      unsubscribeFromNewsletter={unsubscribeFromAccount}
       updateUserInfo={updateUserInfo}
       deleteAddress={deleteAddress}
       setDefaultAddress={setDefaultAddress}

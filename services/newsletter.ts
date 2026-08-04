@@ -62,6 +62,59 @@ export async function unsubscribeByToken(token: string): Promise<NewsletterSubsc
   })
 }
 
+/**
+ * Conferma un'iscrizione solo se era in attesa.
+ * Usata quando l'utente verifica l'email dell'account: quella verifica dimostra
+ * gia' la proprieta' dell'indirizzo, quindi non serve una seconda conferma.
+ */
+export async function confirmPendingSubscription(
+  email: string
+): Promise<NewsletterSubscriber | null> {
+  const existing = await getSubscriberByEmail(email)
+  if (existing?.status !== NEWSLETTER_STATUS.pending) return null
+  return confirmSubscription(email)
+}
+
+/**
+ * Iscrive direttamente un utente autenticato, senza passare da "pending".
+ * Chi ha effettuato l'accesso ha gia' un indirizzo verificato, quindi il
+ * doppio consenso sarebbe una conferma di qualcosa di gia' dimostrato.
+ */
+export async function activateSubscription(
+  email: string,
+  locale: string,
+  source: string
+): Promise<NewsletterSubscriber> {
+  const normalized = normalizeEmail(email)
+  const now = new Date()
+  return prisma.newsletterSubscriber.upsert({
+    where: { email: normalized },
+    create: {
+      email: normalized,
+      locale,
+      source,
+      status: NEWSLETTER_STATUS.active,
+      confirmedAt: now,
+    },
+    update: {
+      locale,
+      source,
+      status: NEWSLETTER_STATUS.active,
+      confirmedAt: now,
+      unsubscribedAt: null,
+    },
+  })
+}
+
+export async function unsubscribeByEmail(email: string): Promise<NewsletterSubscriber | null> {
+  const existing = await getSubscriberByEmail(email)
+  if (!existing) return null
+  return prisma.newsletterSubscriber.update({
+    where: { id: existing.id },
+    data: { status: NEWSLETTER_STATUS.unsubscribed, unsubscribedAt: new Date() },
+  })
+}
+
 export async function getSubscribers(): Promise<NewsletterSubscriber[]> {
   return prisma.newsletterSubscriber.findMany({ orderBy: { createdAt: 'desc' } })
 }

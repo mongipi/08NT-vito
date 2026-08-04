@@ -39,6 +39,8 @@ export function RegisterForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  // Non spuntata di default: una casella pre-selezionata non e' consenso valido.
+  const [newsletter, setNewsletter] = useState(false)
   // L'account viene creato anche se l'email di conferma non parte: in quel caso
   // va detto, altrimenti si resta ad aspettare un messaggio che non arrivera'.
   const [emailSent, setEmailSent] = useState(true)
@@ -56,7 +58,7 @@ export function RegisterForm() {
     try {
       const result = await postJson<{ emailSent?: boolean }>(
         '/api/auth/register',
-        { name, email, password, confirmPassword },
+        { name, email, password, confirmPassword, newsletter },
         { fallbackError: t('register_generic_error') }
       )
       setEmailSent(result.emailSent !== false)
@@ -170,6 +172,25 @@ export function RegisterForm() {
           {error}
         </p>
       )}
+
+      <label
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '0.5rem',
+          fontSize: '0.75rem',
+          lineHeight: 1.5,
+          color: 'var(--ink-3)',
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={newsletter}
+          onChange={(event) => setNewsletter(event.target.checked)}
+          style={{ marginTop: '0.15rem', accentColor: 'var(--forest)', flexShrink: 0 }}
+        />
+        <span>{t('newsletter_optin_register')}</span>
+      </label>
 
       <button
         type="submit"

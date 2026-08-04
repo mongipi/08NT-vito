@@ -257,6 +257,13 @@ export const dictionary = {
     newsletter_success:
       'Ti abbiamo inviato una email: conferma il tuo indirizzo per ricevere il codice.',
     newsletter_error: 'Non siamo riusciti a completare l iscrizione.',
+    newsletter_optin_register:
+      'Voglio ricevere la newsletter con novità e offerte. Puoi cancellarti in ogni momento.',
+    newsletter_account_title: 'Newsletter',
+    newsletter_account_active: 'Sei iscritto alla newsletter.',
+    newsletter_account_inactive: 'Non sei iscritto alla newsletter.',
+    newsletter_account_subscribe: 'Iscrivimi',
+    newsletter_account_unsubscribe: 'Cancella iscrizione',
     checkout_foreign_surcharge: 'Supplemento estero',
     checkout_cod_surcharge: 'Supplemento contrassegno',
     checkout_trust_stripe: 'Pagamento sicuro con Stripe',
@@ -871,6 +878,13 @@ export const dictionary = {
       'and I agree to receive marketing communications. You can unsubscribe at any time.',
     newsletter_success: 'We sent you an email: confirm your address to receive the code.',
     newsletter_error: 'We could not complete your subscription.',
+    newsletter_optin_register:
+      'I want to receive the newsletter with news and offers. You can unsubscribe at any time.',
+    newsletter_account_title: 'Newsletter',
+    newsletter_account_active: 'You are subscribed to the newsletter.',
+    newsletter_account_inactive: 'You are not subscribed to the newsletter.',
+    newsletter_account_subscribe: 'Subscribe me',
+    newsletter_account_unsubscribe: 'Unsubscribe',
     checkout_foreign_surcharge: 'International surcharge',
     checkout_cod_surcharge: 'Cash-on-delivery surcharge',
     checkout_trust_stripe: 'Secure payment with Stripe',

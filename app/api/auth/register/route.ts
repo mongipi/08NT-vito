@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { hashPassword } from '@/lib/auth/password'
 import { issueVerificationEmail } from '@/lib/verification'
 import { createUser, getUserByEmail } from '@/services/users'
+import { subscribeToNewsletter } from '@/services/newsletter'
 
 export async function POST(req: NextRequest) {
-  const { name, email, password, confirmPassword } = await req.json()
+  const { name, email, password, confirmPassword, newsletter } = await req.json()
 
   if (!email || !password || password.length < 8) {
     return NextResponse.json({ error: 'Dati non validi' }, { status: 400 })
@@ -20,6 +21,16 @@ export async function POST(req: NextRequest) {
   }
 
   await createUser({ name, email, password: await hashPassword(password), role: 'consumer' })
+
+  // L'iscrizione resta in attesa: sara' la verifica dell'email dell'account a
+  // confermarla, perche' dimostra la stessa cosa del doppio consenso.
+  if (newsletter === true) {
+    try {
+      await subscribeToNewsletter(email, 'it', 'registrazione')
+    } catch (error) {
+      console.error('Iscrizione newsletter da registrazione fallita per', email, error)
+    }
+  }
 
   // L'account è già creato: se l'invio dell'email fallisce (SMTP non
   // raggiungibile o mal configurato) non ha senso rispondere con un errore.
