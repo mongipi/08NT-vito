@@ -1,16 +1,12 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import type { Role } from '@/lib/domain/roles'
+import { isAdmin, type Role } from '@/lib/domain/roles'
 
 /**
  * Controlli di accesso lato server.
  * Il confronto `(session.user as { role?: string }).role !== 'admin'` era
  * ricopiato in middleware, layout admin e azione impostazioni.
  */
-
-export function isAdmin(role: unknown): boolean {
-  return role === 'admin'
-}
 
 /** Utente autenticato, altrimenti redirect al login. */
 export async function requireUser() {

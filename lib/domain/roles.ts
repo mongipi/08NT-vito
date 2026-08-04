@@ -13,6 +13,17 @@ export const ROLE_LABELS: Record<Role, string> = {
 
 export const ROLES = Object.keys(ROLE_LABELS) as Role[]
 
+/**
+ * Vero se il ruolo e' amministratore.
+ *
+ * Vive qui e non in lib/auth/guards perche' il middleware gira nel runtime
+ * Edge: importarla da guards trascinava nel bundle @/auth con l'adapter
+ * Prisma e bcrypt, facendo superare il limite di 1 MB.
+ */
+export function isAdmin(role: unknown): boolean {
+  return role === 'admin'
+}
+
 export function isRole(value: unknown): value is Role {
   return typeof value === 'string' && value in ROLE_LABELS
 }
