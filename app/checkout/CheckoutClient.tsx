@@ -7,11 +7,9 @@ import { formatPrice } from '@/lib/cart'
 import Link from 'next/link'
 import { COUNTRIES } from '@/lib/countries'
 import type { PricingConfig } from '@/lib/domain/pricing'
-import { BrtFermopointPicker } from './BrtFermopointPicker'
 import { PosteLockerPicker } from './PosteLockerPicker'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
-import { richText } from '@/lib/i18n/richText'
 import {
   PHONE_PREFIXES,
   useCheckoutForm,
@@ -85,8 +83,6 @@ export function CheckoutClient({
     setPayMethod,
     deliveryType,
     setDeliveryType,
-    pickupCarrier,
-    setPickupCarrier,
     pickupPointCode,
     pickupPointAddress,
     selectPickupPoint,
@@ -98,9 +94,6 @@ export function CheckoutClient({
     setGuestPassword,
     saveForNextTime,
     setSaveForNextTime,
-    isIsland,
-    effectiveCarrier,
-    isBrtPickup,
     canProceed,
     totals,
     isCod,
@@ -791,74 +784,13 @@ export function CheckoutClient({
                     border: '1px solid var(--border)',
                   }}
                 >
-                  {/* Scelta corriere */}
-                  {isIsland ? (
-                    <div
-                      style={{
-                        fontSize: '0.75rem',
-                        color: '#b45309',
-                        background: '#fffbeb',
-                        border: '1px solid #fde68a',
-                        padding: '0.625rem 0.875rem',
-                      }}
-                    >
-                      {richText(t('checkout_islands_poste_only'))}
-                    </div>
-                  ) : (
-                    <div>
-                      <p style={{ ...labelStyle, marginBottom: '0.5rem' }}>
-                        {t('checkout_carrier')}
-                      </p>
-                      <div style={{ display: 'flex', gap: '0.75rem' }}>
-                        {(['BRT', 'POSTE'] as const).map((c) => (
-                          <label
-                            key={c}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
-                              cursor: 'pointer',
-                              fontSize: '0.875rem',
-                            }}
-                          >
-                            <input
-                              type="radio"
-                              name="pickupCarrier"
-                              value={c}
-                              checked={pickupCarrier === c}
-                              onChange={() => setPickupCarrier(c)}
-                              style={{
-                                accentColor: 'var(--forest)',
-                                width: '1rem',
-                                height: '1rem',
-                              }}
-                            />
-                            {c === 'BRT' ? t('checkout_carrier_brt') : t('checkout_carrier_poste')}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {effectiveCarrier === 'POSTE' ? (
-                    <PosteLockerPicker
-                      pickupPointCode={pickupPointCode}
-                      pickupPointAddress={pickupPointAddress}
-                      onSelect={selectPickupPoint}
-                      inputStyle={inputStyle}
-                      labelStyle={labelStyle}
-                    />
-                  ) : (
-                    <BrtFermopointPicker
-                      pickupPointCode={pickupPointCode}
-                      pickupPointAddress={pickupPointAddress}
-                      onSelect={selectPickupPoint}
-                      inputStyle={inputStyle}
-                      labelStyle={labelStyle}
-                      postalCode={address.postalCode}
-                      t={t as (key: string, vars?: Record<string, string | number>) => string}
-                    />
-                  )}
+                  <PosteLockerPicker
+                    pickupPointCode={pickupPointCode}
+                    pickupPointAddress={pickupPointAddress}
+                    onSelect={selectPickupPoint}
+                    inputStyle={inputStyle}
+                    labelStyle={labelStyle}
+                  />
                 </div>
               )}
             </div>
@@ -946,7 +878,6 @@ export function CheckoutClient({
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {PAY_METHODS.map((opt) => {
-                  const disabled = isBrtPickup && opt.value === 'contrassegno'
                   return (
                     <label
                       key={opt.value}
@@ -954,14 +885,13 @@ export function CheckoutClient({
                         display: 'flex',
                         alignItems: 'flex-start',
                         gap: '0.75rem',
-                        cursor: disabled ? 'not-allowed' : 'pointer',
+                        cursor: 'pointer',
                         padding: '0.875rem 1rem',
                         border:
                           payMethod === opt.value
                             ? '1.5px solid var(--forest)'
                             : '1px solid var(--border)',
                         background: payMethod === opt.value ? '#f8faf9' : 'white',
-                        opacity: disabled ? 0.5 : 1,
                       }}
                     >
                       <input
@@ -969,8 +899,7 @@ export function CheckoutClient({
                         name="payMethod"
                         value={opt.value}
                         checked={payMethod === opt.value}
-                        onChange={() => !disabled && setPayMethod(opt.value)}
-                        disabled={disabled}
+                        onChange={() => setPayMethod(opt.value)}
                         style={{
                           accentColor: 'var(--forest)',
                           width: '1rem',
@@ -1006,18 +935,6 @@ export function CheckoutClient({
                   )
                 })}
               </div>
-              {isBrtPickup && (
-                <p
-                  style={{
-                    fontSize: '0.75rem',
-                    color: 'var(--ink-4)',
-                    marginTop: '0.625rem',
-                    marginBottom: 0,
-                  }}
-                >
-                  {t('checkout_brt_cod_disabled')}
-                </p>
-              )}
             </div>
 
             <button

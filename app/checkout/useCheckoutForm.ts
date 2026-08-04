@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
+import { useCallback, useMemo, useState, useTransition } from 'react'
 import { useSession } from 'next-auth/react'
 import { useCart } from '@/contexts/CartContext'
 import { useLocale } from '@/contexts/LocaleContext'
@@ -11,10 +11,10 @@ import {
   createPaymentIntent,
   hashPasswordForCheckout,
 } from '@/lib/actions/checkout'
-import { ISLAND_PROVINCES } from '@/lib/countries'
 import { computeOrderTotals, isDomesticCountry, type PricingConfig } from '@/lib/domain/pricing'
 import { toCustomerRole } from '@/lib/domain/roles'
-import type { DeliveryType, DocType, PickupCarrier, ShippingAddress } from '@/types/checkout'
+import type { DeliveryType, DocType, ShippingAddress } from '@/types/checkout'
+import { PICKUP_CARRIER } from '@/types/checkout'
 
 /**
  * Stato e regole del checkout.
@@ -102,7 +102,6 @@ export function useCheckoutForm(pricing: PricingConfig, prefill?: CheckoutPrefil
   const [docType, setDocType] = useState<DocType>('nessuno')
   const [payMethod, setPayMethod] = useState<PayMethod>('stripe')
   const [deliveryType, setDeliveryType] = useState<DeliveryType>('home')
-  const [pickupCarrier, setPickupCarrier] = useState<PickupCarrier>('BRT')
   const [pickupPointCode, setPickupPointCode] = useState('')
   const [pickupPointAddress, setPickupPointAddress] = useState('')
   const [guestEmail, setGuestEmail] = useState('')
@@ -122,13 +121,6 @@ export function useCheckoutForm(pricing: PricingConfig, prefill?: CheckoutPrefil
     province: '',
     country: 'IT',
   })
-
-  // Nelle isole italiane il ritiro è disponibile solo con Poste.
-  const isIsland =
-    address.country === 'IT' &&
-    (ISLAND_PROVINCES as readonly string[]).includes(address.province.trim().toUpperCase())
-  const effectiveCarrier: PickupCarrier = isIsland ? 'POSTE' : pickupCarrier
-  const isBrtPickup = deliveryType === 'pickup' && effectiveCarrier === 'BRT'
 
   const baseOk = !!(
     address.firstName &&
@@ -163,11 +155,6 @@ export function useCheckoutForm(pricing: PricingConfig, prefill?: CheckoutPrefil
 
   const isCod = payMethod === 'contrassegno'
   const isEstero = !isDomesticCountry(address.country)
-
-  // Il ritiro BRT non accetta il contrassegno.
-  useEffect(() => {
-    if (isBrtPickup && payMethod === 'contrassegno') setPayMethod('stripe')
-  }, [isBrtPickup, payMethod])
 
   /** Un solo handler stabile per entrambi i picker, invece di due funzioni inline. */
   const selectPickupPoint = useCallback((code: string, addressLabel: string) => {
@@ -209,7 +196,7 @@ export function useCheckoutForm(pricing: PricingConfig, prefill?: CheckoutPrefil
       guestPasswordHash,
       saveForNextTime,
       deliveryType,
-      pickupCarrier: isPickup ? effectiveCarrier : null,
+      pickupCarrier: isPickup ? PICKUP_CARRIER : null,
       pickupPointCode: isPickup ? pickupPointCode : undefined,
       pickupPointAddress: isPickup ? pickupPointAddress : undefined,
       billingDifferent,
@@ -287,8 +274,6 @@ export function useCheckoutForm(pricing: PricingConfig, prefill?: CheckoutPrefil
     setPayMethod,
     deliveryType,
     setDeliveryType,
-    pickupCarrier,
-    setPickupCarrier,
     pickupPointCode,
     setPickupPointCode,
     pickupPointAddress,
@@ -302,9 +287,6 @@ export function useCheckoutForm(pricing: PricingConfig, prefill?: CheckoutPrefil
     setGuestPassword,
     saveForNextTime,
     setSaveForNextTime,
-    isIsland,
-    effectiveCarrier,
-    isBrtPickup,
     canProceed,
     totals,
     isCod,

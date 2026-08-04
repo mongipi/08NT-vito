@@ -2,7 +2,16 @@
 
 export type DocType = 'fattura' | 'scontrino' | 'nessuno'
 export type DeliveryType = 'home' | 'pickup'
-export type PickupCarrier = 'BRT' | 'POSTE'
+/**
+ * Corriere per il ritiro in punto.
+ *
+ * Il ritiro BRT Fermopoint e' stato rimosso: si appoggiava allo scraping del
+ * sito mybrt.it, funzionava solo su Windows e si sarebbe rotto a ogni modifica
+ * di quelle pagine. Gli ordini gia' registrati con "BRT" restano leggibili,
+ * il campo a database e' una stringa libera.
+ */
+export type PickupCarrier = 'POSTE'
+export const PICKUP_CARRIER: PickupCarrier = 'POSTE'
 
 /**
  * Dati raccolti nel checkout: spedizione, fatturazione, ritiro e, per gli
