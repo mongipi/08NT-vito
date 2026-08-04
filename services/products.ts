@@ -175,18 +175,7 @@ export async function getProductSlugs(): Promise<string[]> {
  * il mapping storefront, perche' la tabella mostra i campi grezzi del database.
  */
 export async function getAdminProducts() {
-  return prisma.product.findMany({
-    orderBy: { order: 'asc' },
-    include: {
-      line: true,
-      // Servono per mostrare prezzo e scorte reali: quando un prodotto ha
-      // varianti, i campi price e stock del prodotto non vengono usati.
-      variants: {
-        orderBy: { order: 'asc' },
-        select: { label: true, price: true, stock: true },
-      },
-    },
-  })
+  return prisma.product.findMany({ orderBy: { order: 'asc' }, include: { line: true } })
 }
 
 /** Prodotto completo per il form di modifica admin. */
