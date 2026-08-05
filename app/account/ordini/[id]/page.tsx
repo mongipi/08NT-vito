@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { redirect, notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getOrderForUser } from '@/services/orders'
 import type { Metadata } from 'next'
 import { OrderDetailContent } from './OrderDetailContent'
 
@@ -16,11 +16,8 @@ export default async function OrderDetailPage({ params }: Props) {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: { items: true, shippingAddress: true },
-  })
-  if (!order || order.userId !== session.user.id) notFound()
+  const order = await getOrderForUser(id, session.user.id)
+  if (!order) notFound()
 
   return <OrderDetailContent order={order} />
 }

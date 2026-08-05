@@ -1,5 +1,4 @@
-import { prisma } from '@/lib/prisma'
-import type { Prisma } from '@prisma/client'
+import { searchUsers } from '@/services/users'
 import Link from 'next/link'
 import { PageHeader } from '../_components/PageHeader'
 import { Badge } from '../_components/Badge'
@@ -18,16 +17,7 @@ interface Props {
 export default async function UtentiPage({ searchParams }: Props) {
   const { q } = await searchParams
 
-  const where: Prisma.UserWhereInput | undefined = q ? {
-    OR: [
-      { name: { contains: q, mode: 'insensitive' } },
-      { email: { contains: q, mode: 'insensitive' } },
-      { company: { contains: q, mode: 'insensitive' } },
-      { vatNumber: { contains: q, mode: 'insensitive' } },
-    ],
-  } : undefined
-
-  const users = await prisma.user.findMany({ where, orderBy: { createdAt: 'desc' } })
+  const users = await searchUsers(q)
 
   return (
     <div>

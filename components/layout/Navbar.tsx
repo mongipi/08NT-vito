@@ -8,30 +8,25 @@ import { signOut, useSession } from 'next-auth/react'
 import { Logo } from './Logo'
 import { useScrolled } from '@/hooks/useScrolled'
 import { cn } from '@/lib/utils'
-import { SOCIAL_LINKS } from '@/lib/social-links'
 import { useCart } from '@/contexts/CartContext'
 import { CartDrawer } from '@/components/ui/CartDrawer'
 import { useLocale, type Locale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
+import { useSiteSettings } from '@/contexts/SiteSettingsContext'
+import { getSocialLinks } from '@/lib/site-settings'
 
 const NAV_LINKS = [
-  { href: '/', key: 'nav_home' },
-  { href: '/prodotti', key: 'nav_products' },
-  { href: '/metodo', key: 'nav_quality' },
-  { href: '/blog', key: 'nav_blog' },
-  { href: '/lavora-con-noi', key: 'nav_careers' },
-  { href: '/contatti', key: 'nav_contact' },
-] as const
+  { href: '/', label: 'Home' },
+  { href: '/prodotti', label: 'Prodotti & Shop' },
+  { href: '/metodo', label: 'Qualità 08' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/lavora-con-noi', label: 'Lavora con noi' },
+  { href: '/contatti', label: 'Contatti' },
+]
 
-// Solo IT/EN sono attive: hanno contenuti tradotti. Le altre restano visibili
-// ma disabilitate ("Prossimamente"), pronte per quando avranno traduzioni.
 const LANG_FLAGS = [
   { code: 'it', label: 'Italiano', src: '/v61/flags/it.png', enabled: true },
   { code: 'en', label: 'English', src: '/v61/flags/gb.png', enabled: true },
-  { code: 'es', label: 'Espanol', src: '/v61/flags/es.png', enabled: false },
-  { code: 'fr', label: 'Francais', src: '/v61/flags/fr.png', enabled: false },
-  { code: 'de', label: 'Deutsch', src: '/v61/flags/de.png', enabled: false },
-  { code: 'pt', label: 'Portugues', src: '/v61/flags/pt.png', enabled: false },
 ] as const
 
 function CartButton({ size = 18, onOpen }: { size?: number; onOpen: () => void }) {
@@ -40,11 +35,12 @@ function CartButton({ size = 18, onOpen }: { size?: number; onOpen: () => void }
   const t = useTranslation(locale)
   return (
     <button onClick={onOpen} aria-label={t('nav_cart')} className="v61-icon-button">
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="9" cy="20" r="1.35" />
-        <circle cx="18" cy="20" r="1.35" />
-        <path d="M3 4h2.2l2.15 10.25a2 2 0 0 0 1.95 1.58h7.7a2 2 0 0 0 1.9-1.38L21 8H6.1" />
-        <path d="M8 11h10.8" />
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5.2 7.2h15.1l-1.35 8.2a2.05 2.05 0 0 1-2.03 1.72H9.1a2.05 2.05 0 0 1-2.03-1.72L5.2 4.75H2.8" />
+        <path d="M8.15 10.45h10.9" />
+        <path d="M8.85 13.55h9.55" />
+        <circle cx="9.35" cy="20" r="1.25" />
+        <circle cx="17.55" cy="20" r="1.25" />
       </svg>
       {cart.itemCount > 0 && <span className="v61-cart-count">{cart.itemCount}</span>}
     </button>
@@ -135,14 +131,12 @@ function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
             <button
               key={flag.code}
               type="button"
-              disabled={!flag.enabled}
               className={cn(flag.code === locale && 'active', !flag.enabled && 'disabled')}
-              aria-label={flag.enabled ? flag.label : `${flag.label} — ${t('lang_coming_soon')}`}
+              aria-label={flag.label}
               aria-selected={flag.code === locale}
-              title={flag.enabled ? flag.label : `${flag.label} — ${t('lang_coming_soon')}`}
+              title={flag.label}
               role="option"
               onClick={() => {
-                if (!flag.enabled) return
                 setLocale(flag.code as Locale)
                 setOpen(false)
               }}
@@ -192,6 +186,8 @@ export function Navbar() {
 
   const { locale } = useLocale()
   const t = useTranslation(locale)
+  const siteSettings = useSiteSettings()
+  const socialLinks = getSocialLinks(siteSettings)
   const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href)
 
   return (
@@ -201,17 +197,17 @@ export function Navbar() {
           <Logo variant="dark" height={70} className="v61-header-logo" />
 
           <ul className="v61-menu" role="list">
-            {NAV_LINKS.map(({ href, key }) => (
+            {NAV_LINKS.map(({ href, label }) => (
               <li key={href}>
                 <Link href={href} className={cn(isActive(href) && 'active')} aria-current={isActive(href) ? 'page' : undefined}>
-                  {t(key)}
+                  {label}
                 </Link>
               </li>
             ))}
           </ul>
 
           <div className="v61-nav-actions">
-            {SOCIAL_LINKS.map(({ href, label }) => (
+            {socialLinks.map(({ href, label }) => (
               <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="v61-social-link">
                 <Image src={`/v61/icons/${label.toLowerCase()}.svg`} alt="" width={17} height={17} />
               </a>
@@ -257,9 +253,9 @@ export function Navbar() {
         </div>
         <div className="v61-mobile-drawer-body">
           <div className="v61-mobile-drawer-nav">
-            {NAV_LINKS.map(({ href, key }) => (
+            {NAV_LINKS.map(({ href, label }) => (
               <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={cn(isActive(href) && 'active')}>
-                {t(key)}
+                {label}
               </Link>
             ))}
           </div>

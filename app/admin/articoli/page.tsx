@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getAdminArticles } from '@/services/articles'
 import Link from 'next/link'
 import { PageHeader } from '../_components/PageHeader'
 import { Badge } from '../_components/Badge'
@@ -10,7 +10,7 @@ const th: React.CSSProperties = { padding: '0.625rem 1rem', textAlign: 'left', f
 const td: React.CSSProperties = { padding: '0.6875rem 1rem', fontSize: '0.8125rem', color: '#374151', borderBottom: '1px solid #f7f8f9' }
 
 export default async function ArticoliPage() {
-  const articles = await prisma.article.findMany({ orderBy: { publishedAt: 'desc' } })
+  const articles = await getAdminArticles()
 
   return (
     <div>

@@ -1,3 +1,6 @@
+'use client'
+
+import { useCallback } from 'react'
 import type { Locale } from '@/contexts/LocaleContext'
 
 // Bozza di traduzione automatica delle stringhe UI principali (navbar). Da rivedere
@@ -59,8 +62,10 @@ export const dictionary = {
 
     // Home
     home_hero_title: "L'**Eccellenza**\ncome Standard.",
-    home_hero_body: "08 Natural Technology nasce da un sogno: creare qualcosa di cui poter essere veramente orgogliosi. Non volevamo semplicemente realizzare degli integratori, ma dare vita a prodotti sviluppati con passione, attenzione e rispetto per le persone che ogni giorno ripongono la loro fiducia in noi.",
+    home_hero_body:
+      '08 Natural Technology nasce da un sogno: creare qualcosa di cui poter essere veramente orgogliosi. Non volevamo semplicemente realizzare degli integratori, ma dare vita a prodotti sviluppati con passione, attenzione e rispetto per le persone che ogni giorno ripongono la loro fiducia in noi.',
     home_hero_cta: 'Scopri le formule',
+    home_hero_alt: '08 Natural Technology',
 
     home_feature_1_title: 'Eccellenza italiana',
     home_feature_1_body: 'Identità italiana, cura del dettaglio e standard elevati in ogni scelta.',
@@ -74,19 +79,24 @@ export const dictionary = {
     home_about_eyebrow: 'Chi siamo',
     home_about_script: 'Lettera del Fondatore',
     home_about_title: 'Un sogno diventato\n**promessa quotidiana.**',
-    home_about_quote: 'Per noi il benessere non è una semplice parola: è energia, equilibrio, serenità e qualità della vita.',
-    home_about_p1: "**08 Natural Technology** nasce dal desiderio di creare integratori alimentari curati nei dettagli, con formule comprensibili, ingredienti selezionati e un'identità italiana riconoscibile.",
-    home_about_p2: 'Non volevamo realizzare semplicemente prodotti, ma un marchio con formule capaci di trasmettere fiducia, attenzione e rispetto verso chi ogni giorno sceglie di prendersi cura di sé.',
+    home_about_quote:
+      'Per noi il benessere non è una semplice parola: è energia, equilibrio, serenità e qualità della vita.',
+    home_about_p1:
+      "**08 Natural Technology** nasce dal desiderio di creare integratori alimentari curati nei dettagli, con formule comprensibili, ingredienti selezionati e un'identità italiana riconoscibile.",
+    home_about_p2:
+      'Non volevamo realizzare semplicemente prodotti, ma un marchio con formule capaci di trasmettere fiducia, attenzione e rispetto verso chi ogni giorno sceglie di prendersi cura di sé.',
     home_about_signature: 'Vito Tatulli',
 
     home_formulas_eyebrow: 'Le nostre formule',
     home_formulas_title: 'Prodotti pensati\nper **esigenze reali.**',
-    home_formulas_body: "Dai prodotti per microcircolo e gambe leggere, fino al supporto vitaminico, alla bellezza di capelli, pelle e unghie e all'equilibrio femminile in menopausa: 08 Natural Technology propone soluzioni nutrizionali pensate per esigenze concrete e quotidiane.",
+    home_formulas_body:
+      "Dai prodotti per microcircolo e gambe leggere, fino al supporto vitaminico, alla bellezza di capelli, pelle e unghie e all'equilibrio femminile in menopausa: 08 Natural Technology propone soluzioni nutrizionali pensate per esigenze concrete e quotidiane.",
     home_formulas_cta: 'Scopri i prodotti',
 
     home_blog_eyebrow: 'Approfondimenti',
     home_blog_title: 'Dossier, principi attivi e qualità.',
-    home_blog_body: "Il blog diventa uno strumento SEO e di autorevolezza: articoli sugli ingredienti, guide d'uso, consigli e spiegazioni semplici.",
+    home_blog_body:
+      "Il blog diventa uno strumento SEO e di autorevolezza: articoli sugli ingredienti, guide d'uso, consigli e spiegazioni semplici.",
     home_reading_time: 'min di lettura',
 
     // Contatti
@@ -116,8 +126,10 @@ export const dictionary = {
     // B2B
     b2b_eyebrow: 'B2B',
     b2b_hero_title: 'Diventa rivenditore\n**08 Natural Technology.**',
-    b2b_hero_p1: 'Pagina dedicata a farmacie, parafarmacie, erboristerie e operatori del settore. Qui il sito raccoglie contatti qualificati e richieste catalogo da partner commerciali interessati alla linea 08 Natural Technology.',
-    b2b_hero_p2: 'Siamo presenti in farmacia, parafarmacia ed erboristeria. Se sei un operatore del settore e vuoi portare 08 nel tuo punto vendita, contattaci per ricevere il catalogo commerciale e le condizioni di fornitura.',
+    b2b_hero_p1:
+      'Pagina dedicata a farmacie, parafarmacie, erboristerie e operatori del settore. Qui il sito raccoglie contatti qualificati e richieste catalogo da partner commerciali interessati alla linea 08 Natural Technology.',
+    b2b_hero_p2:
+      'Siamo presenti in farmacia, parafarmacia ed erboristeria. Se sei un operatore del settore e vuoi portare 08 nel tuo punto vendita, contattaci per ricevere il catalogo commerciale e le condizioni di fornitura.',
     b2b_hero_cta: 'Richiedi informazioni',
     b2b_offer_title: 'Cosa offriamo\nal **rivenditore.**',
     b2b_offer_1: 'Catalogo prodotti',
@@ -132,11 +144,14 @@ export const dictionary = {
     b2b_why_eyebrow: 'Perché 08',
     b2b_why_title: 'Un marchio che costruisce fiducia\nnel **punto vendita.**',
     b2b_trust_1_label: 'Prodotti notificati',
-    b2b_trust_1_body: 'Integratori alimentari notificati al Ministero della Salute della Repubblica Italiana dove indicato.',
+    b2b_trust_1_body:
+      'Integratori alimentari notificati al Ministero della Salute della Repubblica Italiana dove indicato.',
     b2b_trust_2_label: 'Made in Italy',
-    b2b_trust_2_body: 'Progetto nato a Bitonto, in Puglia. Identità italiana chiara e riconoscibile.',
+    b2b_trust_2_body:
+      'Progetto nato a Bitonto, in Puglia. Identità italiana chiara e riconoscibile.',
     b2b_trust_3_label: 'Formule curate',
-    b2b_trust_3_body: 'Ingredienti selezionati, dosaggi dichiarati, comunicazione responsabile e trasparente.',
+    b2b_trust_3_body:
+      'Ingredienti selezionati, dosaggi dichiarati, comunicazione responsabile e trasparente.',
 
     // Checkout
     checkout_empty: 'Il carrello è vuoto.',
@@ -149,7 +164,8 @@ export const dictionary = {
     checkout_create_account: 'Crea un account con questi dati',
     checkout_password: 'Password',
     checkout_password_placeholder: 'Crea una password sicura',
-    checkout_password_note: 'Potrai accedere con questa email e password per consultare i tuoi ordini.',
+    checkout_password_note:
+      'Potrai accedere con questa email e password per consultare i tuoi ordini.',
     checkout_first_name: 'Nome',
     checkout_first_name_placeholder: 'Nome intestatario',
     checkout_last_name: 'Cognome',
@@ -244,6 +260,30 @@ export const dictionary = {
     checkout_order_summary: 'Riepilogo ordine',
     checkout_discount_with_code: 'Sconto ({code})',
     checkout_free: 'Gratuita',
+
+    // Newsletter
+    newsletter_kicker: 'Newsletter 08',
+    newsletter_title: 'Extra sconto 5%',
+    newsletter_body:
+      'Iscriviti per ricevere novità, contenuti e formule 08 Natural Technology.',
+    newsletter_button: 'Iscriviti',
+    newsletter_email_label: 'Email',
+    newsletter_email_placeholder: 'nome@email.it',
+    newsletter_sending: 'Invio...',
+    newsletter_consent_before: 'Ho letto l',
+    newsletter_consent_link: 'informativa privacy',
+    newsletter_consent_after:
+      'e acconsento a ricevere comunicazioni commerciali. Puoi cancellarti in ogni momento.',
+    newsletter_success:
+      'Ti abbiamo inviato una email: conferma il tuo indirizzo per ricevere il codice.',
+    newsletter_error: 'Non siamo riusciti a completare l iscrizione.',
+    newsletter_optin_register:
+      'Voglio ricevere la newsletter con novità e offerte. Puoi cancellarti in ogni momento.',
+    newsletter_account_title: 'Newsletter',
+    newsletter_account_active: 'Sei iscritto alla newsletter.',
+    newsletter_account_inactive: 'Non sei iscritto alla newsletter.',
+    newsletter_account_subscribe: 'Iscrivimi',
+    newsletter_account_unsubscribe: 'Cancella iscrizione',
     checkout_foreign_surcharge: 'Supplemento estero',
     checkout_cod_surcharge: 'Supplemento contrassegno',
     checkout_trust_stripe: 'Pagamento sicuro con Stripe',
@@ -256,15 +296,19 @@ export const dictionary = {
     success_order_received: 'Ordine ricevuto',
     success_thank_you: 'Grazie per il tuo acquisto.',
     success_bank_instructions_title: 'Istruzioni bonifico bancario',
-    success_bank_instructions_body: "Effettua il bonifico entro **5 giorni lavorativi**. L'ordine sarà processato alla ricezione del pagamento.",
+    success_bank_instructions_body:
+      "Effettua il bonifico entro **5 giorni lavorativi**. L'ordine sarà processato alla ricezione del pagamento.",
     success_bank_holder: 'Intestatario',
     success_bank_iban: 'IBAN',
     success_bank_reason: 'Causale',
     success_bank_reason_fallback: 'Numero ordine (vedi email)',
     success_cod_title: 'Pagamento alla consegna',
-    success_cod_body: "Il pagamento avviene direttamente al corriere al momento della consegna. Tieni pronto l'importo esatto in contanti. Il supplemento contrassegno di **€5,00** è già incluso nel totale.",
-    success_stripe_body: 'Il tuo ordine è stato ricevuto e confermato. Riceverai una email con i dettagli della spedizione non appena il pacco sarà in partenza.',
-    success_confirmation_email_note: 'Riceverai una email di conferma con il riepilogo del tuo ordine.',
+    success_cod_body:
+      "Il pagamento avviene direttamente al corriere al momento della consegna. Tieni pronto l'importo esatto in contanti. Il supplemento contrassegno di **€5,00** è già incluso nel totale.",
+    success_stripe_body:
+      'Il tuo ordine è stato ricevuto e confermato. Riceverai una email con i dettagli della spedizione non appena il pacco sarà in partenza.',
+    success_confirmation_email_note:
+      'Riceverai una email di conferma con il riepilogo del tuo ordine.',
     success_view_orders: 'Vedi i miei ordini',
     success_continue_shopping: 'Continua gli acquisti',
 
@@ -275,25 +319,33 @@ export const dictionary = {
     products_capsules: '{n} capsule vegetali',
     products_days: '{n} giorni',
     products_discover: 'Scopri',
-    products_disclaimer: "Gli integratori alimentari non sostituiscono una dieta varia ed equilibrata e uno stile di vita sano. Tenere fuori dalla portata dei bambini. Tutti i prodotti sono notificati al Ministero della Salute della Repubblica Italiana dove indicato.",
+    products_disclaimer:
+      'Gli integratori alimentari non sostituiscono una dieta varia ed equilibrata e uno stile di vita sano. Tenere fuori dalla portata dei bambini. Tutti i prodotti sono notificati al Ministero della Salute della Repubblica Italiana dove indicato.',
 
     // Pagina prodotto (dettaglio) - avviso normativo
-    product_regulatory_notice: 'Integratore alimentare notificato al Ministero della Salute della Repubblica Italiana{ms}. Non superare la dose giornaliera consigliata. Gli integratori alimentari non sostituiscono una dieta varia ed equilibrata e uno stile di vita sano. Tenere fuori dalla portata dei bambini.',
+    product_regulatory_notice:
+      'Integratore alimentare notificato al Ministero della Salute della Repubblica Italiana{ms}. Non superare la dose giornaliera consigliata. Gli integratori alimentari non sostituiscono una dieta varia ed equilibrata e uno stile di vita sano. Tenere fuori dalla portata dei bambini.',
 
     // Lavora con noi
     work_hero_title: 'Lavora **con noi.**',
-    work_hero_body: 'Cerchiamo collaborazioni costruite su competenza, fiducia e attenzione reale alla qualità del progetto.',
+    work_hero_body:
+      'Cerchiamo collaborazioni costruite su competenza, fiducia e attenzione reale alla qualità del progetto.',
     work_eyebrow: 'Crescere con metodo',
     work_title: 'Un progetto giovane,\ncon **standard chiari.**',
-    work_intro: "08 Natural Technology valuta collaborazioni con persone e realtà che condividono un approccio serio, chiaro e orientato al benessere quotidiano. Ogni rapporto nasce dal rispetto per il prodotto, per il cliente e per il modo in cui il brand viene rappresentato.",
+    work_intro:
+      '08 Natural Technology valuta collaborazioni con persone e realtà che condividono un approccio serio, chiaro e orientato al benessere quotidiano. Ogni rapporto nasce dal rispetto per il prodotto, per il cliente e per il modo in cui il brand viene rappresentato.',
     work_area_1_title: 'Area commerciale',
-    work_area_1_body: 'Collaborazioni con figure capaci di raccontare il valore del prodotto con precisione, metodo e attenzione al cliente.',
+    work_area_1_body:
+      'Collaborazioni con figure capaci di raccontare il valore del prodotto con precisione, metodo e attenzione al cliente.',
     work_area_2_title: 'Consulenza e divulgazione',
-    work_area_2_body: 'Professionisti interessati a contribuire a un linguaggio chiaro, responsabile e coerente con la qualità 08.',
+    work_area_2_body:
+      'Professionisti interessati a contribuire a un linguaggio chiaro, responsabile e coerente con la qualità 08.',
     work_area_3_title: 'Partner territoriali',
-    work_area_3_body: 'Relazioni con realtà locali, farmacie, parafarmacie, erboristerie e operatori del benessere.',
+    work_area_3_body:
+      'Relazioni con realtà locali, farmacie, parafarmacie, erboristerie e operatori del benessere.',
     work_cta_title: 'Raccontaci il tuo profilo.',
-    work_cta_body: 'Se pensi di poter contribuire alla crescita di 08 Natural Technology, inviaci una presentazione sintetica: esperienze, area di interesse e modalità di collaborazione proposta.',
+    work_cta_body:
+      'Se pensi di poter contribuire alla crescita di 08 Natural Technology, inviaci una presentazione sintetica: esperienze, area di interesse e modalità di collaborazione proposta.',
     work_cta_button: 'Contattaci',
 
     // Blog
@@ -312,9 +364,11 @@ export const dictionary = {
     blog_section_dossier_title: 'Dossier prodotto',
     blog_section_dossier_body: 'I post completi dedicati alle formule 08 Natural Technology.',
     blog_section_principles_title: 'Principi attivi, ingredienti e funzioni',
-    blog_section_principles_body: 'Post separati dedicati ai singoli attivi: cosa sono, quale ingrediente viene usato e quale funzione svolgono nella formula.',
+    blog_section_principles_body:
+      'Post separati dedicati ai singoli attivi: cosa sono, quale ingrediente viene usato e quale funzione svolgono nella formula.',
     blog_section_quality_title: 'Qualità ingredienti: confronti utili',
-    blog_section_quality_body: "Post separati che spiegano la differenza tra un ingrediente tecnico e la rispettiva alternativa generica.",
+    blog_section_quality_body:
+      'Post separati che spiegano la differenza tra un ingrediente tecnico e la rispettiva alternativa generica.',
     blog_section_other_title: 'Approfondimenti già presenti',
     blog_section_other_body: "Articoli mantenuti nell'archivio blog.",
     blog_read_article: 'Leggi articolo',
@@ -416,7 +470,8 @@ export const dictionary = {
     login_email: 'Email',
     login_password: 'Password',
     login_forgot_password: 'Password dimenticata?',
-    login_error_unverified: 'Devi prima confermare la tua email. Controlla la tua casella di posta.',
+    login_error_unverified:
+      'Devi prima confermare la tua email. Controlla la tua casella di posta.',
     login_error_credentials: 'Email o password non corretti.',
     login_resend_sent: 'Email inviata di nuovo',
     login_resend_sending: 'Invio in corso…',
@@ -426,7 +481,8 @@ export const dictionary = {
     login_or: 'oppure',
     login_google: 'Continua con Google',
     login_verify_success: 'Email confermata! Ora puoi accedere.',
-    login_verify_expired: "Il link di conferma è scaduto. Richiedine uno nuovo qui sotto dopo aver effettuato l'accesso.",
+    login_verify_expired:
+      "Il link di conferma è scaduto. Richiedine uno nuovo qui sotto dopo aver effettuato l'accesso.",
     login_verify_invalid: 'Link di conferma non valido.',
     login_reset_success: 'Password aggiornata! Accedi con la nuova password.',
 
@@ -453,7 +509,11 @@ export const dictionary = {
     register_and_the: 'e la',
     register_privacy_link: 'Privacy Policy',
     register_check_email_title: 'Controlla la tua email',
-    register_check_email_body: 'Ti abbiamo inviato un link a **{email}** per confermare il tuo indirizzo. Clicca sul link entro 24 ore per attivare l\'account.',
+    register_check_email_body:
+      "Ti abbiamo inviato un link a **{email}** per confermare il tuo indirizzo. Clicca sul link entro 24 ore per attivare l'account.",
+    register_email_failed_title: 'Account creato, email non inviata',
+    register_email_failed_body:
+      'Il tuo account **{email}** è stato creato, ma non siamo riusciti a inviare l\'email di conferma. Vai alla pagina di accesso e usa "Invia di nuovo l\'email di verifica".',
 
     // Password dimenticata / reimposta
     forgot_eyebrow: 'Recupero account',
@@ -461,7 +521,8 @@ export const dictionary = {
     forgot_body: 'Inserisci la tua email e ti invieremo un link per reimpostarla.',
     forgot_back_to_login: 'Torna al login',
     forgot_check_email_title: 'Controlla la tua email',
-    forgot_check_email_body: 'Se esiste un account associato a **{email}**, ti abbiamo inviato un link per reimpostare la password. Il link scade tra 1 ora.',
+    forgot_check_email_body:
+      'Se esiste un account associato a **{email}**, ti abbiamo inviato un link per reimpostare la password. Il link scade tra 1 ora.',
     forgot_submit: 'Invia link di reimpostazione',
     forgot_submitting: 'Invio in corso…',
     reset_title: 'Scegli una nuova password.',
@@ -482,87 +543,115 @@ export const dictionary = {
     // Metodo / Qualità 08
     method_eyebrow: 'Qualità 08',
     method_hero_title: "L'**Eccellenza**\ncome Standard.",
-    method_hero_body: 'Non volevamo semplicemente realizzare degli integratori, ma dare vita a prodotti sviluppati con passione, attenzione e rispetto per le persone che ogni giorno ripongono la loro fiducia in noi.',
+    method_hero_body:
+      'Non volevamo semplicemente realizzare degli integratori, ma dare vita a prodotti sviluppati con passione, attenzione e rispetto per le persone che ogni giorno ripongono la loro fiducia in noi.',
     method_hero_cta: 'Scopri le formule',
     method_promise_eyebrow: 'La nostra promessa',
     method_promise_title: 'Qualità, innovazione\ne **fiducia.**',
-    method_promise_body: 'Dietro ogni formula ci sono ricerca, impegno e una scelta accurata degli ingredienti, perché crediamo che la qualità non sia un dettaglio, ma un valore fondamentale.',
+    method_promise_body:
+      'Dietro ogni formula ci sono ricerca, impegno e una scelta accurata degli ingredienti, perché crediamo che la qualità non sia un dettaglio, ma un valore fondamentale.',
     method_panel1_title: 'Più di un marchio.',
-    method_panel1_p1: 'Per noi il benessere non è una semplice parola: è energia, equilibrio, serenità e qualità della vita. È qualcosa di prezioso che merita attenzione e cura.',
-    method_panel1_p2: 'Per questo lavoriamo ogni giorno con lo stesso obiettivo: offrire prodotti che uniscano qualità, innovazione e fiducia, mettendo sempre la persona al centro di ogni scelta.',
+    method_panel1_p1:
+      'Per noi il benessere non è una semplice parola: è energia, equilibrio, serenità e qualità della vita. È qualcosa di prezioso che merita attenzione e cura.',
+    method_panel1_p2:
+      'Per questo lavoriamo ogni giorno con lo stesso obiettivo: offrire prodotti che uniscano qualità, innovazione e fiducia, mettendo sempre la persona al centro di ogni scelta.',
     method_panel1_li1: 'Formule sviluppate con attenzione.',
     method_panel1_li2: 'Ingredienti selezionati con cura.',
     method_panel1_li3: 'Comunicazione chiara e responsabile.',
     method_panel1_li4: 'Rispetto verso chi sceglie il nostro brand.',
     method_panel2_title: 'La promessa 08.',
     method_panel2_p1: 'La qualità, per noi, non è solo un obiettivo: è un metodo.',
-    method_panel2_p2: 'Ogni formula 08 Natural Technology viene sviluppata con attenzione alla composizione, alla selezione degli ingredienti e alla chiarezza delle informazioni.',
-    method_panel2_p3: 'Vogliamo costruire un rapporto di fiducia attraverso prodotti curati, comunicazione trasparente e un’identità coerente con i valori del benessere quotidiano.',
+    method_panel2_p2:
+      'Ogni formula 08 Natural Technology viene sviluppata con attenzione alla composizione, alla selezione degli ingredienti e alla chiarezza delle informazioni.',
+    method_panel2_p3:
+      'Vogliamo costruire un rapporto di fiducia attraverso prodotti curati, comunicazione trasparente e un’identità coerente con i valori del benessere quotidiano.',
     method_panel2_li1: 'Processi chiari, pensati per garantire coerenza.',
     method_panel2_li2: 'Standard elevati, in ogni fase del percorso.',
     method_panel2_li3: 'Una visione orientata alla qualità, al valore e alla fiducia.',
     method_panel2_li4: 'Qualità percepita e sostanziale.',
     method_values_eyebrow: 'I valori del benessere',
     method_values_title: 'Energia, equilibrio,\n**serenità e qualità della vita.**',
-    method_values_body: 'Questi sono i concetti che guidano il linguaggio di 08 Natural Technology: non semplici integratori, ma prodotti pensati per accompagnare il benessere quotidiano con attenzione, qualità e rispetto.',
+    method_values_body:
+      'Questi sono i concetti che guidano il linguaggio di 08 Natural Technology: non semplici integratori, ma prodotti pensati per accompagnare il benessere quotidiano con attenzione, qualità e rispetto.',
     method_value1_title: 'Energia',
-    method_value1_body: 'Il desiderio di sostenere la vitalità quotidiana, nei momenti in cui il corpo richiede maggiore attenzione.',
+    method_value1_body:
+      'Il desiderio di sostenere la vitalità quotidiana, nei momenti in cui il corpo richiede maggiore attenzione.',
     method_value2_title: 'Equilibrio',
-    method_value2_body: 'La ricerca di formule ordinate, sensate e coerenti con le reali esigenze della persona.',
+    method_value2_body:
+      'La ricerca di formule ordinate, sensate e coerenti con le reali esigenze della persona.',
     method_value3_title: 'Serenità',
-    method_value3_body: 'La fiducia di scegliere un prodotto curato, chiaro e sviluppato senza scorciatoie comunicative.',
+    method_value3_body:
+      'La fiducia di scegliere un prodotto curato, chiaro e sviluppato senza scorciatoie comunicative.',
     method_value4_title: 'Qualità della vita',
-    method_value4_body: 'Il benessere quotidiano come obiettivo: più consapevolezza, più cura, più attenzione ai dettagli.',
+    method_value4_body:
+      'Il benessere quotidiano come obiettivo: più consapevolezza, più cura, più attenzione ai dettagli.',
     method_different_eyebrow: 'Cosa ci rende diversi',
     method_different_title: 'Alta qualità e attenzione\nsulle **formule.**',
-    method_different_body: 'Il posizionamento di 08 non nasce dal voler essere "un altro integratore", ma dal desiderio di costruire prodotti curati, con formule pensate e ingredienti selezionati evitando materie prime di scarsa qualità.',
+    method_different_body:
+      'Il posizionamento di 08 non nasce dal voler essere "un altro integratore", ma dal desiderio di costruire prodotti curati, con formule pensate e ingredienti selezionati evitando materie prime di scarsa qualità.',
     method_step1_title: 'Formula',
-    method_step1_body: 'Ogni prodotto nasce da una funzione precisa e da una scelta attenta degli attivi.',
+    method_step1_body:
+      'Ogni prodotto nasce da una funzione precisa e da una scelta attenta degli attivi.',
     method_step2_title: 'Ingredienti',
     method_step2_body: 'La selezione degli ingredienti è uno dei punti centrali dell’identità 08.',
     method_step3_title: 'Conservazione',
-    method_step3_body: 'Il vetro farmaceutico comunica protezione, qualità e maggiore attenzione alla conservazione.',
+    method_step3_body:
+      'Il vetro farmaceutico comunica protezione, qualità e maggiore attenzione alla conservazione.',
     method_step4_title: 'Persona',
-    method_step4_body: 'Il cliente non è un numero: ogni scelta deve trasmettere rispetto, cura e fiducia.',
+    method_step4_body:
+      'Il cliente non è un numero: ogni scelta deve trasmettere rispetto, cura e fiducia.',
     method_audience_eyebrow: 'A chi ci rivolgiamo',
     method_audience_title: 'Per chi riconosce il valore della qualità.',
-    method_audience_p1: '08 Natural Technology si rivolge a chi cerca integratori alimentari curati, chiari e sviluppati con una logica formulativa precisa.',
-    method_audience_p2: 'Ogni prodotto nasce per accompagnare il benessere quotidiano con attenzione, coerenza e rispetto verso chi sceglie il brand.',
+    method_audience_p1:
+      '08 Natural Technology si rivolge a chi cerca integratori alimentari curati, chiari e sviluppati con una logica formulativa precisa.',
+    method_audience_p2:
+      'Ogni prodotto nasce per accompagnare il benessere quotidiano con attenzione, coerenza e rispetto verso chi sceglie il brand.',
     method_audience_li1: 'Persone che cercano prodotti affidabili e riconoscibili.',
     method_audience_li2: 'Chi desidera formule curate e facili da comprendere.',
     method_audience_li3: 'Chi vuole scegliere con maggiore consapevolezza.',
     method_madeinitaly_eyebrow: 'Made in Italy',
     method_madeinitaly_title: 'Un valore centrale, non una decorazione.',
-    method_madeinitaly_p1: 'Il Made in Italy rappresenta un elemento distintivo dell’identità di 08 Natural Technology.',
-    method_madeinitaly_p2: 'Ogni prodotto nasce in Italia, in un contesto orientato alla qualità, alla cura del dettaglio e alla coerenza del brand.',
-    method_madeinitaly_p3: 'Più che un semplice riferimento d’origine, è un valore che accompagna il progetto e ne rafforza l’affidabilità.',
+    method_madeinitaly_p1:
+      'Il Made in Italy rappresenta un elemento distintivo dell’identità di 08 Natural Technology.',
+    method_madeinitaly_p2:
+      'Ogni prodotto nasce in Italia, in un contesto orientato alla qualità, alla cura del dettaglio e alla coerenza del brand.',
+    method_madeinitaly_p3:
+      'Più che un semplice riferimento d’origine, è un valore che accompagna il progetto e ne rafforza l’affidabilità.',
     method_madeinitaly_li1: 'Identità italiana riconoscibile.',
     method_madeinitaly_li2: 'Qualità e coerenza in ogni scelta.',
     method_madeinitaly_li3: 'Un’origine che valorizza il prodotto.',
     method_madeinitaly_li4: 'Un approccio fondato su fiducia e credibilità.',
     method_lineup_eyebrow: 'Linea prodotti',
     method_lineup_title: 'Le nostre formule,\nin continuo **sviluppo.**',
-    method_lineup_body: "08 è all'inizio del proprio percorso. Lo 0 rappresenta la nascita del progetto; l'8 rappresenta la volontà di crescere, migliorare e ampliare la linea nel tempo.",
+    method_lineup_body:
+      "08 è all'inizio del proprio percorso. Lo 0 rappresenta la nascita del progetto; l'8 rappresenta la volontà di crescere, migliorare e ampliare la linea nel tempo.",
     method_formula1_line: 'Linea Beauty',
     method_formula1_name: 'Capelli, Pelle & Unghie',
-    method_formula1_body: 'Formula dedicata con attivi selezionati ed estratti secchi naturali per capelli, pelle e unghie.',
+    method_formula1_body:
+      'Formula dedicata con attivi selezionati ed estratti secchi naturali per capelli, pelle e unghie.',
     method_formula2_line: 'Linea Donna',
     method_formula2_name: 'MenoPausa Complex',
-    method_formula2_body: 'Supporto nutrizionale, con estratti secchi naturali, per il benessere femminile, azione giorno e notte.',
+    method_formula2_body:
+      'Supporto nutrizionale, con estratti secchi naturali, per il benessere femminile, azione giorno e notte.',
     method_formula3_line: 'Linea Microcircolo',
     method_formula3_name: 'Microcircolo Superior',
-    method_formula3_body: 'Formula pensata per il microcircolo e il drenaggio dei liquidi nelle zone periferiche.',
+    method_formula3_body:
+      'Formula pensata per il microcircolo e il drenaggio dei liquidi nelle zone periferiche.',
     method_formula4_line: 'Linea Energia',
     method_formula4_name: 'Multivitaminico & Minerali',
-    method_formula4_body: 'Formula dedicata per supportare energia, vitalità, benessere quotidiano e stress ossidativo.',
+    method_formula4_body:
+      'Formula dedicata per supportare energia, vitalità, benessere quotidiano e stress ossidativo.',
     method_formula5_line: 'In arrivo',
     method_formula5_name: 'Magnesio NP3',
     method_formula5_body: 'Neuro Performance 3: nuova formula in sviluppo.',
     method_formula_discover: 'Scopri',
     method_vision_title: 'Vision.',
-    method_vision_p1: "**L'Eccellenza come Standard** è il principio che definisce la visione di 08 Natural Technology.",
-    method_vision_p2: 'Un modo di intendere il benessere che parte dalla qualità, dalla coerenza e dalla cura di ogni dettaglio, con l’obiettivo di costruire un’identità riconoscibile e duratura.',
-    method_vision_p3: 'Ogni formula diventa parte di un progetto più ampio: creare prodotti affidabili, curati e distintivi, pensati per accompagnare il quotidiano con serietà e valore.',
+    method_vision_p1:
+      "**L'Eccellenza come Standard** è il principio che definisce la visione di 08 Natural Technology.",
+    method_vision_p2:
+      'Un modo di intendere il benessere che parte dalla qualità, dalla coerenza e dalla cura di ogni dettaglio, con l’obiettivo di costruire un’identità riconoscibile e duratura.',
+    method_vision_p3:
+      'Ogni formula diventa parte di un progetto più ampio: creare prodotti affidabili, curati e distintivi, pensati per accompagnare il quotidiano con serietà e valore.',
     method_vision_cta1: 'Scopri i prodotti',
     method_vision_cta2: 'Contattaci',
   },
@@ -618,11 +707,14 @@ export const dictionary = {
     footer_legal_notices: 'Legal notices',
 
     home_hero_title: '**Excellence**\nas Standard.',
-    home_hero_body: "08 Natural Technology was born from a dream: to create something we could be truly proud of. We didn't just want to make supplements, but bring to life products developed with passion, care and respect for the people who put their trust in us every day.",
+    home_hero_body:
+      "08 Natural Technology was born from a dream: to create something we could be truly proud of. We didn't just want to make supplements, but bring to life products developed with passion, care and respect for the people who put their trust in us every day.",
     home_hero_cta: 'Discover our formulas',
+    home_hero_alt: '08 Natural Technology',
 
     home_feature_1_title: 'Italian excellence',
-    home_feature_1_body: 'Italian identity, attention to detail and high standards in every choice.',
+    home_feature_1_body:
+      'Italian identity, attention to detail and high standards in every choice.',
     home_feature_2_title: 'High-quality ingredients',
     home_feature_2_body: 'Carefully selected raw materials and consistent formulas.',
     home_feature_3_title: 'Research and innovation',
@@ -633,19 +725,24 @@ export const dictionary = {
     home_about_eyebrow: 'About us',
     home_about_script: "Founder's Letter",
     home_about_title: 'A dream that became\na **daily promise.**',
-    home_about_quote: "For us, wellness isn't just a word: it's energy, balance, serenity and quality of life.",
-    home_about_p1: '**08 Natural Technology** was born from the desire to create food supplements crafted with care, with understandable formulas, selected ingredients and a recognizable Italian identity.',
-    home_about_p2: "We didn't just want to make products, but a brand with formulas capable of conveying trust, care and respect for those who choose to take care of themselves every day.",
+    home_about_quote:
+      "For us, wellness isn't just a word: it's energy, balance, serenity and quality of life.",
+    home_about_p1:
+      '**08 Natural Technology** was born from the desire to create food supplements crafted with care, with understandable formulas, selected ingredients and a recognizable Italian identity.',
+    home_about_p2:
+      "We didn't just want to make products, but a brand with formulas capable of conveying trust, care and respect for those who choose to take care of themselves every day.",
     home_about_signature: 'Vito Tatulli',
 
     home_formulas_eyebrow: 'Our formulas',
     home_formulas_title: 'Products designed\nfor **real needs.**',
-    home_formulas_body: "From products for microcirculation and light legs, to vitamin support, hair, skin and nail beauty, and female balance during menopause: 08 Natural Technology offers nutritional solutions designed for concrete, everyday needs.",
+    home_formulas_body:
+      'From products for microcirculation and light legs, to vitamin support, hair, skin and nail beauty, and female balance during menopause: 08 Natural Technology offers nutritional solutions designed for concrete, everyday needs.',
     home_formulas_cta: 'Discover our products',
 
     home_blog_eyebrow: 'Insights',
     home_blog_title: 'Dossiers, active ingredients and quality.',
-    home_blog_body: 'The blog becomes an SEO and authority tool: articles on ingredients, usage guides, tips and simple explanations.',
+    home_blog_body:
+      'The blog becomes an SEO and authority tool: articles on ingredients, usage guides, tips and simple explanations.',
     home_reading_time: 'min read',
 
     contact_eyebrow: "Let's talk",
@@ -673,8 +770,10 @@ export const dictionary = {
 
     b2b_eyebrow: 'B2B',
     b2b_hero_title: 'Become an\n**08 Natural Technology** reseller.',
-    b2b_hero_p1: 'A page dedicated to pharmacies, drugstores, herbalist shops and industry professionals. Here the site collects qualified contacts and catalog requests from business partners interested in the 08 Natural Technology line.',
-    b2b_hero_p2: "We're present in pharmacies, drugstores and herbalist shops. If you're an industry professional and want to bring 08 into your store, contact us to receive the commercial catalog and supply terms.",
+    b2b_hero_p1:
+      'A page dedicated to pharmacies, drugstores, herbalist shops and industry professionals. Here the site collects qualified contacts and catalog requests from business partners interested in the 08 Natural Technology line.',
+    b2b_hero_p2:
+      "We're present in pharmacies, drugstores and herbalist shops. If you're an industry professional and want to bring 08 into your store, contact us to receive the commercial catalog and supply terms.",
     b2b_hero_cta: 'Request information',
     b2b_offer_title: 'What we offer\nto **resellers.**',
     b2b_offer_1: 'Product catalog',
@@ -689,11 +788,13 @@ export const dictionary = {
     b2b_why_eyebrow: 'Why 08',
     b2b_why_title: 'A brand that builds trust\nat the **point of sale.**',
     b2b_trust_1_label: 'Notified products',
-    b2b_trust_1_body: 'Food supplements notified to the Italian Ministry of Health where indicated.',
+    b2b_trust_1_body:
+      'Food supplements notified to the Italian Ministry of Health where indicated.',
     b2b_trust_2_label: 'Made in Italy',
     b2b_trust_2_body: 'A project born in Bitonto, Puglia. Clear and recognizable Italian identity.',
     b2b_trust_3_label: 'Carefully crafted formulas',
-    b2b_trust_3_body: 'Selected ingredients, declared dosages, responsible and transparent communication.',
+    b2b_trust_3_body:
+      'Selected ingredients, declared dosages, responsible and transparent communication.',
 
     checkout_empty: 'Your cart is empty.',
     checkout_go_to_products: 'Go to products',
@@ -705,7 +806,8 @@ export const dictionary = {
     checkout_create_account: 'Create an account with these details',
     checkout_password: 'Password',
     checkout_password_placeholder: 'Create a secure password',
-    checkout_password_note: "You'll be able to log in with this email and password to check your orders.",
+    checkout_password_note:
+      "You'll be able to log in with this email and password to check your orders.",
     checkout_first_name: 'First name',
     checkout_first_name_placeholder: 'First name',
     checkout_last_name: 'Last name',
@@ -722,7 +824,8 @@ export const dictionary = {
     checkout_vat_placeholder: 'Tax code or VAT number',
     checkout_sdi_code: 'SDI code',
     checkout_pec: 'PEC',
-    checkout_sdi_or_pec_note: 'Enter at least the SDI code or PEC (required for Italian e-invoicing).',
+    checkout_sdi_or_pec_note:
+      'Enter at least the SDI code or PEC (required for Italian e-invoicing).',
     checkout_address: 'Address',
     checkout_address_placeholder: 'Street and house number',
     checkout_city: 'City',
@@ -800,6 +903,28 @@ export const dictionary = {
     checkout_order_summary: 'Order summary',
     checkout_discount_with_code: 'Discount ({code})',
     checkout_free: 'Free',
+
+    // Newsletter
+    newsletter_kicker: 'Newsletter 08',
+    newsletter_title: 'Extra 5% off',
+    newsletter_body: 'Subscribe for news, content and 08 Natural Technology formulas.',
+    newsletter_button: 'Subscribe',
+    newsletter_email_label: 'Email',
+    newsletter_email_placeholder: 'name@email.com',
+    newsletter_sending: 'Sending...',
+    newsletter_consent_before: 'I have read the',
+    newsletter_consent_link: 'privacy policy',
+    newsletter_consent_after:
+      'and I agree to receive marketing communications. You can unsubscribe at any time.',
+    newsletter_success: 'We sent you an email: confirm your address to receive the code.',
+    newsletter_error: 'We could not complete your subscription.',
+    newsletter_optin_register:
+      'I want to receive the newsletter with news and offers. You can unsubscribe at any time.',
+    newsletter_account_title: 'Newsletter',
+    newsletter_account_active: 'You are subscribed to the newsletter.',
+    newsletter_account_inactive: 'You are not subscribed to the newsletter.',
+    newsletter_account_subscribe: 'Subscribe me',
+    newsletter_account_unsubscribe: 'Unsubscribe',
     checkout_foreign_surcharge: 'International surcharge',
     checkout_cod_surcharge: 'Cash-on-delivery surcharge',
     checkout_trust_stripe: 'Secure payment with Stripe',
@@ -811,14 +936,17 @@ export const dictionary = {
     success_order_received: 'Order received',
     success_thank_you: 'Thank you for your purchase.',
     success_bank_instructions_title: 'Bank transfer instructions',
-    success_bank_instructions_body: 'Complete the transfer within **5 business days**. Your order will be processed once payment is received.',
+    success_bank_instructions_body:
+      'Complete the transfer within **5 business days**. Your order will be processed once payment is received.',
     success_bank_holder: 'Account holder',
     success_bank_iban: 'IBAN',
     success_bank_reason: 'Payment reference',
     success_bank_reason_fallback: 'Order number (see email)',
     success_cod_title: 'Payment on delivery',
-    success_cod_body: 'Payment is made directly to the courier upon delivery. Have the exact amount ready in cash. The **€5.00** cash-on-delivery surcharge is already included in the total.',
-    success_stripe_body: "Your order has been received and confirmed. You'll receive an email with shipping details as soon as your package is on its way.",
+    success_cod_body:
+      'Payment is made directly to the courier upon delivery. Have the exact amount ready in cash. The **€5.00** cash-on-delivery surcharge is already included in the total.',
+    success_stripe_body:
+      "Your order has been received and confirmed. You'll receive an email with shipping details as soon as your package is on its way.",
     success_confirmation_email_note: "You'll receive a confirmation email with your order summary.",
     success_view_orders: 'View my orders',
     success_continue_shopping: 'Continue shopping',
@@ -829,23 +957,31 @@ export const dictionary = {
     products_capsules: '{n} vegetable capsules',
     products_days: '{n} days',
     products_discover: 'Discover',
-    products_disclaimer: 'Food supplements are not a substitute for a varied and balanced diet and a healthy lifestyle. Keep out of reach of children. All products are notified to the Italian Ministry of Health where indicated.',
+    products_disclaimer:
+      'Food supplements are not a substitute for a varied and balanced diet and a healthy lifestyle. Keep out of reach of children. All products are notified to the Italian Ministry of Health where indicated.',
 
-    product_regulatory_notice: 'Food supplement notified to the Italian Ministry of Health{ms}. Do not exceed the recommended daily dose. Food supplements are not a substitute for a varied and balanced diet and a healthy lifestyle. Keep out of reach of children.',
+    product_regulatory_notice:
+      'Food supplement notified to the Italian Ministry of Health{ms}. Do not exceed the recommended daily dose. Food supplements are not a substitute for a varied and balanced diet and a healthy lifestyle. Keep out of reach of children.',
 
     work_hero_title: 'Work **with us.**',
-    work_hero_body: 'We look for collaborations built on expertise, trust and real attention to project quality.',
+    work_hero_body:
+      'We look for collaborations built on expertise, trust and real attention to project quality.',
     work_eyebrow: 'Growing with method',
     work_title: 'A young project,\nwith **clear standards.**',
-    work_intro: '08 Natural Technology considers collaborations with people and organizations who share a serious, clear approach oriented toward everyday wellness. Every relationship is built on respect for the product, the customer, and how the brand is represented.',
+    work_intro:
+      '08 Natural Technology considers collaborations with people and organizations who share a serious, clear approach oriented toward everyday wellness. Every relationship is built on respect for the product, the customer, and how the brand is represented.',
     work_area_1_title: 'Sales',
-    work_area_1_body: 'Collaborations with people able to convey the value of the product with precision, method and customer care.',
+    work_area_1_body:
+      'Collaborations with people able to convey the value of the product with precision, method and customer care.',
     work_area_2_title: 'Consulting and outreach',
-    work_area_2_body: 'Professionals interested in contributing to clear, responsible language consistent with 08 quality.',
+    work_area_2_body:
+      'Professionals interested in contributing to clear, responsible language consistent with 08 quality.',
     work_area_3_title: 'Local partners',
-    work_area_3_body: 'Relationships with local businesses, pharmacies, drugstores, herbalist shops and wellness professionals.',
+    work_area_3_body:
+      'Relationships with local businesses, pharmacies, drugstores, herbalist shops and wellness professionals.',
     work_cta_title: 'Tell us about yourself.',
-    work_cta_body: 'If you think you could contribute to the growth of 08 Natural Technology, send us a brief introduction: your experience, area of interest and proposed collaboration.',
+    work_cta_body:
+      'If you think you could contribute to the growth of 08 Natural Technology, send us a brief introduction: your experience, area of interest and proposed collaboration.',
     work_cta_button: 'Contact us',
 
     blog_eyebrow: 'Science, nutrition, wellness',
@@ -863,9 +999,11 @@ export const dictionary = {
     blog_section_dossier_title: 'Product dossier',
     blog_section_dossier_body: 'Full posts dedicated to 08 Natural Technology formulas.',
     blog_section_principles_title: 'Active ingredients, ingredients and functions',
-    blog_section_principles_body: 'Separate posts dedicated to individual actives: what they are, which ingredient is used and what function they perform in the formula.',
+    blog_section_principles_body:
+      'Separate posts dedicated to individual actives: what they are, which ingredient is used and what function they perform in the formula.',
     blog_section_quality_title: 'Ingredient quality: useful comparisons',
-    blog_section_quality_body: 'Separate posts explaining the difference between a technical ingredient and its generic alternative.',
+    blog_section_quality_body:
+      'Separate posts explaining the difference between a technical ingredient and its generic alternative.',
     blog_section_other_title: 'Existing insights',
     blog_section_other_body: 'Articles kept in the blog archive.',
     blog_read_article: 'Read article',
@@ -974,7 +1112,8 @@ export const dictionary = {
     login_or: 'or',
     login_google: 'Continue with Google',
     login_verify_success: 'Email confirmed! You can now log in.',
-    login_verify_expired: 'The confirmation link has expired. Request a new one below after logging in.',
+    login_verify_expired:
+      'The confirmation link has expired. Request a new one below after logging in.',
     login_verify_invalid: 'Invalid confirmation link.',
     login_reset_success: 'Password updated! Log in with your new password.',
 
@@ -1000,14 +1139,19 @@ export const dictionary = {
     register_and_the: 'and the',
     register_privacy_link: 'Privacy Policy',
     register_check_email_title: 'Check your email',
-    register_check_email_body: "We've sent a link to **{email}** to confirm your address. Click the link within 24 hours to activate your account.",
+    register_check_email_body:
+      "We've sent a link to **{email}** to confirm your address. Click the link within 24 hours to activate your account.",
+    register_email_failed_title: 'Account created, email not sent',
+    register_email_failed_body:
+      'Your account **{email}** was created, but we could not send the confirmation email. Go to the sign-in page and use "Resend verification email".',
 
     forgot_eyebrow: 'Account recovery',
     forgot_title: 'Forgot your password?',
     forgot_body: "Enter your email and we'll send you a link to reset it.",
     forgot_back_to_login: 'Back to login',
     forgot_check_email_title: 'Check your email',
-    forgot_check_email_body: "If an account exists for **{email}**, we've sent a link to reset your password. The link expires in 1 hour.",
+    forgot_check_email_body:
+      "If an account exists for **{email}**, we've sent a link to reset your password. The link expires in 1 hour.",
     forgot_submit: 'Send reset link',
     forgot_submitting: 'Sending…',
     reset_title: 'Choose a new password.',
@@ -1026,101 +1170,144 @@ export const dictionary = {
 
     method_eyebrow: '08 Quality',
     method_hero_title: '**Excellence**\nas Standard.',
-    method_hero_body: "We didn't just want to make supplements, but bring to life products developed with passion, care and respect for the people who put their trust in us every day.",
+    method_hero_body:
+      "We didn't just want to make supplements, but bring to life products developed with passion, care and respect for the people who put their trust in us every day.",
     method_hero_cta: 'Discover our formulas',
     method_promise_eyebrow: 'Our promise',
     method_promise_title: 'Quality, innovation\nand **trust.**',
-    method_promise_body: 'Behind every formula lies research, commitment and a careful choice of ingredients, because we believe quality is not a detail, but a core value.',
+    method_promise_body:
+      'Behind every formula lies research, commitment and a careful choice of ingredients, because we believe quality is not a detail, but a core value.',
     method_panel1_title: 'More than a brand.',
-    method_panel1_p1: "For us, wellness isn't just a word: it's energy, balance, serenity and quality of life. It's something precious that deserves attention and care.",
-    method_panel1_p2: 'That\'s why we work every day toward the same goal: offering products that combine quality, innovation and trust, always putting the person at the center of every choice.',
+    method_panel1_p1:
+      "For us, wellness isn't just a word: it's energy, balance, serenity and quality of life. It's something precious that deserves attention and care.",
+    method_panel1_p2:
+      "That's why we work every day toward the same goal: offering products that combine quality, innovation and trust, always putting the person at the center of every choice.",
     method_panel1_li1: 'Formulas developed with care.',
     method_panel1_li2: 'Carefully selected ingredients.',
     method_panel1_li3: 'Clear and responsible communication.',
     method_panel1_li4: 'Respect for those who choose our brand.',
     method_panel2_title: 'The 08 promise.',
     method_panel2_p1: "For us, quality isn't just a goal: it's a method.",
-    method_panel2_p2: 'Every 08 Natural Technology formula is developed with attention to composition, ingredient selection and clarity of information.',
-    method_panel2_p3: 'We want to build a relationship of trust through carefully crafted products, transparent communication and an identity consistent with the values of everyday wellness.',
+    method_panel2_p2:
+      'Every 08 Natural Technology formula is developed with attention to composition, ingredient selection and clarity of information.',
+    method_panel2_p3:
+      'We want to build a relationship of trust through carefully crafted products, transparent communication and an identity consistent with the values of everyday wellness.',
     method_panel2_li1: 'Clear processes, designed to ensure consistency.',
     method_panel2_li2: 'High standards, at every stage of the journey.',
     method_panel2_li3: 'A vision oriented toward quality, value and trust.',
     method_panel2_li4: 'Perceived and substantial quality.',
     method_values_eyebrow: 'The values of wellness',
     method_values_title: 'Energy, balance,\n**serenity and quality of life.**',
-    method_values_body: 'These are the concepts that guide the language of 08 Natural Technology: not just supplements, but products designed to support everyday wellness with care, quality and respect.',
+    method_values_body:
+      'These are the concepts that guide the language of 08 Natural Technology: not just supplements, but products designed to support everyday wellness with care, quality and respect.',
     method_value1_title: 'Energy',
-    method_value1_body: 'The desire to support everyday vitality, in the moments when the body needs more attention.',
+    method_value1_body:
+      'The desire to support everyday vitality, in the moments when the body needs more attention.',
     method_value2_title: 'Balance',
-    method_value2_body: 'The pursuit of orderly, sensible formulas consistent with the real needs of the person.',
+    method_value2_body:
+      'The pursuit of orderly, sensible formulas consistent with the real needs of the person.',
     method_value3_title: 'Serenity',
-    method_value3_body: 'The confidence of choosing a carefully crafted, clear product developed without communication shortcuts.',
+    method_value3_body:
+      'The confidence of choosing a carefully crafted, clear product developed without communication shortcuts.',
     method_value4_title: 'Quality of life',
-    method_value4_body: 'Everyday wellness as a goal: more awareness, more care, more attention to detail.',
+    method_value4_body:
+      'Everyday wellness as a goal: more awareness, more care, more attention to detail.',
     method_different_eyebrow: 'What makes us different',
     method_different_title: 'High quality and attention\nto our **formulas.**',
-    method_different_body: '08\'s positioning doesn\'t come from wanting to be "just another supplement", but from the desire to build carefully crafted products, with thoughtful formulas and selected ingredients, avoiding low-quality raw materials.',
+    method_different_body:
+      '08\'s positioning doesn\'t come from wanting to be "just another supplement", but from the desire to build carefully crafted products, with thoughtful formulas and selected ingredients, avoiding low-quality raw materials.',
     method_step1_title: 'Formula',
-    method_step1_body: 'Every product starts from a precise function and a careful choice of active ingredients.',
+    method_step1_body:
+      'Every product starts from a precise function and a careful choice of active ingredients.',
     method_step2_title: 'Ingredients',
-    method_step2_body: 'Ingredient selection is one of the core points of 08\'s identity.',
+    method_step2_body: "Ingredient selection is one of the core points of 08's identity.",
     method_step3_title: 'Preservation',
-    method_step3_body: 'Pharmaceutical glass conveys protection, quality and greater attention to preservation.',
+    method_step3_body:
+      'Pharmaceutical glass conveys protection, quality and greater attention to preservation.',
     method_step4_title: 'The person',
-    method_step4_body: 'The customer is not a number: every choice must convey respect, care and trust.',
+    method_step4_body:
+      'The customer is not a number: every choice must convey respect, care and trust.',
     method_audience_eyebrow: 'Who we serve',
     method_audience_title: 'For those who recognize the value of quality.',
-    method_audience_p1: '08 Natural Technology is for those looking for food supplements that are carefully crafted, clear and developed with a precise formulation logic.',
-    method_audience_p2: 'Every product is designed to support everyday wellness with care, consistency and respect for those who choose the brand.',
+    method_audience_p1:
+      '08 Natural Technology is for those looking for food supplements that are carefully crafted, clear and developed with a precise formulation logic.',
+    method_audience_p2:
+      'Every product is designed to support everyday wellness with care, consistency and respect for those who choose the brand.',
     method_audience_li1: 'People looking for reliable, recognizable products.',
     method_audience_li2: 'Those who want carefully crafted, easy-to-understand formulas.',
     method_audience_li3: 'Those who want to choose with greater awareness.',
     method_madeinitaly_eyebrow: 'Made in Italy',
     method_madeinitaly_title: 'A core value, not a decoration.',
-    method_madeinitaly_p1: "Made in Italy is a distinctive element of 08 Natural Technology's identity.",
-    method_madeinitaly_p2: 'Every product is born in Italy, in a context oriented toward quality, attention to detail and brand consistency.',
-    method_madeinitaly_p3: 'More than a simple reference to origin, it is a value that accompanies the project and strengthens its reliability.',
+    method_madeinitaly_p1:
+      "Made in Italy is a distinctive element of 08 Natural Technology's identity.",
+    method_madeinitaly_p2:
+      'Every product is born in Italy, in a context oriented toward quality, attention to detail and brand consistency.',
+    method_madeinitaly_p3:
+      'More than a simple reference to origin, it is a value that accompanies the project and strengthens its reliability.',
     method_madeinitaly_li1: 'Recognizable Italian identity.',
     method_madeinitaly_li2: 'Quality and consistency in every choice.',
     method_madeinitaly_li3: 'An origin that adds value to the product.',
     method_madeinitaly_li4: 'An approach built on trust and credibility.',
     method_lineup_eyebrow: 'Product line',
     method_lineup_title: 'Our formulas,\nconstantly **evolving.**',
-    method_lineup_body: '08 is at the beginning of its journey. The 0 represents the birth of the project; the 8 represents the desire to grow, improve and expand the line over time.',
+    method_lineup_body:
+      '08 is at the beginning of its journey. The 0 represents the birth of the project; the 8 represents the desire to grow, improve and expand the line over time.',
     method_formula1_line: 'Beauty Line',
     method_formula1_name: 'Hair, Skin & Nails',
-    method_formula1_body: 'Dedicated formula with selected active ingredients and natural dry extracts for hair, skin and nails.',
+    method_formula1_body:
+      'Dedicated formula with selected active ingredients and natural dry extracts for hair, skin and nails.',
     method_formula2_line: "Women's Line",
     method_formula2_name: 'MenoPause Complex',
-    method_formula2_body: 'Nutritional support, with natural dry extracts, for female wellness, day and night action.',
+    method_formula2_body:
+      'Nutritional support, with natural dry extracts, for female wellness, day and night action.',
     method_formula3_line: 'Microcirculation Line',
     method_formula3_name: 'Microcircolo Superior',
-    method_formula3_body: 'Formula designed for microcirculation and fluid drainage in peripheral areas.',
+    method_formula3_body:
+      'Formula designed for microcirculation and fluid drainage in peripheral areas.',
     method_formula4_line: 'Energy Line',
     method_formula4_name: 'Multivitamin & Minerals',
-    method_formula4_body: 'Dedicated formula to support energy, vitality, everyday wellness and oxidative stress.',
+    method_formula4_body:
+      'Dedicated formula to support energy, vitality, everyday wellness and oxidative stress.',
     method_formula5_line: 'Coming soon',
     method_formula5_name: 'Magnesio NP3',
     method_formula5_body: 'Neuro Performance 3: new formula in development.',
     method_formula_discover: 'Discover',
     method_vision_title: 'Vision.',
-    method_vision_p1: '**Excellence as Standard** is the principle that defines the vision of 08 Natural Technology.',
-    method_vision_p2: 'A way of understanding wellness that starts from quality, consistency and attention to every detail, with the goal of building a recognizable and lasting identity.',
-    method_vision_p3: 'Every formula becomes part of a larger project: creating reliable, carefully crafted and distinctive products, designed to accompany everyday life with seriousness and value.',
+    method_vision_p1:
+      '**Excellence as Standard** is the principle that defines the vision of 08 Natural Technology.',
+    method_vision_p2:
+      'A way of understanding wellness that starts from quality, consistency and attention to every detail, with the goal of building a recognizable and lasting identity.',
+    method_vision_p3:
+      'Every formula becomes part of a larger project: creating reliable, carefully crafted and distinctive products, designed to accompany everyday life with seriousness and value.',
     method_vision_cta1: 'Discover our products',
     method_vision_cta2: 'Contact us',
   },
-} as const satisfies Record<Locale, Record<string, string>>
+} as const satisfies Record<string, Record<string, string>>
 
 export type DictionaryKey = keyof typeof dictionary.it
 
+/** Traduce una chiave, sostituendo i segnaposto {nome} con i valori indicati. */
+export function translate(
+  locale: Locale,
+  key: DictionaryKey,
+  vars?: Record<string, string>
+): string {
+  const selected = dictionary[locale as keyof typeof dictionary] ?? dictionary.it
+  const text = (selected[key] ?? dictionary.it[key]) as string
+  if (!vars) return text
+  return Object.entries(vars).reduce((acc, [name, value]) => acc.replace(`{${name}}`, value), text)
+}
+
+/**
+ * La funzione restituita è stabile finché la lingua non cambia.
+ *
+ * Prima veniva ricreata a ogni render, quindi non poteva essere usata come
+ * dipendenza di useMemo o useEffect: nei punti in cui serviva si era dovuto
+ * mettere un eslint-disable e dipendere da `locale` a mano.
+ */
 export function useTranslation(locale: Locale) {
-  return (key: DictionaryKey, vars?: Record<string, string>) => {
-    const text = dictionary[locale][key] ?? dictionary.it[key]
-    if (!vars) return text
-    return Object.entries(vars).reduce(
-      (acc, [k, v]) => acc.replace(`{${k}}`, v),
-      text as string
-    )
-  }
+  return useCallback(
+    (key: DictionaryKey, vars?: Record<string, string>) => translate(locale, key, vars),
+    [locale]
+  )
 }

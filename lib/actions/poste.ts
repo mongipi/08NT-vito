@@ -1,10 +1,11 @@
 'use server'
 
-import { searchPosteLockers, type PosteLocker } from '@/lib/poste'
+import { isPosteConfigured, searchPosteLockers, type PosteLocker } from '@/lib/poste'
 
 interface SearchPosteLockersResult {
   lockers?: PosteLocker[]
   error?: string
+  configurationMissing?: boolean
 }
 
 export async function searchPosteLockersAction(zipCode: string): Promise<SearchPosteLockersResult> {
@@ -12,11 +13,20 @@ export async function searchPosteLockersAction(zipCode: string): Promise<SearchP
     return { error: 'CAP non valido' }
   }
 
+  if (!isPosteConfigured()) {
+    return {
+      error: 'La selezione automatica richiede l’attivazione delle credenziali Poste Italiane.',
+      configurationMissing: true,
+    }
+  }
+
   try {
     const lockers = await searchPosteLockers(zipCode)
     return { lockers }
   } catch (err) {
     console.error('Ricerca locker Poste fallita:', err)
-    return { error: 'Servizio Poste Italiane non disponibile al momento' }
+    const message =
+      err instanceof Error ? err.message : 'Servizio Poste Italiane non disponibile al momento'
+    return { error: message }
   }
 }

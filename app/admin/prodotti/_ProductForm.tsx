@@ -35,6 +35,7 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
     for (const img of product.productImages) {
       const path = KEY_TO_PATH[img.key]
       if (path) images[img.key] = `/api/product-images/${product.id}/${path}`
+      else if (img.key.startsWith('variant-')) images[img.key] = `/api/product-images/${product.id}/${img.key}`
     }
   }
 
@@ -95,6 +96,7 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
                 comparePrice: v.comparePrice,
                 b2bPrice: v.b2bPrice,
                 stock: v.stock,
+                image: images[`variant-${variantImageToken(v.quantity, v.label)}`],
               })) ?? []} />
             </div>
 
@@ -153,8 +155,8 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
                 Usati solo se il prodotto non ha varianti (vedi sotto).
               </p>
               <div style={s.stack(12)}>
-                <Field label="Prezzo (€)" name="price" type="number" step="0.01" required defaultValue={product?.price} placeholder="0.00" />
-                <Field label="Prezzo barrato (€)" name="comparePrice" type="number" step="0.01" defaultValue={product?.comparePrice} placeholder="0.00" />
+                <Field label="Prezzo di vendita (€)" name="price" required defaultValue={product?.price} placeholder="0,00" />
+                <Field label="Prezzo originale barrato (€)" name="comparePrice" defaultValue={product?.comparePrice} placeholder="0,00" />
                 <Field label="Scorte" name="stock" type="number" required defaultValue={product?.stock ?? 0} />
               </div>
             </div>
@@ -210,4 +212,16 @@ export function ProductForm({ lines, action, product, deleteAction }: Props) {
       `}</style>
     </>
   )
+}
+
+function variantImageToken(quantity: number, label: string) {
+  if (quantity > 0) return String(quantity)
+  const quantityInLabel = label.match(/\d+/)?.[0]
+  if (quantityInLabel) return quantityInLabel
+  return label
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
 }

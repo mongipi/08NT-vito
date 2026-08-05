@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { hashPassword } from '@/lib/auth/password'
 import { issueVerificationEmail } from '@/lib/verification'
+import { createUser, getUserByEmail } from '@/services/users'
+import { subscribeToNewsletter } from '@/services/newsletter'
 
 export async function POST(req: NextRequest) {
-  const { name, email, password, confirmPassword } = await req.json()
+  const { name, email, password, confirmPassword, newsletter } = await req.json()
 
   if (!email || !password || password.length < 8) {
     return NextResponse.json({ error: 'Dati non validi' }, { status: 400 })
@@ -14,17 +15,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Le password non coincidono' }, { status: 400 })
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } })
+  const existing = await getUserByEmail(email)
   if (existing) {
     return NextResponse.json({ error: 'Email già registrata' }, { status: 409 })
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10)
-  await prisma.user.create({
-    data: { name, email, password: hashedPassword, role: 'consumer' },
-  })
+  await createUser({ name, email, password: await hashPassword(password), role: 'consumer' })
 
-  await issueVerificationEmail(email, name)
+  // L'iscrizione resta in attesa: sara' la verifica dell'email dell'account a
+  // confermarla, perche' dimostra la stessa cosa del doppio consenso.
+  if (newsletter === true) {
+    try {
+      await subscribeToNewsletter(email, 'it', 'registrazione')
+    } catch (error) {
+      console.error('Iscrizione newsletter da registrazione fallita per', email, error)
+    }
+  }
 
-  return NextResponse.json({ ok: true }, { status: 201 })
+  // L'account è già creato: se l'invio dell'email fallisce (SMTP non
+  // raggiungibile o mal configurato) non ha senso rispondere con un errore.
+  // Restituirebbe 500 lasciando a database un utente che al secondo tentativo
+  // riceverebbe "email già registrata", senza via d'uscita.
+  // Chi si registra può richiedere una nuova email dalla pagina di accesso.
+  let emailSent = true
+  try {
+    await issueVerificationEmail(email, name)
+  } catch (error) {
+    emailSent = false
+    console.error('Invio email di verifica fallito per', email, error)
+  }
+
+  return NextResponse.json({ ok: true, emailSent }, { status: 201 })
 }

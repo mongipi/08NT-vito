@@ -166,6 +166,7 @@ const sections: LegalSection[] = [
 export default function TerminiCondizioniVenditaPage() {
   return (
     <LegalDocument
+      documentKey="terms"
       eyebrow="Vendita online"
       eyebrowEn="Online sales"
       title="Termini e condizioni di vendita"

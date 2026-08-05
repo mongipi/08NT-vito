@@ -14,7 +14,7 @@ const MAX_SIDE = 1800  // px — max dimensione lato più lungo
 const QUALITY  = 0.88  // qualità JPEG/WebP output
 
 async function compressImage(file: File): Promise<File> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const img = new window.Image()
     img.onload = () => {
       let { width, height } = img

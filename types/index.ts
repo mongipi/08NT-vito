@@ -14,6 +14,7 @@ export interface Ingredient {
   id: string
   name: string
   dosage?: string | null
+  vnr?: string | null
   order: number
 }
 
@@ -23,6 +24,7 @@ export interface ProductImages {
   lato1?: string
   lato2?: string
   etichetta?: string
+  variants?: Record<string, string>
 }
 
 export interface ProductVariant {
@@ -34,6 +36,7 @@ export interface ProductVariant {
   b2bPrice?: number | null
   stock: number
   order: number
+  image?: string
 }
 
 export interface Product {

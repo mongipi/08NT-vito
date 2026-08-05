@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getUserWithRecentOrders } from '@/services/users'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Badge } from '../../_components/Badge'
@@ -8,10 +8,7 @@ import { s } from '../../_components/styles'
 
 export default async function EditUtentePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const user = await prisma.user.findUnique({
-    where: { id },
-    include: { orders: { orderBy: { createdAt: 'desc' }, take: 5 } },
-  })
+  const user = await getUserWithRecentOrders(id)
   if (!user) notFound()
 
   const profileFields = [

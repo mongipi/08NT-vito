@@ -1,12 +1,12 @@
 import NextAuth from 'next-auth'
 import authConfig from './auth.config'
 import { NextResponse } from 'next/server'
+import { isAdmin } from '@/lib/domain/roles'
 
 const { auth } = NextAuth(authConfig)
 
 export default auth((req) => {
   const { pathname } = req.nextUrl
-  const role = (req.auth?.user as { role?: string } | undefined)?.role
 
   if (pathname.startsWith('/admin')) {
     if (!req.auth) {
@@ -14,7 +14,7 @@ export default auth((req) => {
       url.searchParams.set('callbackUrl', pathname)
       return NextResponse.redirect(url)
     }
-    if (role !== 'admin') {
+    if (!isAdmin(req.auth.user?.role)) {
       return NextResponse.redirect(new URL('/', req.url))
     }
   }

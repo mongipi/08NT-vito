@@ -2,18 +2,8 @@
 
 import { useState } from 'react'
 import { searchPosteLockersAction } from '@/lib/actions/poste'
+import type { PosteLocker } from '@/lib/poste'
 
-interface PosteLocker {
-  officeCode: string
-  description: string
-  address: string
-  place: string
-  province: string
-  openTimeMon: string
-  closeTimeMon: string
-  openTimeSat: string
-  closeTimeSat: string
-}
 
 interface Props {
   pickupPointCode: string
@@ -29,6 +19,7 @@ export function PosteLockerPicker({ pickupPointCode, pickupPointAddress, onSelec
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [manualOverride, setManualOverride] = useState(false)
+  const [configurationMissing, setConfigurationMissing] = useState(false)
 
   async function search() {
     if (!/^\d{5}$/.test(cap)) {
@@ -42,6 +33,7 @@ export function PosteLockerPicker({ pickupPointCode, pickupPointAddress, onSelec
       const data = await searchPosteLockersAction(cap)
       if (data.error) {
         setError(data.error)
+        setConfigurationMissing(Boolean(data.configurationMissing))
         return
       }
       const found = data.lockers ?? []
@@ -119,6 +111,15 @@ export function PosteLockerPicker({ pickupPointCode, pickupPointAddress, onSelec
 
       {error && <p style={{ fontSize: '0.75rem', color: '#dc2626', margin: 0 }}>{error}</p>}
 
+      <a
+        href="https://www.poste.it/prenotazione/vieni-in-poste?vieni-in-poste"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ fontSize: '0.75rem', color: 'var(--forest)', fontWeight: 500, width: 'max-content' }}
+      >
+        Visualizza i punti Poste Italiane vicino a te →
+      </a>
+
       {lockers.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: 280, overflowY: 'auto' }}>
           {lockers.map(l => {
@@ -158,7 +159,9 @@ export function PosteLockerPicker({ pickupPointCode, pickupPointAddress, onSelec
         onClick={() => setManualOverride(true)}
         style={{ alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0, fontSize: '0.75rem', color: 'var(--ink-4)', textDecoration: 'underline', cursor: 'pointer' }}
       >
-        Non trovi il tuo punto? Inseriscilo manualmente
+        {configurationMissing
+          ? 'Inserisci il punto Poste scelto'
+          : 'Non trovi il tuo punto? Inseriscilo manualmente'}
       </button>
     </div>
   )

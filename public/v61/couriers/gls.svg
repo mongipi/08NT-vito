@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 54" role="img" aria-label="GLS">
+  <rect width="150" height="54" rx="6" fill="#fff"/>
+  <path d="M26 15h42v8H38v8h24v8H26V15Z" fill="#071f45"/>
+  <path d="M73 15h13v16h28v8H73V15Z" fill="#071f45"/>
+  <path d="M119 15h11v24h-11V15Z" fill="#071f45"/>
+  <path d="M124.5 9 138 27l-13.5 18L111 27 124.5 9Z" fill="#f7c600"/>
+  <path d="M124.5 17 132 27l-7.5 10L117 27l7.5-10Z" fill="#071f45"/>
+</svg>

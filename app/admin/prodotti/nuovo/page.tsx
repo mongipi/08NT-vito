@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getLines } from '@/services/lines'
 import Link from 'next/link'
 import { createProduct } from '@/lib/actions/admin/products'
 import { ProductForm } from '../_ProductForm'
@@ -6,7 +6,7 @@ import { ProductForm } from '../_ProductForm'
 export const metadata = { title: 'Nuovo prodotto' }
 
 export default async function NuovoProdottoPage() {
-  const lines = await prisma.line.findMany({ orderBy: { name: 'asc' } })
+  const lines = await getLines()
   return (
     <div>
       <div className="mb-6 flex items-center gap-3">

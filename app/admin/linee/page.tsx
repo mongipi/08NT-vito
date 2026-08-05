@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getLinesWithProductCount } from '@/services/lines'
 import Link from 'next/link'
 import { PageHeader } from '../_components/PageHeader'
 
@@ -8,10 +8,7 @@ const th: React.CSSProperties = { padding: '0.625rem 1rem', textAlign: 'left', f
 const td: React.CSSProperties = { padding: '0.75rem 1rem', fontSize: '0.8125rem', color: '#374151', borderBottom: '1px solid #f7f8f9' }
 
 export default async function LineePage() {
-  const lines = await prisma.line.findMany({
-    orderBy: { name: 'asc' },
-    include: { _count: { select: { products: true } } },
-  })
+  const lines = await getLinesWithProductCount()
 
   return (
     <div>

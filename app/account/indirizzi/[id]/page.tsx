@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { redirect, notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getOwnedAddress } from '@/services/addresses'
 import type { Metadata } from 'next'
 import { updateAddress, deleteAddress } from '@/lib/actions/account'
 import { ModificaIndirizzoContent } from './ModificaIndirizzoContent'
@@ -12,8 +12,8 @@ export default async function ModificaIndirizzoPage({ params }: { params: Promis
   if (!session?.user) redirect('/login')
 
   const { id } = await params
-  const address = await prisma.userAddress.findUnique({ where: { id } })
-  if (!address || address.userId !== session.user.id) notFound()
+  const address = await getOwnedAddress(id, session.user.id)
+  if (!address) notFound()
 
   return <ModificaIndirizzoContent address={address} updateAddress={updateAddress} deleteAddress={deleteAddress} />
 }

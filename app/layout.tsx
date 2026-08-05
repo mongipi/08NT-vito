@@ -3,7 +3,8 @@ import { Cormorant_Garamond, Montserrat, Great_Vibes } from 'next/font/google'
 import { Providers } from './providers'
 import { SiteShell } from './_components/SiteShell'
 import { organizationJsonLd } from '@/lib/jsonld'
-// @ts-ignore
+import { getPublicSiteSettings } from '@/lib/site-settings'
+import { getProductNavLinks } from '@/services/products'
 import './globals.css'
 
 const montserrat = Montserrat({
@@ -44,7 +45,12 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const [siteSettings, footerProducts] = await Promise.all([
+    getPublicSiteSettings(),
+    getProductNavLinks(),
+  ])
+
   return (
     <html
       lang="it"
@@ -57,8 +63,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
         />
-        <Providers>
-          <SiteShell>{children}</SiteShell>
+        <Providers siteSettings={siteSettings}>
+          <SiteShell footerProducts={footerProducts}>{children}</SiteShell>
         </Providers>
       </body>
     </html>

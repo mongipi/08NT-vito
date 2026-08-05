@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/prisma'
+import { getProductForEdit } from '@/services/products'
+import { getLines } from '@/services/lines'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { updateProduct, deleteProduct } from '@/lib/actions/admin/products'
@@ -6,10 +7,7 @@ import { ProductForm } from '../_ProductForm'
 
 export default async function EditProdottoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const [product, lines] = await Promise.all([
-    prisma.product.findUnique({ where: { id }, include: { line: true, ingredients: { orderBy: { order: 'asc' } }, productImages: { select: { key: true } }, variants: { orderBy: { order: 'asc' } } } }),
-    prisma.line.findMany({ orderBy: { name: 'asc' } }),
-  ])
+  const [product, lines] = await Promise.all([getProductForEdit(id), getLines()])
   if (!product) notFound()
 
   return (
