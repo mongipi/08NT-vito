@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { useCart } from '@/contexts/CartContext'
@@ -11,6 +11,7 @@ import { formatPrice } from '@/lib/cart'
 import Link from 'next/link'
 import { COUNTRIES, DOMESTIC_COUNTRIES, ISLAND_PROVINCES } from '@/lib/countries'
 import { PosteLockerPicker } from './PosteLockerPicker'
+import { BrtFermopointPicker } from './BrtFermopointPicker'
 import { useLocale } from '@/contexts/LocaleContext'
 import { useTranslation } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
@@ -170,11 +171,20 @@ export function CheckoutClient({
 
   const isIsland = address.country === 'IT' && (ISLAND_PROVINCES as readonly string[]).includes(address.province.trim().toUpperCase())
   const effectiveCarrier: 'BRT' | 'POSTE' = isIsland ? 'POSTE' : pickupCarrier
+  const isBrtPickup = deliveryType === 'pickup' && effectiveCarrier === 'BRT'
 
   const baseOk = !!(address.firstName && address.lastName && address.address && address.city && address.postalCode)
   const docOk = docType === 'nessuno' || docType === 'scontrino' || (docType === 'fattura' && !!(address.company && address.vatNumber && (address.sdiCode || address.pec)))
-  const pickupOk = deliveryType === 'home' || !!pickupPointAddress.trim()
+  const pickupOk = deliveryType === 'home' || (!!pickupPointAddress.trim() && !!address.phone.trim())
   const canProceed = baseOk && docOk && pickupOk
+
+  const availablePayMethods = PAY_METHODS.filter(opt => !(isBrtPickup && opt.value === 'contrassegno'))
+
+  useEffect(() => {
+    if (isBrtPickup && payMethod === 'contrassegno') {
+      setPayMethod('stripe')
+    }
+  }, [isBrtPickup, payMethod])
 
   const isCod          = payMethod === 'contrassegno'
   const isEstero       = !(DOMESTIC_COUNTRIES as readonly string[]).includes(address.country)
@@ -332,7 +342,10 @@ export function CheckoutClient({
               ))}
 
               <div>
-                <label style={labelStyle}>{t('checkout_phone_optional')}</label>
+                <label style={labelStyle}>
+                  {deliveryType === 'pickup' ? t('checkout_phone') : t('checkout_phone_optional')}
+                  {deliveryType === 'pickup' && <span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>}
+                </label>
                 <div className="checkout-phone-row">
                   <select
                     value={phonePrefix}
@@ -522,39 +535,13 @@ export function CheckoutClient({
                       labelStyle={labelStyle}
                     />
                   ) : (
-                    <>
-                      {/* Link locator corriere */}
-                      <div style={{ fontSize: '0.75rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
-                        {t('checkout_find_nearest_point')}&nbsp;
-                        <a href="https://www.brt.it/it/servizi/fermopoint.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--forest)', fontWeight: 500 }}>
-                          {t('checkout_carrier_brt')} →
-                        </a>
-                      </div>
-
-                      {/* Inserimento punto */}
-                      <div>
-                        <label style={labelStyle}>
-                          {t('checkout_pickup_address')}<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={pickupPointAddress}
-                          onChange={e => setPickupPointAddress(e.target.value)}
-                          placeholder={t('checkout_pickup_address_placeholder')}
-                          style={inputStyle}
-                        />
-                      </div>
-                      <div>
-                        <label style={labelStyle}>{t('checkout_pickup_code')}</label>
-                        <input
-                          type="text"
-                          value={pickupPointCode}
-                          onChange={e => setPickupPointCode(e.target.value)}
-                          placeholder={t('checkout_pickup_code_placeholder')}
-                          style={{ ...inputStyle, fontFamily: 'monospace' }}
-                        />
-                      </div>
-                    </>
+                    <BrtFermopointPicker
+                      pickupPointCode={pickupPointCode}
+                      onSelect={(code, addr) => { setPickupPointCode(code); setPickupPointAddress(addr) }}
+                      inputStyle={inputStyle}
+                      labelStyle={labelStyle}
+                      defaultZip={address.postalCode}
+                    />
                   )}
                 </div>
               )}
@@ -590,8 +577,11 @@ export function CheckoutClient({
             {/* Metodo di pagamento */}
             <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
               <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>{t('checkout_payment_method')}</p>
+              {isBrtPickup && (
+                <p style={{ fontSize: '0.75rem', color: 'var(--ink-4)', margin: '0 0 0.75rem' }}>{t('checkout_brt_cod_disabled')}</p>
+              )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {PAY_METHODS.map(opt => (
+                {availablePayMethods.map(opt => (
                   <label key={opt.value} style={{
                     display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer',
                     padding: '0.875rem 1rem',
