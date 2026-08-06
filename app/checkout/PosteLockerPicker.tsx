@@ -7,19 +7,16 @@ import type { PosteLocker } from '@/lib/poste'
 
 interface Props {
   pickupPointCode: string
-  pickupPointAddress: string
   onSelect: (code: string, address: string) => void
   inputStyle: React.CSSProperties
   labelStyle: React.CSSProperties
 }
 
-export function PosteLockerPicker({ pickupPointCode, pickupPointAddress, onSelect, inputStyle, labelStyle }: Props) {
+export function PosteLockerPicker({ pickupPointCode, onSelect, inputStyle, labelStyle }: Props) {
   const [cap, setCap] = useState('')
   const [lockers, setLockers] = useState<PosteLocker[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [manualOverride, setManualOverride] = useState(false)
-  const [configurationMissing, setConfigurationMissing] = useState(false)
 
   async function search() {
     if (!/^\d{5}$/.test(cap)) {
@@ -33,7 +30,6 @@ export function PosteLockerPicker({ pickupPointCode, pickupPointAddress, onSelec
       const data = await searchPosteLockersAction(cap)
       if (data.error) {
         setError(data.error)
-        setConfigurationMissing(Boolean(data.configurationMissing))
         return
       }
       const found = data.lockers ?? []
@@ -44,42 +40,6 @@ export function PosteLockerPicker({ pickupPointCode, pickupPointAddress, onSelec
     } finally {
       setLoading(false)
     }
-  }
-
-  if (manualOverride) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-        <div>
-          <label style={labelStyle}>
-            Indirizzo punto di ritiro<span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>
-          </label>
-          <input
-            type="text"
-            value={pickupPointAddress}
-            onChange={e => onSelect(pickupPointCode, e.target.value)}
-            placeholder="es. Ufficio Postale Via Roma 1, Palermo"
-            style={inputStyle}
-          />
-        </div>
-        <div>
-          <label style={labelStyle}>Codice punto <span style={{ color: 'var(--ink-4)', fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(opzionale)</span></label>
-          <input
-            type="text"
-            value={pickupPointCode}
-            onChange={e => onSelect(e.target.value, pickupPointAddress)}
-            placeholder="es. 23625"
-            style={{ ...inputStyle, fontFamily: 'monospace' }}
-          />
-        </div>
-        <button
-          type="button"
-          onClick={() => setManualOverride(false)}
-          style={{ alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0, fontSize: '0.75rem', color: 'var(--forest)', textDecoration: 'underline', cursor: 'pointer' }}
-        >
-          Torna alla ricerca punti di ritiro
-        </button>
-      </div>
-    )
   }
 
   return (
@@ -110,15 +70,6 @@ export function PosteLockerPicker({ pickupPointCode, pickupPointAddress, onSelec
       </div>
 
       {error && <p style={{ fontSize: '0.75rem', color: '#dc2626', margin: 0 }}>{error}</p>}
-
-      <a
-        href="https://www.poste.it/prenotazione/vieni-in-poste?vieni-in-poste"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ fontSize: '0.75rem', color: 'var(--forest)', fontWeight: 500, width: 'max-content' }}
-      >
-        Visualizza i punti Poste Italiane vicino a te →
-      </a>
 
       {lockers.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: 280, overflowY: 'auto' }}>
@@ -153,16 +104,6 @@ export function PosteLockerPicker({ pickupPointCode, pickupPointAddress, onSelec
           })}
         </div>
       )}
-
-      <button
-        type="button"
-        onClick={() => setManualOverride(true)}
-        style={{ alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0, fontSize: '0.75rem', color: 'var(--ink-4)', textDecoration: 'underline', cursor: 'pointer' }}
-      >
-        {configurationMissing
-          ? 'Inserisci il punto Poste scelto'
-          : 'Non trovi il tuo punto? Inseriscilo manualmente'}
-      </button>
     </div>
   )
 }

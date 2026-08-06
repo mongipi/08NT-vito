@@ -91,7 +91,6 @@ export function CheckoutClient({
     effectiveCarrier,
     isBrtPickup,
     pickupPointCode,
-    pickupPointAddress,
     selectPickupPoint,
     guestEmail,
     setGuestEmail,
@@ -825,7 +824,6 @@ export function CheckoutClient({
                   {effectiveCarrier === 'POSTE' ? (
                     <PosteLockerPicker
                       pickupPointCode={pickupPointCode}
-                      pickupPointAddress={pickupPointAddress}
                       onSelect={selectPickupPoint}
                       inputStyle={inputStyle}
                       labelStyle={labelStyle}
