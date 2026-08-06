@@ -448,7 +448,8 @@ export async function sendOrderCancelled(data: OrderData) {
 }
 
 export async function sendAdminOrderNotification(data: OrderData) {
-  const adminEmail = process.env.ADMIN_EMAIL?.trim() || DEFAULT_EMAIL
+  const settings = await getSettingsMap()
+  const adminEmail = settings['COMPANY_EMAIL']?.trim() || DEFAULT_EMAIL
   const html = layout(`
     <p style="margin:0 0 0.25rem;font-size:0.625rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#9ca3af">Nuovo ordine ricevuto</p>
     <h1 style="margin:0 0 1.5rem;font-size:1.375rem;font-weight:600;color:#111827">#${escapeHtml(data.orderId.slice(-8).toUpperCase())} - ${formatEuro(data.total)}</h1>
@@ -575,8 +576,8 @@ export interface ContactMessageData {
 }
 
 export async function sendContactNotification(data: ContactMessageData) {
-  const recipient =
-    process.env.CONTACT_EMAIL_TO?.trim() || process.env.ADMIN_EMAIL?.trim() || DEFAULT_EMAIL
+  const settings = await getSettingsMap()
+  const recipient = settings['COMPANY_EMAIL']?.trim() || DEFAULT_EMAIL
   const safeSubject = data.subject.trim() || 'Richiesta dal sito'
 
   const html = `<!DOCTYPE html>

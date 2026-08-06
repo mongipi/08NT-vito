@@ -60,7 +60,7 @@ export function ResetPasswordForm() {
 
     setLoading(true)
     try {
-      await postJson('/api/auth/reset-password', { token, password, confirmPassword }, {
+      await postJson('/api/auth/reset-password', { token, password, confirmPassword, locale }, {
         fallbackError: t('reset_generic_error'),
       })
       router.push('/login?reset=success')

@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { searchPosteLockersAction } from '@/lib/actions/poste'
 import type { PosteLocker } from '@/lib/poste'
-
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
 interface Props {
   pickupPointCode: string
@@ -13,6 +14,8 @@ interface Props {
 }
 
 export function PosteLockerPicker({ pickupPointCode, onSelect, inputStyle, labelStyle }: Props) {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const [cap, setCap] = useState('')
   const [lockers, setLockers] = useState<PosteLocker[]>([])
   const [loading, setLoading] = useState(false)
@@ -20,7 +23,7 @@ export function PosteLockerPicker({ pickupPointCode, onSelect, inputStyle, label
 
   async function search() {
     if (!/^\d{5}$/.test(cap)) {
-      setError('Inserisci un CAP valido (5 cifre)')
+      setError(t('checkout_pickup_zip_error'))
       return
     }
     setLoading(true)
@@ -28,15 +31,15 @@ export function PosteLockerPicker({ pickupPointCode, onSelect, inputStyle, label
     setLockers([])
     try {
       const data = await searchPosteLockersAction(cap)
-      if (data.error) {
-        setError(data.error)
+      if (data.errorKey) {
+        setError(t(data.errorKey))
         return
       }
       const found = data.lockers ?? []
-      if (found.length === 0) setError('Nessun punto di ritiro trovato per questo CAP')
+      if (found.length === 0) setError(t('checkout_pickup_none_found'))
       setLockers(found)
     } catch {
-      setError('Errore di rete durante la ricerca')
+      setError(t('checkout_pickup_network_error'))
     } finally {
       setLoading(false)
     }
@@ -45,13 +48,13 @@ export function PosteLockerPicker({ pickupPointCode, onSelect, inputStyle, label
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
       <div>
-        <label style={labelStyle}>Cerca punto di ritiro per CAP</label>
+        <label style={labelStyle}>{t('checkout_poste_search_label')}</label>
         <div style={{ display: 'flex', gap: 8 }}>
           <input
             type="text" inputMode="numeric" maxLength={5}
             value={cap}
             onChange={e => setCap(e.target.value.replace(/\D/g, ''))}
-            placeholder="es. 00164"
+            placeholder={t('checkout_poste_zip_placeholder')}
             style={{ ...inputStyle, fontFamily: 'monospace' }}
           />
           <button
@@ -64,7 +67,7 @@ export function PosteLockerPicker({ pickupPointCode, onSelect, inputStyle, label
               cursor: loading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
             }}
           >
-            {loading ? '…' : 'Cerca'}
+            {loading ? '…' : t('checkout_pickup_search_button')}
           </button>
         </div>
       </div>
@@ -95,7 +98,8 @@ export function PosteLockerPicker({ pickupPointCode, onSelect, inputStyle, label
                   </span>
                   {(l.openTimeMon || l.openTimeSat) && (
                     <span style={{ display: 'block', fontSize: '0.6875rem', color: 'var(--ink-4)', marginTop: 2 }}>
-                      Lun-Ven {l.openTimeMon}–{l.closeTimeMon}{l.openTimeSat ? ` · Sab ${l.openTimeSat}–${l.closeTimeSat}` : ''}
+                      {t('checkout_poste_hours_weekday')} {l.openTimeMon}–{l.closeTimeMon}
+                      {l.openTimeSat ? ` · ${t('checkout_poste_hours_saturday')} ${l.openTimeSat}–${l.closeTimeSat}` : ''}
                     </span>
                   )}
                 </span>

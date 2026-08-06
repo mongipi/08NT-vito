@@ -33,7 +33,7 @@ export function HomeHeroCarousel() {
 
   return (
     <>
-      <div className="v61-hero-carousel" aria-label="Carousel immagini hero">
+      <div className="v61-hero-carousel" aria-label={t('hero_carousel_aria')}>
         {activeSlides.map((slide, index) => (
           <div
             key={slide.id}
@@ -53,8 +53,8 @@ export function HomeHeroCarousel() {
       </div>
 
       {activeSlides.length > 1 && (
-        <div className="v61-hero-carousel-controls" aria-label="Controlli carousel hero">
-          <button type="button" className="v61-hero-carousel-arrow prev" onClick={prev} aria-label="Immagine precedente">
+        <div className="v61-hero-carousel-controls" aria-label={t('hero_carousel_controls_aria')}>
+          <button type="button" className="v61-hero-carousel-arrow prev" onClick={prev} aria-label={t('gallery_aria_prev')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M15 18l-6-6 6-6" />
             </svg>
@@ -66,11 +66,11 @@ export function HomeHeroCarousel() {
                 type="button"
                 className={index === active ? 'active' : ''}
                 onClick={() => setActive(index)}
-                aria-label={`Vai alla slide ${index + 1}`}
+                aria-label={t('hero_carousel_goto', { n: String(index + 1) })}
               />
             ))}
           </div>
-          <button type="button" className="v61-hero-carousel-arrow next" onClick={next} aria-label="Immagine successiva">
+          <button type="button" className="v61-hero-carousel-arrow next" onClick={next} aria-label={t('gallery_aria_next')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M9 18l6-6-6-6" />
             </svg>

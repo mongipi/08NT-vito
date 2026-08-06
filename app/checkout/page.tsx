@@ -4,6 +4,7 @@ import { getCheckoutProfile } from '@/services/users'
 import { getDefaultAddress } from '@/services/addresses'
 import { getPricingConfig } from '@/lib/domain/pricing-config'
 import { CheckoutClient } from './CheckoutClient'
+import { T } from '@/components/ui/T'
 
 export const metadata: Metadata = {
   title: 'Checkout — 08 Natural Technology',
@@ -50,7 +51,7 @@ export default async function CheckoutPage() {
           <div style={{ marginBottom: '2rem' }}>
             <div style={{ fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--green)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ width: 18, height: '1px', background: 'var(--green)', display: 'block' }} />
-              Acquisto sicuro
+              <T k="checkout_secure_purchase" />
             </div>
             <h1 style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300, fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', color: 'var(--forest)', margin: 0, lineHeight: 1 }}>
               Checkout

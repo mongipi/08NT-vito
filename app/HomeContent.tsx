@@ -5,50 +5,16 @@ import Link from 'next/link'
 import { useLocale, pickLocalized } from '@/contexts/LocaleContext'
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup'
 import { HomeHeroCarousel } from '@/components/ui/HomeHeroCarousel'
-import { useTranslation } from '@/lib/i18n/dictionary'
+import { useTranslation, type DictionaryKey } from '@/lib/i18n/dictionary'
 import { richText } from '@/lib/i18n/richText'
 import { formatDate } from '@/lib/utils'
 
-const HOME_FEATURES = [
-  {
-    id: 'home-feature-1',
-    icon: 'IT',
-    title: 'ECCELLENZA ITALIANA',
-    body: 'Identità italiana, cura del dettaglio e standard elevati in ogni scelta.',
-  },
-  {
-    id: 'home-feature-2',
-    icon: '🌿',
-    title: 'INGREDIENTI DI ALTA QUALITÀ',
-    body: 'Materie prime selezionate con attenzione e formule coerenti.',
-  },
-  {
-    id: 'home-feature-3',
-    icon: '🔬',
-    title: 'RICERCA E INNOVAZIONE',
-    body: 'Soluzioni nutrizionali moderne, ad alta biodisponibilità.',
-  },
-  {
-    id: 'home-feature-4',
-    icon: '✨',
-    title: 'BENESSERE E RISULTATI CONCRETI',
-    body: 'Soluzioni concrete, pensate per esigenze mirate.',
-  },
+const HOME_FEATURES: { id: string; icon: string; titleKey: DictionaryKey; bodyKey: DictionaryKey }[] = [
+  { id: 'home-feature-1', icon: 'IT', titleKey: 'home_feature_1_title', bodyKey: 'home_feature_1_body' },
+  { id: 'home-feature-2', icon: '🌿', titleKey: 'home_feature_2_title', bodyKey: 'home_feature_2_body' },
+  { id: 'home-feature-3', icon: '🔬', titleKey: 'home_feature_3_title', bodyKey: 'home_feature_3_body' },
+  { id: 'home-feature-4', icon: '✨', titleKey: 'home_feature_4_title', bodyKey: 'home_feature_4_body' },
 ]
-
-const HOME_FORMULAS = {
-  eyebrow: 'Le nostre formule',
-  title: 'Prodotti pensati\n**per esigenze reali.**',
-  body: 'Dai prodotti per microcircolo e gambe leggere, fino al supporto vitaminico, alla bellezza di capelli, pelle e unghie e all’equilibrio femminile in menopausa: 08 Natural Technology propone soluzioni nutrizionali pensate per esigenze concrete e quotidiane.',
-  ctaLabel: 'Scopri i prodotti',
-  ctaHref: '/prodotti',
-}
-
-const HOME_BLOG = {
-  eyebrow: 'Blog 08',
-  title: 'Approfondimenti e benessere quotidiano',
-  body: 'Scopri consigli, ingredienti e articoli utili per orientarti meglio tra formule, esigenze e scelte quotidiane.',
-}
 
 export interface HomeArticle {
   id: string
@@ -91,8 +57,8 @@ export function HomeContent({ articles }: { articles: HomeArticle[] }) {
             <div className="v61-feature" key={item.id}>
               <div className="ico">{item.icon}</div>
               <div>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
+                <h3>{t(item.titleKey)}</h3>
+                <p>{t(item.bodyKey)}</p>
               </div>
             </div>
           ))}
@@ -104,7 +70,7 @@ export function HomeContent({ articles }: { articles: HomeArticle[] }) {
           <div className="v61-showcase">
             <Image
               src="/v61/img/founder-lab-08.png"
-              alt="Laboratorio 08 Natural Technology"
+              alt={t('home_lab_alt')}
               width={520}
               height={340}
             />
@@ -127,11 +93,11 @@ export function HomeContent({ articles }: { articles: HomeArticle[] }) {
 
       <section className="section v61-formulas-intro">
         <div className="v61-inner v61-formulas-intro-inner">
-          <div className="v61-eyebrow">{HOME_FORMULAS.eyebrow}</div>
-          <h2 className="v61-title">{richText(HOME_FORMULAS.title)}</h2>
-          <p>{HOME_FORMULAS.body}</p>
-          <Link className="v61-button green" href={HOME_FORMULAS.ctaHref}>
-            {HOME_FORMULAS.ctaLabel}
+          <div className="v61-eyebrow">{t('home_formulas_eyebrow')}</div>
+          <h2 className="v61-title">{richText(t('home_formulas_title'))}</h2>
+          <p>{t('home_formulas_body')}</p>
+          <Link className="v61-button green" href="/prodotti">
+            {t('home_formulas_cta')}
           </Link>
         </div>
       </section>
@@ -146,10 +112,10 @@ export function HomeContent({ articles }: { articles: HomeArticle[] }) {
         <div className="v61-inner">
           <div className="v61-section-head">
             <div>
-              <div className="v61-eyebrow">{HOME_BLOG.eyebrow}</div>
-              <h2 className="v61-title">{HOME_BLOG.title}</h2>
+              <div className="v61-eyebrow">{t('home_blog_eyebrow')}</div>
+              <h2 className="v61-title">{t('home_blog_title')}</h2>
             </div>
-            <p>{HOME_BLOG.body}</p>
+            <p>{t('home_blog_body')}</p>
           </div>
           <div className="v61-blog-carousel">
             {articles.map((article) => (

@@ -11,17 +11,17 @@ import { cn } from '@/lib/utils'
 import { useCart } from '@/contexts/CartContext'
 import { CartDrawer } from '@/components/ui/CartDrawer'
 import { useLocale, type Locale } from '@/contexts/LocaleContext'
-import { useTranslation } from '@/lib/i18n/dictionary'
+import { useTranslation, type DictionaryKey } from '@/lib/i18n/dictionary'
 import { useSiteSettings } from '@/contexts/SiteSettingsContext'
 import { getSocialLinks } from '@/lib/site-settings'
 
-const NAV_LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/prodotti', label: 'Prodotti & Shop' },
-  { href: '/metodo', label: 'Qualità 08' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/lavora-con-noi', label: 'Lavora con noi' },
-  { href: '/contatti', label: 'Contatti' },
+const NAV_LINKS: { href: string; labelKey: DictionaryKey }[] = [
+  { href: '/', labelKey: 'nav_home' },
+  { href: '/prodotti', labelKey: 'nav_products' },
+  { href: '/metodo', labelKey: 'nav_quality' },
+  { href: '/blog', labelKey: 'nav_blog' },
+  { href: '/lavora-con-noi', labelKey: 'nav_careers' },
+  { href: '/contatti', labelKey: 'nav_contact' },
 ]
 
 const LANG_FLAGS = [
@@ -86,7 +86,7 @@ function UserMenu() {
       {open && (
         <div className="v61-user-menu">
           <div className="v61-user-menu-head">
-            <p>{session.user.name ?? 'Utente'}</p>
+            <p>{session.user.name ?? t('nav_user_fallback')}</p>
             <span>{session.user.email}</span>
           </div>
           <Link href="/account" onClick={() => setOpen(false)}>{t('nav_account')}</Link>
@@ -193,14 +193,14 @@ export function Navbar() {
   return (
     <>
       <header className={cn('v61-site-header', scrolled && 'v61-site-header-scrolled')}>
-        <nav className="v61-nav" aria-label="Navigazione principale">
+        <nav className="v61-nav" aria-label={t('nav_aria_main')}>
           <Logo variant="dark" height={70} className="v61-header-logo" />
 
           <ul className="v61-menu" role="list">
-            {NAV_LINKS.map(({ href, label }) => (
+            {NAV_LINKS.map(({ href, labelKey }) => (
               <li key={href}>
                 <Link href={href} className={cn(isActive(href) && 'active')} aria-current={isActive(href) ? 'page' : undefined}>
-                  {label}
+                  {t(labelKey)}
                 </Link>
               </li>
             ))}
@@ -223,7 +223,7 @@ export function Navbar() {
             <button
               className="v61-mobile-toggle"
               onClick={() => setMobileOpen((o) => !o)}
-              aria-label={mobileOpen ? 'Chiudi menu' : 'Apri menu'}
+              aria-label={mobileOpen ? t('nav_aria_close_menu') : t('nav_aria_open_menu')}
               aria-expanded={mobileOpen}
               aria-controls="mobile-menu-drawer"
             >
@@ -240,11 +240,11 @@ export function Navbar() {
         id="mobile-menu-drawer"
         className={cn('v61-mobile-drawer', mobileOpen && 'open')}
         aria-hidden={!mobileOpen}
-        aria-label="Menu mobile"
+        aria-label={t('nav_aria_mobile_menu')}
       >
         <div className="v61-mobile-drawer-head">
           <span>{t('nav_menu')}</span>
-          <button type="button" onClick={() => setMobileOpen(false)} aria-label="Chiudi menu">
+          <button type="button" onClick={() => setMobileOpen(false)} aria-label={t('nav_aria_close_menu')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
@@ -253,9 +253,9 @@ export function Navbar() {
         </div>
         <div className="v61-mobile-drawer-body">
           <div className="v61-mobile-drawer-nav">
-            {NAV_LINKS.map(({ href, label }) => (
+            {NAV_LINKS.map(({ href, labelKey }) => (
               <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={cn(isActive(href) && 'active')}>
-                {label}
+                {t(labelKey)}
               </Link>
             ))}
           </div>

@@ -47,7 +47,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     setCouponError(null)
     const role = toCustomerRole(session?.user?.role)
     const result = await validateCoupon(couponInput, cart.items, role)
-    if (!result.valid) setCouponError(result.error ?? 'Codice non valido')
+    if (!result.valid) setCouponError(t(result.errorKey ?? 'coupon_error_invalid', result.errorVars))
     else if (result.coupon) { cart.applyCoupon(result.coupon); setCouponInput('') }
     setCouponLoading(false)
   }
@@ -280,7 +280,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               {t('cart_checkout_note')}
             </p>
             <p style={{ textAlign: 'center', fontSize: '0.6875rem', color: 'var(--ink-4)', margin: 0, lineHeight: 1.55 }}>
-              Spedizione gratuita da {formatPrice(freeThreshold)}.
+              {t('cart_free_shipping_from', { amount: formatPrice(freeThreshold) })}
             </p>
           </div>
         )}

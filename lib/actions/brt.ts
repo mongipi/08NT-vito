@@ -1,10 +1,11 @@
 'use server'
 
 import { searchBrtPudoByZip, searchBrtPudoByLatLng, type BrtPudoPoint } from '@/lib/brt'
+import type { DictionaryKey } from '@/lib/i18n/dictionary'
 
 interface SearchBrtPudoResult {
   points?: BrtPudoPoint[]
-  error?: string
+  errorKey?: DictionaryKey
 }
 
 export async function searchBrtPudoByZipAction(
@@ -12,7 +13,7 @@ export async function searchBrtPudoByZipAction(
   language?: string
 ): Promise<SearchBrtPudoResult> {
   if (!/^\d{5}$/.test(zipCode)) {
-    return { error: 'CAP non valido' }
+    return { errorKey: 'checkout_pickup_zip_error' }
   }
 
   try {
@@ -20,7 +21,7 @@ export async function searchBrtPudoByZipAction(
     return { points }
   } catch (err) {
     console.error('Ricerca punti BRT per CAP fallita:', err)
-    return { error: 'Servizio BRT non disponibile al momento' }
+    return { errorKey: 'checkout_brt_service_unavailable' }
   }
 }
 
@@ -30,7 +31,7 @@ export async function searchBrtPudoByLatLngAction(
   language?: string
 ): Promise<SearchBrtPudoResult> {
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-    return { error: 'Coordinate non valide' }
+    return { errorKey: 'checkout_brt_invalid_coordinates' }
   }
 
   try {
@@ -38,6 +39,6 @@ export async function searchBrtPudoByLatLngAction(
     return { points }
   } catch (err) {
     console.error('Ricerca punti BRT per coordinate fallita:', err)
-    return { error: 'Servizio BRT non disponibile al momento' }
+    return { errorKey: 'checkout_brt_service_unavailable' }
   }
 }

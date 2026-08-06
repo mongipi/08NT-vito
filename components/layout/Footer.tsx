@@ -6,35 +6,40 @@ import { Logo } from './Logo'
 import { CookiePreferencesButton } from '@/components/ui/CookieConsent'
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup'
 import { useLocale } from '@/contexts/LocaleContext'
-import { useTranslation } from '@/lib/i18n/dictionary'
+import { useTranslation, type DictionaryKey } from '@/lib/i18n/dictionary'
 import { useSiteSettings } from '@/contexts/SiteSettingsContext'
 import { formatWhatsappHref, getSocialLinks } from '@/lib/site-settings'
 
-const FOOTER_PAGE_SECTIONS = [
+const FOOTER_PAGE_SECTIONS: {
+  id: string
+  titleKey: DictionaryKey
+  links: { id: string; labelKey: DictionaryKey; href: string }[]
+}[] = [
   {
     id: 'footer-company',
-    title: 'Azienda',
+    titleKey: 'footer_company',
     links: [
-      { id: 'fc-1', label: 'Qualità 08', href: '/metodo' },
-      { id: 'fc-2', label: 'Blog', href: '/blog' },
-      { id: 'fc-3', label: 'Lavora con noi', href: '/lavora-con-noi' },
-      { id: 'fc-4', label: 'Resi e spedizioni', href: '/resi-e-spedizioni' },
-      { id: 'fc-5', label: 'Contatti', href: '/contatti' },
+      { id: 'fc-1', labelKey: 'nav_quality', href: '/metodo' },
+      { id: 'fc-2', labelKey: 'nav_blog', href: '/blog' },
+      { id: 'fc-3', labelKey: 'nav_careers', href: '/lavora-con-noi' },
+      { id: 'fc-4', labelKey: 'footer_returns_shipping', href: '/resi-e-spedizioni' },
+      { id: 'fc-5', labelKey: 'nav_contact', href: '/contatti' },
     ],
   },
   {
     id: 'footer-legal',
-    title: 'Legale',
+    titleKey: 'footer_legal',
     links: [
-      { id: 'fl-1', label: 'Termini e condizioni', href: '/termini-condizioni-vendita' },
-      { id: 'fl-2', label: 'Privacy policy', href: '/privacy' },
-      { id: 'fl-3', label: 'Cookie policy', href: '/cookie' },
-      { id: 'fl-4', label: 'Note legali', href: '/note-legali' },
+      { id: 'fl-1', labelKey: 'footer_terms', href: '/termini-condizioni-vendita' },
+      { id: 'fl-2', labelKey: 'footer_privacy', href: '/privacy' },
+      { id: 'fl-3', labelKey: 'footer_cookie_policy', href: '/cookie' },
+      { id: 'fl-4', labelKey: 'footer_legal_notices', href: '/note-legali' },
     ],
   },
 ]
 
-const FOOTER_PAYMENTS = ['Visa', 'Mastercard', 'PayPal', 'Google Pay', 'Apple Pay', 'Contrassegno', 'Bonifico']
+const FOOTER_PAYMENT_BRANDS = ['Visa', 'Mastercard', 'PayPal', 'Google Pay', 'Apple Pay']
+const FOOTER_PAYMENT_KEYS: DictionaryKey[] = ['footer_payment_cod', 'footer_payment_bank_transfer']
 
 const FOOTER_COURIERS = [
   { label: 'GLS', src: '/v61/img/gls%20logo.png', width: 57, height: 20 },
@@ -56,7 +61,7 @@ export function Footer({ products }: { products: { name: string; slug: string }[
   const socialLinks = getSocialLinks(siteSettings)
   const contacts = [
     {
-      label: 'Telefono',
+      label: t('footer_contact_phone_label'),
       href: `tel:${siteSettings.companyPhone.replace(/\s+/g, '')}`,
       text: siteSettings.companyPhone,
       icon: 'phone.svg',
@@ -99,22 +104,31 @@ export function Footer({ products }: { products: { name: string; slug: string }[
               </span>
             ))}
           </div>
-          <div className="v61-footer-payments" aria-label="Pagamenti disponibili">
-            {FOOTER_PAYMENTS.map((payment) => <span key={payment}>{payment}</span>)}
+          <div className="v61-footer-payments" aria-label={t('footer_aria_payments')}>
+            {FOOTER_PAYMENT_BRANDS.map((payment) => <span key={payment}>{payment}</span>)}
+            {FOOTER_PAYMENT_KEYS.map((key) => <span key={key}>{t(key)}</span>)}
           </div>
         </div>
 
         {[
           {
             id: 'footer-products',
-            title: 'Prodotti & Shop',
+            title: t('nav_products'),
             links: products.map((product) => ({
               id: product.slug,
               label: product.name,
               href: `/prodotti/${product.slug}`,
             })),
           },
-          ...FOOTER_PAGE_SECTIONS,
+          ...FOOTER_PAGE_SECTIONS.map((section) => ({
+            id: section.id,
+            title: t(section.titleKey),
+            links: section.links.map((link) => ({
+              id: link.id,
+              label: t(link.labelKey),
+              href: link.href,
+            })),
+          })),
         ].map((section) => (
           <div key={section.id}>
             <p className="v61-footer-title">{section.title}</p>

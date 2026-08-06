@@ -306,6 +306,7 @@ export default async function ImpostazioniPage({
                   defaultValue={companyEmail}
                   style={input}
                 />
+                <p style={hint}>Mostrata sul sito e usata come destinatario delle notifiche di nuovo ordine e del form contatti.</p>
               </div>
             </div>
             <div>

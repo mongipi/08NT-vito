@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation, type DictionaryKey } from '@/lib/i18n/dictionary'
 
 type CookiePreferenceKey = 'analytics' | 'marketing' | 'newsletter'
 
@@ -15,24 +17,12 @@ const COOKIE_NAME = '08nt_cookie_preferences'
 
 const COOKIE_OPTIONS: {
   key: CookiePreferenceKey
-  title: string
-  body: string
+  titleKey: DictionaryKey
+  bodyKey: DictionaryKey
 }[] = [
-  {
-    key: 'analytics',
-    title: 'Statistiche',
-    body: 'Misurazione delle visite e delle interazioni, solo se verranno attivati strumenti come Analytics.',
-  },
-  {
-    key: 'marketing',
-    title: 'Marketing',
-    body: 'Misurazione campagne e pubblicità personalizzata, solo se verranno attivati strumenti come Meta Pixel o Google Ads.',
-  },
-  {
-    key: 'newsletter',
-    title: 'Newsletter',
-    body: 'Tracciamenti collegati a newsletter, automazioni o comunicazioni commerciali, solo se presenti.',
-  },
+  { key: 'analytics', titleKey: 'cookie_option_analytics_title', bodyKey: 'cookie_option_analytics_body' },
+  { key: 'marketing', titleKey: 'cookie_option_marketing_title', bodyKey: 'cookie_option_marketing_body' },
+  { key: 'newsletter', titleKey: 'cookie_option_newsletter_title', bodyKey: 'cookie_option_newsletter_body' },
 ]
 
 const defaultPreferences: CookiePreferences = {
@@ -44,6 +34,8 @@ const defaultPreferences: CookiePreferences = {
 }
 
 export function CookieConsent() {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const [mounted, setMounted] = useState(false)
   const [open, setOpen] = useState(false)
   const [customizing, setCustomizing] = useState(false)
@@ -90,29 +82,26 @@ export function CookieConsent() {
         aria-labelledby="cookie-title"
       >
         <div className="v61-cookie-copy">
-          <p className="v61-cookie-kicker">Preferenze privacy</p>
-          <h2 id="cookie-title">Gestione cookie</h2>
-          <p>
-            Usiamo cookie tecnici necessari per far funzionare carrello, checkout, sicurezza e preferenze.
-            Gli strumenti facoltativi per statistiche, marketing o newsletter saranno attivati solo dopo consenso.
-          </p>
-          <Link href="/cookie">Leggi la Cookie Policy</Link>
+          <p className="v61-cookie-kicker">{t('cookie_kicker')}</p>
+          <h2 id="cookie-title">{t('cookie_title')}</h2>
+          <p>{t('cookie_intro')}</p>
+          <Link href="/cookie">{t('cookie_read_policy')}</Link>
         </div>
 
         {customizing && (
           <div className="v61-cookie-options">
             <div className="v61-cookie-option locked">
               <div>
-                <strong>Necessari</strong>
-                <span>Richiesti per il funzionamento del sito. Sempre attivi.</span>
+                <strong>{t('cookie_necessary_title')}</strong>
+                <span>{t('cookie_necessary_body')}</span>
               </div>
-              <span className="v61-cookie-pill">Sempre attivi</span>
+              <span className="v61-cookie-pill">{t('cookie_always_active')}</span>
             </div>
             {COOKIE_OPTIONS.map((option) => (
               <label className="v61-cookie-option" key={option.key}>
                 <div>
-                  <strong>{option.title}</strong>
-                  <span>{option.body}</span>
+                  <strong>{t(option.titleKey)}</strong>
+                  <span>{t(option.bodyKey)}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -128,22 +117,22 @@ export function CookieConsent() {
           {customizing ? (
             <>
               <button type="button" className="v61-cookie-secondary" onClick={rejectOptional}>
-                Rifiuta facoltativi
+                {t('cookie_reject_optional')}
               </button>
               <button type="button" className="v61-cookie-primary" onClick={() => save(preferences)}>
-                Salva preferenze
+                {t('cookie_save_preferences')}
               </button>
             </>
           ) : (
             <>
               <button type="button" className="v61-cookie-secondary" onClick={rejectOptional}>
-                Rifiuta
+                {t('cookie_reject')}
               </button>
               <button type="button" className="v61-cookie-secondary" onClick={() => setCustomizing(true)}>
-                Personalizza
+                {t('cookie_customize')}
               </button>
               <button type="button" className="v61-cookie-primary" onClick={acceptAll}>
-                Accetta
+                {t('cookie_accept')}
               </button>
             </>
           )}
@@ -154,13 +143,15 @@ export function CookieConsent() {
 }
 
 export function CookiePreferencesButton() {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   return (
     <button
       type="button"
       className="v61-footer-cookie-button"
       onClick={() => window.dispatchEvent(new Event('08nt:open-cookie-preferences'))}
     >
-      Preferenze cookie
+      {t('footer_cookie_preferences')}
     </button>
   )
 }

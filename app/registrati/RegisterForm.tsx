@@ -58,7 +58,7 @@ export function RegisterForm() {
     try {
       const result = await postJson<{ emailSent?: boolean }>(
         '/api/auth/register',
-        { name, email, password, confirmPassword, newsletter },
+        { name, email, password, confirmPassword, newsletter, locale },
         { fallbackError: t('register_generic_error') }
       )
       setEmailSent(result.emailSent !== false)

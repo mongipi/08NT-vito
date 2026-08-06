@@ -3,11 +3,13 @@
 import { calcDiscount, calcSubtotal } from '@/lib/cart'
 import type { CartItem, AppliedCoupon } from '@/lib/cart'
 import { getDiscountByCode } from '@/services/discounts'
+import type { DictionaryKey } from '@/lib/i18n/dictionary'
 
 interface ValidateCouponResult {
   valid: boolean
   coupon?: AppliedCoupon
-  error?: string
+  errorKey?: DictionaryKey
+  errorVars?: Record<string, string>
 }
 
 export async function validateCoupon(
@@ -15,7 +17,7 @@ export async function validateCoupon(
   items: CartItem[],
   userRole: 'consumer' | 'b2b'
 ): Promise<ValidateCouponResult> {
-  if (!code) return { valid: false, error: 'Inserisci un codice sconto' }
+  if (!code) return { valid: false, errorKey: 'coupon_error_empty' }
 
   const normalizedCode = code.toUpperCase().trim()
   let doc = null
@@ -28,17 +30,21 @@ export async function validateCoupon(
 
   // Nessun coupon vive nel codice: la fonte di verità è /admin/sconti.
   // Disattivare o eliminare un codice da admin lo disattiva davvero.
-  if (!doc) return { valid: false, error: 'Codice non valido' }
-  if (!doc.active) return { valid: false, error: 'Codice non attivo' }
-  if (doc.expiresAt && doc.expiresAt < new Date()) return { valid: false, error: 'Codice scaduto' }
-  if (doc.maxUses && doc.usedCount >= doc.maxUses) return { valid: false, error: 'Codice esaurito' }
+  if (!doc) return { valid: false, errorKey: 'coupon_error_invalid' }
+  if (!doc.active) return { valid: false, errorKey: 'coupon_error_inactive' }
+  if (doc.expiresAt && doc.expiresAt < new Date()) return { valid: false, errorKey: 'coupon_error_expired' }
+  if (doc.maxUses && doc.usedCount >= doc.maxUses) return { valid: false, errorKey: 'coupon_error_exhausted' }
   if (doc.applicableTo !== 'all' && doc.applicableTo !== userRole) {
-    return { valid: false, error: 'Codice non applicabile al tuo account' }
+    return { valid: false, errorKey: 'coupon_error_not_applicable' }
   }
 
   const subtotal = calcSubtotal(items)
   if (doc.minOrderAmount && subtotal < doc.minOrderAmount) {
-    return { valid: false, error: `Importo minimo ordine: €${doc.minOrderAmount.toFixed(2)}` }
+    return {
+      valid: false,
+      errorKey: 'coupon_error_min_order',
+      errorVars: { amount: `€${doc.minOrderAmount.toFixed(2)}` },
+    }
   }
 
   const coupon: AppliedCoupon = {

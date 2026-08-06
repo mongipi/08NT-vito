@@ -10,33 +10,14 @@ import { IngredientsDisclosure } from '@/components/ui/IngredientsDisclosure'
 import { ProductRegulatoryNotice } from '@/components/ui/ProductRegulatoryNotice'
 import { Localized } from '@/components/ui/Localized'
 import { ProductTitle } from '@/components/ui/ProductTitle'
+import { T } from '@/components/ui/T'
+import { translate } from '@/lib/i18n/data'
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
 export const dynamic = 'force-dynamic'
-
-const PRODUCT_PAGE_TEXTS = {
-  breadcrumbBrandLabel: '08 Natural Technology',
-  allProductsLabel: 'Tutti i prodotti',
-  madeInItalyLabel: 'Made in Italy',
-  defaultKickerTemplate: '{line} - Formula mirata',
-  galleryFrontLabel: 'Fronte',
-  galleryInfographicLabel: 'Infografica',
-  galleryCompositionLabel: 'Composizione',
-  galleryBackLabel: 'Retro etichetta',
-  galleryLabelLabel: 'Etichetta',
-  sectionUsageTitle: "Modo d'uso",
-  sectionTargetTitle: 'A chi è rivolto',
-  sectionFormatTitle: 'Formato e composizione',
-  sectionIngredientsTitle: 'Ingredienti',
-  fallbackUsageBody: 'Seguire le indicazioni riportate in etichetta.',
-  fallbackTargetBody: 'Pensato per chi cerca un supporto nutrizionale mirato.',
-  fallbackIngredientsBody: 'Ingredienti non ancora specificati.',
-  capsuleSuffix: 'capsule vegetali',
-  daysSuffix: 'giorni',
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -58,26 +39,17 @@ export default async function ProductPage({ params }: Props) {
   } = product
 
   const images = product.images as ProductImages
-  const texts = PRODUCT_PAGE_TEXTS
-  const gallerySlides = buildFallbackGallery(images, name, texts)
-  const kicker = texts.defaultKickerTemplate.replace('{line}', line.name)
-  const metaPills = [
-    capsules ? `${capsules} ${texts.capsuleSuffix}` : format,
-    days ? `${days} ${texts.daysSuffix}` : null,
-    dosage,
-    notificationMs,
-    texts.madeInItalyLabel,
-  ].filter(Boolean) as string[]
+  const gallerySlides = buildFallbackGallery(images)
 
   return (
     <main className="v61-product-detail-page" style={{ '--accent': line.color, '--soft': line.colorLight } as CSSProperties}>
       <div className="v61-product-breadcrumb">
         <span>
-          <strong>{texts.breadcrumbBrandLabel}</strong>
+          <strong>08 Natural Technology</strong>
           <i>/</i>
           {line.name}
         </span>
-        <Link href="/prodotti">{texts.allProductsLabel}</Link>
+        <Link href="/prodotti"><T k="product_all_products" /></Link>
       </div>
 
       <section className="page-hero product-single-hero">
@@ -106,8 +78,12 @@ export default async function ProductPage({ params }: Props) {
             variants={product.variants}
             color={line.color}
             slides={gallerySlides}
-            metaPills={metaPills}
-            kicker={kicker}
+            lineName={line.name}
+            capsules={capsules}
+            days={days}
+            dosage={dosage}
+            notificationMs={notificationMs}
+            format={format}
             description={longDescription || shortDescription}
             descriptionEn={longDescriptionEn || shortDescriptionEn}
           />
@@ -122,17 +98,29 @@ export default async function ProductPage({ params }: Props) {
 
       <section className="section v61-detail-info-section">
         <div className="v61-inner v61-detail-grid">
-          <DetailCard title={texts.sectionUsageTitle} color={line.color}>
-            <Localized it={usage ?? texts.fallbackUsageBody} en={usageEn} />
+          <DetailCard title={<T k="product_section_usage" />} color={line.color}>
+            <Localized
+              it={usage ?? translate('it', 'product_fallback_usage')}
+              en={usageEn ?? translate('en', 'product_fallback_usage')}
+            />
           </DetailCard>
-          <DetailCard title={texts.sectionTargetTitle} color={line.color}>
-            <Localized it={target ?? texts.fallbackTargetBody} en={targetEn} />
+          <DetailCard title={<T k="product_section_target" />} color={line.color}>
+            <Localized
+              it={target ?? translate('it', 'product_fallback_target')}
+              en={targetEn ?? translate('en', 'product_fallback_target')}
+            />
           </DetailCard>
-          <DetailCard title={texts.sectionFormatTitle} color={line.color}>
-            <Localized it={format ?? `${capsules ?? ''} ${texts.capsuleSuffix}`.trim()} en={formatEn} />
+          <DetailCard title={<T k="product_section_format" />} color={line.color}>
+            <Localized
+              it={format ?? `${capsules ?? ''} ${translate('it', 'product_capsules_suffix')}`.trim()}
+              en={formatEn ?? (capsules ? `${capsules} ${translate('en', 'product_capsules_suffix')}` : null)}
+            />
           </DetailCard>
-          <DetailCard title={texts.sectionIngredientsTitle} color={line.color}>
-            <Localized it={ingredientsText ?? texts.fallbackIngredientsBody} en={ingredientsTextEn} />
+          <DetailCard title={<T k="product_section_ingredients" />} color={line.color}>
+            <Localized
+              it={ingredientsText ?? translate('it', 'product_fallback_ingredients')}
+              en={ingredientsTextEn ?? translate('en', 'product_fallback_ingredients')}
+            />
           </DetailCard>
         </div>
       </section>
@@ -142,33 +130,13 @@ export default async function ProductPage({ params }: Props) {
   )
 }
 
-function buildFallbackGallery(
-  images: ProductImages,
-  name: string,
-  texts: typeof PRODUCT_PAGE_TEXTS
-): GallerySlide[] {
+function buildFallbackGallery(images: ProductImages): GallerySlide[] {
   return [
-    images?.fronte && { src: images.fronte, label: texts.galleryFrontLabel, alt: name },
-    images?.infografica && {
-      src: images.infografica,
-      label: texts.galleryInfographicLabel,
-      alt: `${name} - ${texts.galleryInfographicLabel.toLowerCase()}`,
-    },
-    images?.lato1 && {
-      src: images.lato1,
-      label: texts.galleryCompositionLabel,
-      alt: `${name} - ${texts.galleryCompositionLabel.toLowerCase()}`,
-    },
-    images?.lato2 && {
-      src: images.lato2,
-      label: texts.galleryBackLabel,
-      alt: `${name} - ${texts.galleryBackLabel.toLowerCase()}`,
-    },
-    images?.etichetta && {
-      src: images.etichetta,
-      label: texts.galleryLabelLabel,
-      alt: `${name} - ${texts.galleryLabelLabel.toLowerCase()}`,
-    },
+    images?.fronte && { src: images.fronte, kind: 'front' as const },
+    images?.infografica && { src: images.infografica, kind: 'infographic' as const },
+    images?.lato1 && { src: images.lato1, kind: 'composition' as const },
+    images?.lato2 && { src: images.lato2, kind: 'back' as const },
+    images?.etichetta && { src: images.etichetta, kind: 'label' as const },
   ].filter(Boolean) as GallerySlide[]
 }
 
@@ -176,7 +144,7 @@ function SectionLabel({ children, color }: { children: ReactNode; color: string 
   return <div className="v61-section-label" style={{ color, borderBottomColor: `${color}22` }}>{children}</div>
 }
 
-function DetailCard({ title, color, children }: { title: string; color: string; children: ReactNode }) {
+function DetailCard({ title, color, children }: { title: ReactNode; color: string; children: ReactNode }) {
   return (
     <div className="v61-detail-card">
       <SectionLabel color={color}>{title}</SectionLabel>

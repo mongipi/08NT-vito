@@ -1,7 +1,7 @@
 ﻿import type { ReactNode } from 'react'
 
 interface PageHeaderProps {
-  eyebrow: string
+  eyebrow: ReactNode
   script?: string
   title: ReactNode
   body?: string

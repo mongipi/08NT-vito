@@ -1,7 +1,11 @@
 'use client'
 import { signOut } from 'next-auth/react'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
 export function SignOutButton() {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   return (
     <button
       onClick={() => signOut({ callbackUrl: '/' })}
@@ -21,7 +25,7 @@ export function SignOutButton() {
         alignSelf: 'flex-start',
       }}
     >
-      Esci
+      {t('nav_logout')}
     </button>
   )
 }

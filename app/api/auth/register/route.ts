@@ -3,21 +3,23 @@ import { hashPassword } from '@/lib/auth/password'
 import { issueVerificationEmail } from '@/lib/verification'
 import { createUser, getUserByEmail } from '@/services/users'
 import { subscribeToNewsletter } from '@/services/newsletter'
+import { translate } from '@/lib/i18n/data'
 
 export async function POST(req: NextRequest) {
-  const { name, email, password, confirmPassword, newsletter } = await req.json()
+  const { name, email, password, confirmPassword, newsletter, locale: rawLocale } = await req.json()
+  const locale = rawLocale === 'en' ? 'en' : 'it'
 
   if (!email || !password || password.length < 8) {
-    return NextResponse.json({ error: 'Dati non validi' }, { status: 400 })
+    return NextResponse.json({ error: translate(locale, 'auth_error_invalid_data') }, { status: 400 })
   }
 
   if (password !== confirmPassword) {
-    return NextResponse.json({ error: 'Le password non coincidono' }, { status: 400 })
+    return NextResponse.json({ error: translate(locale, 'auth_error_password_mismatch') }, { status: 400 })
   }
 
   const existing = await getUserByEmail(email)
   if (existing) {
-    return NextResponse.json({ error: 'Email già registrata' }, { status: 409 })
+    return NextResponse.json({ error: translate(locale, 'auth_error_email_taken') }, { status: 409 })
   }
 
   await createUser({ name, email, password: await hashPassword(password), role: 'consumer' })
@@ -26,7 +28,7 @@ export async function POST(req: NextRequest) {
   // confermarla, perche' dimostra la stessa cosa del doppio consenso.
   if (newsletter === true) {
     try {
-      await subscribeToNewsletter(email, 'it', 'registrazione')
+      await subscribeToNewsletter(email, locale, 'registrazione')
     } catch (error) {
       console.error('Iscrizione newsletter da registrazione fallita per', email, error)
     }

@@ -42,21 +42,17 @@ export function ContattiContent() {
           email: data.get('email'),
           subject: data.get('oggetto'),
           message: data.get('messaggio'),
+          locale,
         },
-        { fallbackError: 'Invio non riuscito.' }
+        { fallbackError: t('contact_send_error_generic') }
       )
-      if (!result.ok) throw new Error(result.message || 'Invio non riuscito.')
+      if (!result.ok) throw new Error(result.message || t('contact_send_error_generic'))
       form.reset()
-      setFormMessage({
-        type: 'success',
-        text: locale === 'it' ? 'Messaggio inviato correttamente.' : 'Message sent successfully.',
-      })
+      setFormMessage({ type: 'success', text: t('contact_send_success') })
     } catch (error) {
       setFormMessage({
         type: 'error',
-        text: error instanceof Error
-          ? error.message
-          : (locale === 'it' ? 'Invio non riuscito. Riprova tra poco.' : 'Unable to send. Please try again.'),
+        text: error instanceof Error ? error.message : t('contact_send_error_generic'),
       })
     } finally {
       setSending(false)
@@ -116,7 +112,7 @@ export function ContattiContent() {
               </Field>
               <Field label={t('contact_field_message')}><textarea name="messaggio" required /></Field>
               <button className="v61-button" type="submit" disabled={sending}>
-                {sending ? (locale === 'it' ? 'Invio...' : 'Sending...') : t('contact_send')}
+                {sending ? t('newsletter_sending') : t('contact_send')}
               </button>
               {formMessage && (
                 <p className={`v61-contact-form-message ${formMessage.type}`} role="status">

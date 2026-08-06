@@ -2,18 +2,35 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import type { GallerySlide as Slide } from '@/types/gallery'
-
+import type { GallerySlide as Slide, GallerySlideKind } from '@/types/gallery'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation, type DictionaryKey } from '@/lib/i18n/dictionary'
 
 interface Props {
   slides: Slide[]
   color: string
   /** contained=true: inside hero column, transparent bg, fills parent height */
   contained?: boolean
+  /** Nome prodotto, usato per comporre l'alt di ogni slide. */
+  productName: string
 }
 
-export function ProductGallery({ slides, color, contained = false }: Props) {
+const GALLERY_TYPE_KEY: Partial<Record<GallerySlideKind, DictionaryKey>> = {
+  infographic: 'gallery_type_infographic',
+  composition: 'gallery_type_composition',
+  back: 'gallery_type_back',
+  label: 'gallery_type_label',
+}
+
+export function ProductGallery({ slides, color, contained = false, productName }: Props) {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const [active, setActive] = useState(0)
+
+  function altFor(slide: Slide): string {
+    const typeKey = GALLERY_TYPE_KEY[slide.kind]
+    return typeKey ? `${productName} - ${t(typeKey).toLowerCase()}` : productName
+  }
 
   // Cambiando prodotto (quindi prima immagine) si torna alla prima slide.
   const firstSlideSrc = slides[0]?.src
@@ -61,7 +78,7 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: contained
-                  ? (slide.label === 'Fronte' ? '2rem 2.25rem' : '1.25rem')
+                  ? (slide.kind === 'front' ? '2rem 2.25rem' : '1.25rem')
                   : '2rem 5rem',
                 background: contained
                   ? 'transparent'
@@ -69,19 +86,19 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
               }}
             >
               <div
-                className={`v61-product-gallery-frame ${slide.label === 'Fronte' ? 'bottle' : 'document'}`}
+                className={`v61-product-gallery-frame ${slide.kind === 'front' ? 'bottle' : 'document'}`}
                 style={{
                   position: 'relative',
                   width: '100%',
                   maxWidth: contained
-                    ? (slide.label === 'Fronte' ? 'var(--product-gallery-max-width, 285px)' : 'min(92%, 760px)')
+                    ? (slide.kind === 'front' ? 'var(--product-gallery-max-width, 285px)' : 'min(92%, 760px)')
                     : 760,
                   height: '100%',
                 }}
               >
                 <Image
                   src={slide.src}
-                  alt={slide.alt}
+                  alt={altFor(slide)}
                   fill
                   style={{
                     objectFit: 'contain',
@@ -105,7 +122,7 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
       {slides.length > 1 && (
         <button
           onClick={prev}
-          aria-label="Immagine precedente"
+          aria-label={t('gallery_aria_prev')}
           style={{
             position: 'absolute',
             top: '50%',
@@ -134,7 +151,7 @@ export function ProductGallery({ slides, color, contained = false }: Props) {
       {slides.length > 1 && (
         <button
           onClick={next}
-          aria-label="Immagine successiva"
+          aria-label={t('gallery_aria_next')}
           style={{
             position: 'absolute',
             top: '50%',

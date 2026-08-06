@@ -187,7 +187,7 @@ export function useCheckoutForm(pricing: PricingConfig, prefill?: CheckoutPrefil
       cart.items,
       toCustomerRole(session?.user?.role)
     )
-    if (!result.valid) setCouponError(result.error ?? 'Codice non valido')
+    if (!result.valid) setCouponError(t(result.errorKey ?? 'coupon_error_invalid', result.errorVars))
     else if (result.coupon) {
       cart.applyCoupon(result.coupon)
       setCouponInput('')

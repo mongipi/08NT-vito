@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { formatDate } from '@/lib/utils'
 import { Localized } from '@/components/ui/Localized'
 import { ArticleBody } from '@/components/ui/ArticleBody'
+import { T } from '@/components/ui/T'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -48,7 +49,7 @@ export default async function ArticlePage({ params }: Props) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
-          Blog
+          <T k="nav_blog" />
         </Link>
 
         <div
@@ -86,7 +87,7 @@ export default async function ArticlePage({ params }: Props) {
             letterSpacing: '0.04em',
           }}
         >
-          {formatDate(article.publishedAt)} · {article.readingTime ?? 5} min di lettura
+          {formatDate(article.publishedAt)} · {article.readingTime ?? 5} <T k="blog_reading_time" />
         </div>
       </div>
 
@@ -130,7 +131,7 @@ export default async function ArticlePage({ params }: Props) {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M19 12H5M12 5l-7 7 7 7" />
               </svg>
-              Tutti gli articoli
+              <T k="blog_all_articles" />
             </Link>
           </div>
         </div>

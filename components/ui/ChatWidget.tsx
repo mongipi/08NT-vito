@@ -4,21 +4,25 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { useSiteSettings } from '@/contexts/SiteSettingsContext'
 import { formatWhatsappHref } from '@/lib/site-settings'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
 export function ChatWidget() {
   const [open, setOpen] = useState(true)
   const siteSettings = useSiteSettings()
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   const href = formatWhatsappHref(siteSettings.companyWhatsapp, siteSettings.whatsappMessage)
 
   return (
     <div className="v61-chat-widget">
       {open && (
-        <section className="v61-whatsapp-panel" aria-label="Assistenza WhatsApp">
+        <section className="v61-whatsapp-panel" aria-label={t('chat_aria_panel')}>
           <button
             type="button"
             className="v61-whatsapp-close"
             onClick={() => setOpen(false)}
-            aria-label="Chiudi assistenza WhatsApp"
+            aria-label={t('chat_aria_close')}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -34,20 +38,17 @@ export function ChatWidget() {
               aria-hidden="true"
             />
             <div>
-              <span>Assistenza diretta</span>
+              <span>{t('chat_direct_support')}</span>
               <strong>WhatsApp 08</strong>
             </div>
           </div>
-          <p>
-            Hai bisogno di un consiglio sui prodotti o vuoi parlare con noi per un ordine?
-            Scrivici direttamente su WhatsApp.
-          </p>
+          <p>{t('chat_body')}</p>
           <a
             href={href}
             target="_blank"
             rel="noopener noreferrer"
             className="v61-chat-launcher v61-whatsapp-launcher"
-            aria-label="Apri la chat WhatsApp"
+            aria-label={t('chat_aria_open_chat')}
           >
             <Image
               src="/v61/icons/whatsapp.svg"
@@ -56,7 +57,7 @@ export function ChatWidget() {
               height={20}
               aria-hidden="true"
             />
-            <span>Apri WhatsApp</span>
+            <span>{t('chat_open_whatsapp')}</span>
           </a>
         </section>
       )}
@@ -65,7 +66,7 @@ export function ChatWidget() {
           type="button"
           className="v61-chat-launcher v61-whatsapp-launcher v61-whatsapp-minimized"
           onClick={() => setOpen(true)}
-          aria-label="Apri assistenza WhatsApp"
+          aria-label={t('chat_aria_open_widget')}
         >
           <Image
             src="/v61/icons/whatsapp.svg"

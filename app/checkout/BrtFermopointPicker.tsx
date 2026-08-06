@@ -66,7 +66,7 @@ export function BrtFermopointPicker({
 
   async function search() {
     if (!/^\d{5}$/.test(zip)) {
-      setError(t('checkout_brt_zip_error'))
+      setError(t('checkout_pickup_zip_error'))
       return
     }
     setLoading(true)
@@ -74,15 +74,15 @@ export function BrtFermopointPicker({
     setPoints([])
     try {
       const data = await searchBrtPudoByZipAction(zip, locale)
-      if (data.error) {
-        setError(data.error)
+      if (data.errorKey) {
+        setError(t(data.errorKey))
         return
       }
       const found = data.points ?? []
-      if (found.length === 0) setError(t('checkout_brt_none_found'))
+      if (found.length === 0) setError(t('checkout_pickup_none_found'))
       setPoints(found)
     } catch {
-      setError(t('checkout_brt_network_error'))
+      setError(t('checkout_pickup_network_error'))
     } finally {
       setLoading(false)
     }
@@ -100,15 +100,15 @@ export function BrtFermopointPicker({
       async (pos) => {
         try {
           const data = await searchBrtPudoByLatLngAction(pos.coords.latitude, pos.coords.longitude, locale)
-          if (data.error) {
-            setError(data.error)
+          if (data.errorKey) {
+            setError(t(data.errorKey))
             return
           }
           const found = data.points ?? []
-          if (found.length === 0) setError(t('checkout_brt_none_found'))
+          if (found.length === 0) setError(t('checkout_pickup_none_found'))
           setPoints(found)
         } catch {
-          setError(t('checkout_brt_network_error'))
+          setError(t('checkout_pickup_network_error'))
         } finally {
           setLocating(false)
         }
@@ -125,14 +125,14 @@ export function BrtFermopointPicker({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
       <div>
-        <label style={labelStyle}>{t('checkout_brt_search_zip')}</label>
+        <label style={labelStyle}>{t('checkout_pickup_search_zip')}</label>
         <input
           type="text"
           inputMode="numeric"
           maxLength={5}
           value={zip}
           onChange={(e) => setZip(e.target.value.replace(/\D/g, ''))}
-          placeholder={t('checkout_brt_search_zip_placeholder')}
+          placeholder={t('checkout_pickup_search_zip_placeholder')}
           style={{ ...inputStyle, fontFamily: 'monospace' }}
         />
       </div>
@@ -148,7 +148,7 @@ export function BrtFermopointPicker({
             cursor: busy ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
           }}
         >
-          {loading ? '…' : t('checkout_brt_search_button')}
+          {loading ? '…' : t('checkout_pickup_search_button')}
         </button>
         <button
           type="button"

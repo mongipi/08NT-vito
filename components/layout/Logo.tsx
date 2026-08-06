@@ -1,6 +1,10 @@
-﻿import Link from 'next/link'
+﻿'use client'
+
+import Link from 'next/link'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
+import { useLocale } from '@/contexts/LocaleContext'
+import { useTranslation } from '@/lib/i18n/dictionary'
 
 interface LogoProps {
   variant?: 'dark' | 'light'
@@ -9,10 +13,12 @@ interface LogoProps {
 }
 
 export function Logo({ variant = 'dark', height = 82, className }: LogoProps) {
+  const { locale } = useLocale()
+  const t = useTranslation(locale)
   return (
     <Link
       href="/"
-      aria-label="08 Natural Technology - torna alla home"
+      aria-label={t('logo_aria_home')}
       className={cn('inline-flex items-center', className)}
     >
       <Image
